@@ -1,0 +1,47 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Admin: user document at users/{auth.uid} must have field role == "admin" (set in Firestore Console).
+    function isAdmin() {
+      return request.auth != null
+        && exists(/databases/$(database)/documents/users/$(request.auth.uid))
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.get('role', '') == 'admin';
+    }
+
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow create: if request.auth != null && request.auth.uid == userId
+        && (!('role' in request.resource.data) || request.resource.data.role == 'client' || request.resource.data.role == 'admin');
+      allow update: if request.auth != null && request.auth.uid == userId
+        && (request.resource.data.get('role', 'client') != 'admin' || resource.data.get('role', 'client') == 'admin');
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /orders/{orderId} {
+      allow read: if request.auth != null && resource.data.userId == request.auth.uid;
+      allow create: if request.auth != null && request.resource.data.userId == request.auth.uid;
+      allow update, delete: if false;
+    }
+
+    match /users/{userId}/requests/{requestId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow create: if request.auth != null && request.auth.uid == userId;
+      allow update: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      allow delete: if request.auth != null && request.auth.uid == userId;
+    }
+
+    match /products/{productId} {
+      allow read: if true; // Public read for store
+      // Admin can fully manage products.
+      // Clients can ONLY decrement stock (countInStock) to reserve items when submitting a request.
+      allow create, delete: if isAdmin();
+      allow update: if isAdmin() || (
+        request.auth != null
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly(['countInStock', 'updatedAt'])
+        && request.resource.data.countInStock is int
+        && request.resource.data.countInStock >= 0
+        && request.resource.data.countInStock <= resource.data.countInStock
+      );
+    }
+  }
+}

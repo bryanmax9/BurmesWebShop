@@ -1,0 +1,17 @@
+[build]
+  command = "npx expo export -p web"
+  publish = "dist"
+
+[functions]
+  directory = "netlify/functions"
+
+[dev]
+  command = "npm run web"
+  targetPort = 8081
+
+# For SPA routing (React Router)
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+

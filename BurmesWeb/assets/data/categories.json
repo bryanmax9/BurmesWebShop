@@ -1,0 +1,22 @@
+[
+  {
+    "_id": { "$oid": "5f15d5cdcb4a6642bddc0fe9" },
+    "name": "pendants",
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "5f15d545f3a046427a1c26e2" },
+    "name": "chains",
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "5f15d54cf3a046427a1c26e3" },
+    "name": "rings",
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "5f15d5b2cb4a6642bddc0fe7" },
+    "name": "bracelets",
+    "__v": 0
+  }
+]

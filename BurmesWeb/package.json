@@ -1,0 +1,28 @@
+{
+  "name": "ecommerce-web",
+  "license": "0BSD",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "expo": "~54.0.31",
+    "expo-status-bar": "~3.0.9",
+    "firebase": "^11.0.0",
+    "native-base": "^3.4.28",
+    "normalize-css-color": "^1.0.2",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "react-native": "0.81.5",
+    "react-native-web": "~0.18.10",
+    "react-router-dom": "^6.28.0"
+  },
+  "private": true,
+  "devDependencies": {
+    "netlify-cli": "^23.15.1"
+  }
+}
