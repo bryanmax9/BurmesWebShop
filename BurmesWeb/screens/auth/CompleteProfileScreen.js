@@ -41,15 +41,15 @@ export default function CompleteProfileScreen({ onComplete }) {
     const addr = (address || "").trim();
     const ph = (phone || "").trim();
     if (!name) {
-      Alert.alert("Required", "Please enter your full name.");
+      Alert.alert("Requerido", "Ingresa tu nombre completo.");
       return;
     }
     if (!addr) {
-      Alert.alert("Required", "Please enter your address.");
+      Alert.alert("Requerido", "Ingresa tu dirección.");
       return;
     }
     if (!ph) {
-      Alert.alert("Required", "Please enter your phone number.");
+      Alert.alert("Requerido", "Ingresa tu número de teléfono.");
       return;
     }
     setLoading(true);
@@ -63,7 +63,7 @@ export default function CompleteProfileScreen({ onComplete }) {
       });
       onComplete?.();
     } catch (err) {
-      Alert.alert("Error", err.message || "Could not save profile.");
+      Alert.alert("Error", err.message || "No se pudo guardar el perfil.");
     } finally {
       setLoading(false);
     }
@@ -101,16 +101,16 @@ export default function CompleteProfileScreen({ onComplete }) {
         showsVerticalScrollIndicator={false}
       >
         <Text style={titleStyle}>
-          Complete your <Text style={styles.titleAccent}>profile</Text>
+          Completa tu <Text style={styles.titleAccent}>perfil</Text>
         </Text>
         <Text style={styles.hint}>
-          A few details so we can serve you better. We’ll contact you via WhatsApp or SMS as you prefer.
+          Algunos datos para atenderte mejor. Te contactaremos por WhatsApp o SMS según prefieras.
         </Text>
 
-        <Text style={styles.label}>Full name</Text>
+        <Text style={styles.label}>Nombre completo</Text>
         <TextInput
           style={inputStyle}
-          placeholder="Full name"
+          placeholder="Nombre completo"
           placeholderTextColor="rgba(255,255,255,0.3)"
           value={fullName}
           onChangeText={setFullName}
@@ -118,20 +118,20 @@ export default function CompleteProfileScreen({ onComplete }) {
           autoCapitalize="words"
         />
 
-        <Text style={styles.label}>Address</Text>
+        <Text style={styles.label}>Dirección</Text>
         <TextInput
           style={inputStyle}
-          placeholder="Address"
+          placeholder="Dirección"
           placeholderTextColor="rgba(255,255,255,0.3)"
           value={address}
           onChangeText={setAddress}
           editable={!loading}
         />
 
-        <Text style={styles.label}>Phone number</Text>
+        <Text style={styles.label}>Teléfono</Text>
         <TextInput
           style={inputStyle}
-          placeholder="Phone number"
+          placeholder="Número de teléfono"
           placeholderTextColor="rgba(255,255,255,0.3)"
           value={phone}
           onChangeText={setPhone}
@@ -141,8 +141,8 @@ export default function CompleteProfileScreen({ onComplete }) {
 
         <View style={styles.row}>
           <View style={{ flex: 1 }}>
-            <Text style={styles.toggleLabel}>Contact me via WhatsApp</Text>
-            <Text style={styles.subtitle}>Otherwise we’ll use SMS</Text>
+            <Text style={styles.toggleLabel}>Contactarme por WhatsApp</Text>
+            <Text style={styles.subtitle}>Si no, usaremos SMS</Text>
           </View>
           <Switch
             value={hasWhatsApp}
@@ -152,10 +152,10 @@ export default function CompleteProfileScreen({ onComplete }) {
           />
         </View>
 
-        <Text style={styles.label}>Work title (optional)</Text>
+        <Text style={styles.label}>Cargo (opcional)</Text>
         <TextInput
           style={[inputStyle, styles.inputOptional]}
-          placeholder="e.g. Designer"
+          placeholder="ej. Diseñador"
           placeholderTextColor="rgba(255,255,255,0.25)"
           value={workTitle}
           onChangeText={setWorkTitle}
@@ -170,7 +170,7 @@ export default function CompleteProfileScreen({ onComplete }) {
           {loading ? (
             <ActivityIndicator size="small" color="#0a0a0a" />
           ) : (
-            <Text style={styles.buttonText}>Continue</Text>
+            <Text style={styles.buttonText}>Continuar</Text>
           )}
         </TouchableOpacity>
       </ScrollView>

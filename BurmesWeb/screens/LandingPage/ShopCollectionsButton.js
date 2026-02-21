@@ -26,7 +26,7 @@ const ShopCollectionsButton = ({ onPress }) => {
           },
         ]}
       >
-        SHOP COLLECTIONS
+        VER COLECCIONES
       </Text>
     </TouchableOpacity>
   );

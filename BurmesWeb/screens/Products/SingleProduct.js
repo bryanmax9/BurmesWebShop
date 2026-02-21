@@ -14,7 +14,7 @@ import Footer from "../../Shared/Footer";
 import ProductCard from "./ProductCard";
 import { useAuth } from "../../contexts/AuthContext";
 
-const WHATSAPP_NUMBER = "51960473802"; // +51 960 473 802
+const WHATSAPP_NUMBER = "51969762316"; // +51 969 762 316
 
 const getId = (x) => x?._id?.$oid || x?._id || x?.id;
 const getCat = (x) => x?.category?.$oid || x?.category;
@@ -26,7 +26,7 @@ const toSource = (img) => {
   return null; // prevent broken {uri:"../assets/.."}
 };
 
-const INSTAGRAM_USER = "burmesandco";
+const INSTAGRAM_URL = "https://www.instagram.com/burmesandco/";
 
 const openWhatsAppOrder = (productName) => {
   const name = productName || "este artículo";
@@ -36,8 +36,7 @@ const openWhatsAppOrder = (productName) => {
 };
 
 const openInstagramOrder = () => {
-  const url = `https://www.instagram.com/${INSTAGRAM_USER}/`;
-  Linking.openURL(url).catch(() => {});
+  Linking.openURL(INSTAGRAM_URL).catch(() => {});
 };
 
 export default function SingleProduct({
@@ -148,10 +147,10 @@ export default function SingleProduct({
   }, [images, selectedImageIndex, product]);
 
   const formatPrice = (price) => {
-    if (price == null) return "Price on request";
+    if (price == null) return "Precio a consultar";
     const n = Number(price);
-    if (Number.isNaN(n)) return "Price on request";
-    return `$${n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    if (Number.isNaN(n)) return "Precio a consultar";
+    return `$${n.toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
   };
 
 
@@ -262,19 +261,19 @@ export default function SingleProduct({
 
           {typeof product.countInStock === "number" && (
             <View style={styles.stockRow}>
-              <Text style={styles.stockLabel}>In stock</Text>
+              <Text style={styles.stockLabel}>En stock</Text>
               <Text style={[styles.stockValue, product.countInStock === 0 && styles.stockValueZero]}>
                 {product.countInStock}
               </Text>
               {product.countInStock > 0 && product.countInStock <= 5 && (
-                <Text style={styles.stockLow}>Only {product.countInStock} left</Text>
+                <Text style={styles.stockLow}>Solo quedan {product.countInStock}</Text>
               )}
             </View>
           )}
 
           {!!product.description && (
             <View style={styles.descBlock}>
-              <Text style={styles.descLabel}>Description</Text>
+              <Text style={styles.descLabel}>Descripción</Text>
               <Text style={styles.desc}>{product.description}</Text>
             </View>
           )}
@@ -282,8 +281,8 @@ export default function SingleProduct({
           <View style={styles.noticeBox}>
             <Text style={styles.noticeText}>
               {isAdmin
-                ? "Admin preview only. Ordering and cart actions are disabled for admin accounts."
-                : "All orders are placed via WhatsApp for the security of both buyer and seller. Our jewellery is made to order according to your requests (size, gold type, and other details)."}
+                ? "Solo vista previa de administrador. Pedidos y carrito deshabilitados para cuentas de administrador."
+                : "Todos los pedidos se realizan por WhatsApp para la seguridad de comprador y vendedor. Nuestra joyería se hace bajo pedido según tus indicaciones (talla, tipo de oro y otros detalles)."}
             </Text>
           </View>
 
@@ -293,7 +292,7 @@ export default function SingleProduct({
                 <>
                   {typeof product.countInStock === "number" && product.countInStock > 0 && (
                     <View style={styles.qtyRow}>
-                      <Text style={styles.qtyLabel}>Quantity</Text>
+                      <Text style={styles.qtyLabel}>Cantidad</Text>
                       <View style={styles.qtyControls}>
                         <TouchableOpacity
                           style={[styles.qtyBtn, selectedQty <= 1 && styles.qtyBtnDisabled]}
@@ -330,7 +329,7 @@ export default function SingleProduct({
                     disabled={typeof product.countInStock === "number" && product.countInStock === 0}
                   >
                     <Text style={styles.orderBtnText}>
-                      {typeof product.countInStock === "number" && product.countInStock === 0 ? "Out of stock" : "Add to cart"}
+                      {typeof product.countInStock === "number" && product.countInStock === 0 ? "Agotado" : "Añadir al carrito"}
                     </Text>
                   </TouchableOpacity>
                   {cartCount > 0 && navigate && (
@@ -339,10 +338,10 @@ export default function SingleProduct({
                       onPress={() => navigate("/cart")}
                       activeOpacity={0.85}
                     >
-                      <Text style={styles.orderBtnTextSecondary}>View cart ({cartCount})</Text>
+                      <Text style={styles.orderBtnTextSecondary}>Ver carrito ({cartCount})</Text>
                     </TouchableOpacity>
                   )}
-                  <Text style={styles.contactHint}>Or contact us directly:</Text>
+                  <Text style={styles.contactHint}>O contáctanos directamente:</Text>
                   <View style={styles.contactRow}>
                     <TouchableOpacity
                       style={styles.contactLink}
@@ -367,7 +366,7 @@ export default function SingleProduct({
                   onPress={() => navigate && navigate("/sign-up")}
                   activeOpacity={0.85}
                 >
-                  <Text style={styles.orderBtnText}>Sign in to add to cart</Text>
+                  <Text style={styles.orderBtnText}>Inicia sesión para añadir al carrito</Text>
                 </TouchableOpacity>
               )}
             </View>
@@ -377,7 +376,7 @@ export default function SingleProduct({
 
       {related.length > 0 && (
         <View style={[styles.relatedSection, { paddingHorizontal: padding }]}>
-          <Text style={styles.relatedTitle}>You May Also Like</Text>
+          <Text style={styles.relatedTitle}>También te puede gustar</Text>
           <View style={styles.relatedGrid}>
             {related.map((item, idx) => (
               <View

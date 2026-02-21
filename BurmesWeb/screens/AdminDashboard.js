@@ -45,9 +45,9 @@ const formatDateShort = (iso) => {
 
 const statusLabel = (s) => {
   const v = (s || "").toLowerCase();
-  if (v === "completed" || v === "shipped") return "Completed";
-  if (v === "pending" || v === "in review") return "In review";
-  return s || "Pending";
+  if (v === "completed" || v === "shipped") return "Completado";
+  if (v === "pending" || v === "in review") return "En revisión";
+  return s || "Pendiente";
 };
 
 const toImageSource = (img) => {
@@ -65,7 +65,7 @@ function ItemDetailModal({ item, visible, onClose }) {
       <Pressable style={styles.modalOverlay} onPress={onClose}>
         <Pressable style={styles.itemModalContent} onPress={(e) => e.stopPropagation()}>
           <View style={styles.itemModalHeader}>
-            <Text style={styles.itemModalTitle}>Item details</Text>
+            <Text style={styles.itemModalTitle}>Detalles del artículo</Text>
             <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
               <Text style={styles.modalCloseText}>✕</Text>
             </TouchableOpacity>
@@ -77,7 +77,7 @@ function ItemDetailModal({ item, visible, onClose }) {
               </View>
             ) : (
               <View style={[styles.itemModalImageContainer, styles.itemModalImagePlaceholder]}>
-                <Text style={styles.itemModalImagePlaceholderText}>No image</Text>
+                <Text style={styles.itemModalImagePlaceholderText}>Sin imagen</Text>
               </View>
             )}
             <View style={styles.itemModalInfo}>
@@ -187,7 +187,7 @@ function RequestCard({ req, onStatusChange, updatingId }) {
             {updatingId === req.id ? (
               <ActivityIndicator size="small" color="#fff" />
             ) : (
-              <Text style={styles.statusBtnText}>Mark completed</Text>
+              <Text style={styles.statusBtnText}>Marcar completado</Text>
             )}
           </TouchableOpacity>
           <TouchableOpacity
@@ -195,7 +195,7 @@ function RequestCard({ req, onStatusChange, updatingId }) {
             onPress={() => onStatusChange(req, "pending")}
             disabled={updatingId === req.id}
           >
-            <Text style={styles.statusBtnOutlineText}>In review</Text>
+            <Text style={styles.statusBtnOutlineText}>En revisión</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -207,23 +207,23 @@ function UserDetailCard({ user, requestCount, onClose }) {
   return (
     <View style={styles.userDetailCard}>
       <View style={styles.userDetailHeader}>
-        <Text style={styles.userDetailTitle}>Client details</Text>
+        <Text style={styles.userDetailTitle}>Datos del cliente</Text>
         <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
           <Text style={styles.closeBtnText}>✕</Text>
         </TouchableOpacity>
       </View>
       <View style={styles.userDetailContent}>
         <View style={styles.userDetailRow}>
-          <Text style={styles.userDetailLabel}>Name</Text>
+          <Text style={styles.userDetailLabel}>Nombre</Text>
           <Text style={styles.userDetailValue}>{user.fullName || "—"}</Text>
         </View>
         <View style={styles.userDetailRow}>
-          <Text style={styles.userDetailLabel}>Email</Text>
+          <Text style={styles.userDetailLabel}>Correo</Text>
           <Text style={styles.userDetailValue}>{user.email || "—"}</Text>
         </View>
         {user.phone && (
           <View style={styles.userDetailRow}>
-            <Text style={styles.userDetailLabel}>Phone</Text>
+            <Text style={styles.userDetailLabel}>Teléfono</Text>
             <Text style={styles.userDetailValue}>
               {user.phone}
               {user.hasWhatsApp === false ? " (SMS)" : " (WhatsApp)"}
@@ -232,22 +232,22 @@ function UserDetailCard({ user, requestCount, onClose }) {
         )}
         {user.address && (
           <View style={styles.userDetailRow}>
-            <Text style={styles.userDetailLabel}>Address</Text>
+            <Text style={styles.userDetailLabel}>Dirección</Text>
             <Text style={styles.userDetailValue}>{user.address}</Text>
           </View>
         )}
         {user.workTitle && (
           <View style={styles.userDetailRow}>
-            <Text style={styles.userDetailLabel}>Work title</Text>
+            <Text style={styles.userDetailLabel}>Cargo</Text>
             <Text style={styles.userDetailValue}>{user.workTitle}</Text>
           </View>
         )}
         <View style={styles.userDetailRow}>
-          <Text style={styles.userDetailLabel}>Account created</Text>
+          <Text style={styles.userDetailLabel}>Cuenta creada</Text>
           <Text style={styles.userDetailValue}>{formatDateShort(user.createdAt)}</Text>
         </View>
         <View style={styles.userDetailRow}>
-          <Text style={styles.userDetailLabel}>Total requests</Text>
+          <Text style={styles.userDetailLabel}>Total solicitudes</Text>
           <Text style={styles.userDetailValue}>{requestCount}</Text>
         </View>
       </View>
@@ -301,7 +301,7 @@ export default function AdminDashboard() {
         if (!cancelled) setUsers(list || []);
       })
       .catch((err) => {
-        if (!cancelled) setUsersError(err?.message || "Could not load clients.");
+        if (!cancelled) setUsersError(err?.message || "No se pudieron cargar los clientes.");
       })
       .finally(() => {
         if (!cancelled) setLoadingUsers(false);
@@ -312,7 +312,7 @@ export default function AdminDashboard() {
         if (!cancelled) setRequests(list || []);
       })
       .catch((err) => {
-        if (!cancelled) setRequestsError(err?.message || "Could not load requests.");
+        if (!cancelled) setRequestsError(err?.message || "No se pudieron cargar las solicitudes.");
       })
       .finally(() => {
         if (!cancelled) setLoadingRequests(false);
@@ -370,13 +370,13 @@ export default function AdminDashboard() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Text style={styles.title}>Admin</Text>
+          <Text style={styles.title}>Administración</Text>
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.storeLink} onPress={() => navigate("/")}>
-              <Text style={styles.storeLinkText}>← Store</Text>
+              <Text style={styles.storeLinkText}>← Tienda</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.signOutBtn} onPress={signOut}>
-              <Text style={styles.signOutText}>Sign out</Text>
+              <Text style={styles.signOutText}>Cerrar sesión</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -392,7 +392,7 @@ export default function AdminDashboard() {
           }}
         >
           <Text style={[styles.tabText, viewMode === "requests" && styles.tabTextActive]}>
-            All requests
+            Todas las solicitudes
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
@@ -403,14 +403,14 @@ export default function AdminDashboard() {
           }}
         >
           <Text style={[styles.tabText, viewMode === "clients" && styles.tabTextActive]}>
-            Clients ({users.length})
+            Clientes ({users.length})
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.tab}
           onPress={() => navigate("/admin/listings")}
         >
-          <Text style={styles.tabText}>Listings</Text>
+          <Text style={styles.tabText}>Productos</Text>
         </TouchableOpacity>
       </View>
 
@@ -421,19 +421,19 @@ export default function AdminDashboard() {
       >
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>
-            {viewMode === "requests" ? "All requests" : "Clients"}
+            {viewMode === "requests" ? "Todas las solicitudes" : "Clientes"}
           </Text>
           <Text style={styles.heroSubtitle}>
             {viewMode === "requests"
-              ? "Search by client name or request number. Mark requests completed when done."
-              : "View client information and their requests. Click a client to see details."}
+              ? "Busca por nombre de cliente o número de solicitud. Marca las solicitudes como completadas cuando termines."
+              : "Consulta la información de los clientes y sus solicitudes. Haz clic en un cliente para ver detalles."}
           </Text>
         </View>
 
         <View style={styles.searchWrap}>
           <TextInput
             style={styles.searchInput}
-            placeholder={viewMode === "requests" ? "Search by client name or email" : "Search clients"}
+            placeholder={viewMode === "requests" ? "Buscar por nombre o correo del cliente" : "Buscar clientes"}
             placeholderTextColor="#8a8a8a"
             value={searchClientName}
             onChangeText={setSearchClientName}
@@ -441,7 +441,7 @@ export default function AdminDashboard() {
           {viewMode === "requests" && (
             <TextInput
               style={styles.searchInput}
-              placeholder="Search by request number"
+              placeholder="Buscar por número de solicitud"
               placeholderTextColor="#8a8a8a"
               value={searchRequestNumber}
               onChangeText={setSearchRequestNumber}
@@ -453,20 +453,20 @@ export default function AdminDashboard() {
           <View style={styles.errorBox}>
             {usersError && (
               <View style={styles.errorItem}>
-                <Text style={styles.errorLabel}>Clients</Text>
+                <Text style={styles.errorLabel}>Clientes</Text>
                 <Text style={styles.errorText}>{usersError}</Text>
                 <Text style={styles.errorHint}>
-                  In Firestore, ensure your user document (users/{user?.uid}) has the field{" "}
-                  <Text style={styles.errorCode}>role: "admin"</Text>. Deploy rules: firebase deploy --only firestore:rules
+                  En Firestore, asegúrate de que tu documento de usuario (users/{user?.uid}) tenga el campo{" "}
+                  <Text style={styles.errorCode}>role: "admin"</Text>. Despliega reglas: firebase deploy --only firestore:rules
                 </Text>
               </View>
             )}
             {requestsError && (
               <View style={[styles.errorItem, usersError && styles.errorItemLast]}>
-                <Text style={styles.errorLabel}>Requests</Text>
+                <Text style={styles.errorLabel}>Solicitudes</Text>
                 <Text style={styles.errorText}>{requestsError}</Text>
                 <Text style={styles.errorHint}>
-                  Ensure your Firestore user document has role: "admin" and that rules are deployed.
+                  Asegúrate de que tu documento de usuario en Firestore tenga role: "admin" y que las reglas estén desplegadas.
                 </Text>
               </View>
             )}
@@ -476,20 +476,20 @@ export default function AdminDashboard() {
         {loading && users.length === 0 && requests.length === 0 ? (
           <View style={styles.loaderWrap}>
             <ActivityIndicator size="large" color="#1a1a1a" />
-            <Text style={styles.loaderText}>Loading…</Text>
+            <Text style={styles.loaderText}>Cargando…</Text>
           </View>
         ) : viewMode === "requests" ? (
           <View style={styles.section}>
             {loadingRequests && requests.length === 0 ? (
               <View style={styles.emptyCard}>
                 <ActivityIndicator size="small" color="#666" />
-                <Text style={styles.emptyText}>Loading requests…</Text>
+                <Text style={styles.emptyText}>Cargando solicitudes…</Text>
               </View>
             ) : filteredRequests.length === 0 ? (
               <View style={styles.emptyCard}>
-                <Text style={styles.emptyText}>No requests yet</Text>
+                <Text style={styles.emptyText}>Aún no hay solicitudes</Text>
                 <Text style={styles.emptySubtext}>
-                  {requestsError ? "Fix the error above." : "Customer requests will appear here."}
+                  {requestsError ? "Corrige el error de arriba." : "Las solicitudes de clientes aparecerán aquí."}
                 </Text>
               </View>
             ) : (
@@ -512,10 +512,10 @@ export default function AdminDashboard() {
                   requestCount={getUserRequestCount(selectedUser.id)}
                   onClose={() => setSelectedUser(null)}
                 />
-                <Text style={styles.sectionTitle}>Requests for {selectedUser.fullName || selectedUser.email}</Text>
+                <Text style={styles.sectionTitle}>Solicitudes de {selectedUser.fullName || selectedUser.email}</Text>
                 {selectedUserRequests.length === 0 ? (
                   <View style={styles.emptyCard}>
-                    <Text style={styles.emptyText}>No requests for this client</Text>
+                    <Text style={styles.emptyText}>No hay solicitudes de este cliente</Text>
                   </View>
                 ) : (
                   selectedUserRequests.map((req) => (
@@ -533,13 +533,13 @@ export default function AdminDashboard() {
                 {loadingUsers && users.length === 0 ? (
                   <View style={styles.emptyCard}>
                     <ActivityIndicator size="small" color="#666" />
-                    <Text style={styles.emptyText}>Loading clients…</Text>
+                    <Text style={styles.emptyText}>Cargando clientes…</Text>
                   </View>
                 ) : filteredUsers.length === 0 ? (
                   <View style={styles.emptyCard}>
-                    <Text style={styles.emptyText}>No clients found</Text>
+                    <Text style={styles.emptyText}>No se encontraron clientes</Text>
                     <Text style={styles.emptySubtext}>
-                      {usersError ? "Fix the error above to load clients." : "Clients appear here after they sign up."}
+                      {usersError ? "Corrige el error de arriba para cargar clientes." : "Los clientes aparecen aquí después de registrarse."}
                     </Text>
                   </View>
                 ) : (
@@ -563,7 +563,7 @@ export default function AdminDashboard() {
                           <Text style={styles.userEmail} numberOfLines={1}>{u.email || "—"}</Text>
                           {u.phone && <Text style={styles.userPhone}>{u.phone}</Text>}
                           {u.address && <Text style={styles.userAddress} numberOfLines={1}>{u.address}</Text>}
-                          <Text style={styles.userCreated}>Joined {formatDateShort(u.createdAt)}</Text>
+                          <Text style={styles.userCreated}>Registrado {formatDateShort(u.createdAt)}</Text>
                         </TouchableOpacity>
                       );
                     })}

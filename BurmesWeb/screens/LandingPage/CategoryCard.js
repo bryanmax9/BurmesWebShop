@@ -17,7 +17,19 @@ const categoryImages = {
   bracelets: require("../../assets/bracelet.png"),
 };
 
+// Display names in Spanish
+const categoryNamesEs = {
+  pendants: "Dijes",
+  chains: "Cadenas",
+  rings: "Anillos",
+  bracelets: "Pulseras",
+};
+
 const CategoryCard = ({ category, onPress, isSmallScreen }) => {
+  const displayName = category?.name
+    ? (categoryNamesEs[category.name.toLowerCase()] ||
+        category.name.charAt(0).toUpperCase() + category.name.slice(1))
+    : "";
   return (
     <TouchableOpacity
       style={[
@@ -71,9 +83,7 @@ const CategoryCard = ({ category, onPress, isSmallScreen }) => {
               },
             ]}
           >
-            {category.name
-              ? category.name.charAt(0).toUpperCase() + category.name.slice(1)
-              : category.name}
+            {displayName}
           </Text>
           <View style={styles.categoryArrow}>
             <Ionicons

@@ -14,8 +14,8 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
-const WHATSAPP_NUMBER = "51960473802";
-const INSTAGRAM_USER = "burmesandco";
+const WHATSAPP_NUMBER = "51969762316";
+const INSTAGRAM_URL = "https://www.instagram.com/burmesandco/";
 
 const toImageSource = (img) => {
   if (!img) return null;
@@ -25,8 +25,8 @@ const toImageSource = (img) => {
 };
 
 const formatPrice = (price) => {
-  if (price == null || Number.isNaN(Number(price))) return "Price on request";
-  return `$${Number(price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  if (price == null || Number.isNaN(Number(price))) return "Precio a consultar";
+  return `$${Number(price).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 };
 
 export default function CartPage() {
@@ -92,7 +92,7 @@ export default function CartPage() {
       if (id) setRequestId(id);
       setRequestSent(true);
     } catch (err) {
-      alert(err.message || "Could not submit request.");
+      alert(err.message || "No se pudo enviar la solicitud.");
     } finally {
       submittingRef.current = false;
       setSubmitting(false);
@@ -107,7 +107,7 @@ export default function CartPage() {
   };
 
   const openInstagram = () => {
-    Linking.openURL(`https://www.instagram.com/${INSTAGRAM_USER}/`).catch(() => {});
+    Linking.openURL(INSTAGRAM_URL).catch(() => {});
   };
 
   if (!user || isAdmin) return null;
@@ -117,7 +117,7 @@ export default function CartPage() {
       <View style={[styles.container, styles.successContainer]}>
         <View style={styles.header}>
           <TouchableOpacity onPress={() => navigate("/")}>
-            <Text style={styles.backText}>← Back to store</Text>
+            <Text style={styles.backText}>← Volver a la tienda</Text>
           </TouchableOpacity>
         </View>
         <View style={[styles.successWrapper, isWebOrLarge && styles.successWrapperWeb]}>
@@ -126,28 +126,28 @@ export default function CartPage() {
               <Text style={styles.successIcon}>✓</Text>
             </View>
             <Text style={[styles.successTitle, isWebOrLarge && styles.successTitleWeb]}>
-              Request sent to the store
+              Solicitud enviada a la tienda
             </Text>
             <Text style={[styles.successSubtitle, isWebOrLarge && styles.successSubtitleWeb]}>
-              Your request is in review. Mention your request number when you contact us for quick tracking.
+              Tu solicitud está en revisión. Indica tu número de solicitud al contactarnos para un seguimiento rápido.
             </Text>
             {requestId ? (
               <View style={styles.requestIdBlock}>
-                <Text style={styles.requestIdLabel}>Request number</Text>
+                <Text style={styles.requestIdLabel}>Número de solicitud</Text>
                 <Text style={styles.requestIdValue} selectable>{requestId}</Text>
-                <Text style={styles.requestIdHint}>Use this when messaging on WhatsApp or Instagram</Text>
+                <Text style={styles.requestIdHint}>Usa este número al escribir por WhatsApp o Instagram</Text>
               </View>
             ) : null}
             <View style={[styles.successActions, isWebOrLarge && styles.successActionsWeb]}>
               <TouchableOpacity style={styles.whatsAppBtn} onPress={openWhatsApp}>
-                <Text style={styles.whatsAppBtnText}>Contact on WhatsApp</Text>
+                <Text style={styles.whatsAppBtnText}>Contactar por WhatsApp</Text>
               </TouchableOpacity>
               <TouchableOpacity style={styles.instagramBtn} onPress={openInstagram}>
-                <Text style={styles.instagramBtnText}>Contact on Instagram</Text>
+                <Text style={styles.instagramBtnText}>Contactar por Instagram</Text>
               </TouchableOpacity>
             </View>
             <TouchableOpacity style={styles.storeLink} onPress={() => navigate("/")}>
-              <Text style={styles.storeLinkText}>Continue shopping</Text>
+              <Text style={styles.storeLinkText}>Seguir comprando</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -159,13 +159,13 @@ export default function CartPage() {
     <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity onPress={() => navigate("/")}>
-          <Text style={styles.backText}>← Back to store</Text>
+          <Text style={styles.backText}>← Volver a la tienda</Text>
         </TouchableOpacity>
-        <Text style={styles.title}>Your cart</Text>
+        <Text style={styles.title}>Tu carrito</Text>
       </View>
       <ScrollView style={styles.scroll} contentContainerStyle={styles.scrollContent}>
         {isEmpty ? (
-          <Text style={styles.empty}>Your cart is empty. Add items from the store to submit a request.</Text>
+          <Text style={styles.empty}>Tu carrito está vacío. Añade productos de la tienda para enviar una solicitud.</Text>
         ) : (
           <>
             {cart.map((item, index) => {
@@ -183,14 +183,14 @@ export default function CartPage() {
                     </View>
                   )}
                   <View style={styles.cartRowInfo}>
-                    <Text style={styles.cartItemName}>{item.productName || "Product"}</Text>
+                    <Text style={styles.cartItemName}>{item.productName || "Producto"}</Text>
                     {item.description ? (
                       <Text style={styles.cartItemDesc} numberOfLines={2}>{item.description}</Text>
                     ) : null}
                     {stock != null && (
                       <Text style={[styles.cartStock, stock === 0 && styles.cartStockZero]}>
-                        {stock === 0 ? "Out of stock" : `${stock} in stock`}
-                        {stock > 0 && stock <= 5 ? ` · Only ${stock} left` : ""}
+                        {stock === 0 ? "Agotado" : `${stock} en stock`}
+                        {stock > 0 && stock <= 5 ? ` · Solo quedan ${stock}` : ""}
                       </Text>
                     )}
                     <View style={styles.cartRowMeta}>
@@ -207,7 +207,7 @@ export default function CartPage() {
                       )}
                     </View>
                     <View style={styles.qtyRow}>
-                      <Text style={styles.qtyLabel}>Qty</Text>
+                      <Text style={styles.qtyLabel}>Cant.</Text>
                       <View style={styles.qtyControls}>
                         <TouchableOpacity
                           style={[styles.qtyBtn, qty <= 1 && styles.qtyBtnDisabled]}
@@ -233,7 +233,7 @@ export default function CartPage() {
                       style={styles.removeBtn}
                       onPress={() => removeFromCart(index)}
                     >
-                      <Text style={styles.removeBtnText}>Remove</Text>
+                      <Text style={styles.removeBtnText}>Quitar</Text>
                     </TouchableOpacity>
                   </View>
                 </View>
@@ -253,16 +253,16 @@ export default function CartPage() {
               {submitting ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
-                <Text style={styles.requestBtnText}>Submit request</Text>
+                <Text style={styles.requestBtnText}>Enviar solicitud</Text>
               )}
             </TouchableOpacity>
             {hasStockIssues && (
               <Text style={styles.stockWarning}>
-                Some items exceed available stock. Please adjust quantities before submitting.
+                Algunos productos superan el stock disponible. Ajusta las cantidades antes de enviar.
               </Text>
             )}
             <Text style={styles.requestHint}>
-              The store will review your request and contact you via WhatsApp or SMS.
+              La tienda revisará tu solicitud y te contactará por WhatsApp o SMS.
             </Text>
           </>
         )}

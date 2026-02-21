@@ -150,7 +150,7 @@ const HeroSection = ({ onShopCollections }) => {
             },
           ]}
         >
-          MADE IN HOUSE
+          HECHO EN CASA
         </Text>
         <Text
           style={[
@@ -162,7 +162,7 @@ const HeroSection = ({ onShopCollections }) => {
             },
           ]}
         >
-          PERU
+          PERÚ
         </Text>
         <ShopCollectionsButton onPress={onShopCollections} />
       </View>

@@ -149,15 +149,15 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
               // Alert.alert is inconsistent on web
               window.alert(msg);
             } else {
-              Alert.alert("Success", msg);
+              Alert.alert("Éxito", msg);
             }
           } catch (err) {
-            const msg = err?.message || "Could not upload image to Google Drive";
+            const msg = err?.message || "No se pudo subir la imagen a Google Drive";
             setUploadNotice({ type: "error", text: `Upload failed for image ${slotIndex + 1}: ${msg}` });
             if (Platform.OS === "web" && typeof window !== "undefined" && window.alert) {
-              window.alert(`Upload failed: ${msg}`);
+              window.alert(`Error al subir: ${msg}`);
             } else {
-              Alert.alert("Upload Failed", msg);
+              Alert.alert("Error al subir", msg);
             }
             setImages((prev) => {
               const next = [...prev];
@@ -173,18 +173,18 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       };
       input.click();
     } else {
-      Alert.alert("Info", "File upload is only available on web. Please use the web version.");
+      Alert.alert("Info", "La subida de archivos solo está disponible en la web. Usa la versión web.");
     }
   };
 
 
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert("Error", "Product name is required.");
+      Alert.alert("Error", "El nombre del producto es obligatorio.");
       return;
     }
     if (!categoryId) {
-      Alert.alert("Error", "Please select a category.");
+      Alert.alert("Error", "Selecciona una categoría.");
       return;
     }
     
@@ -193,7 +193,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       const imageUrls = images.map((x) => x?.imageUrl).filter(Boolean);
       const driveFileIds = images.map((x) => x?.driveFileId).filter(Boolean);
       if (imageUrls.length === 0) {
-        Alert.alert("Error", "Please upload at least 1 image.");
+        Alert.alert("Error", "Sube al menos 1 imagen.");
         setSaving(false);
         return;
       }
@@ -219,7 +219,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       }
       onClose();
     } catch (err) {
-      Alert.alert("Error", err.message || "Could not save product.");
+      Alert.alert("Error", err.message || "No se pudo guardar el producto.");
     } finally {
       setSaving(false);
     }
@@ -230,7 +230,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
     // can be flaky in some browsers.
     if (Platform.OS === "web" && typeof window !== "undefined" && window.confirm) {
       const ok = window.confirm(
-        "Delete this product? This will also delete its images from Google Drive."
+        "¿Eliminar este producto? También se eliminarán sus imágenes de Google Drive."
       );
       if (!ok) return;
       try {
@@ -247,19 +247,19 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
         await onDelete(product.id);
         onClose();
       } catch (err) {
-        window.alert(err?.message || "Could not delete product.");
+        window.alert(err?.message || "No se pudo eliminar el producto.");
       }
       return;
     }
 
     // Native / non-web: use React Native Alert
     Alert.alert(
-      "Delete product",
-      "Are you sure you want to delete this product? This will also delete the images from Google Drive.",
+      "Eliminar producto",
+      "¿Seguro que quieres eliminar este producto? También se eliminarán las imágenes de Google Drive.",
       [
-        { text: "Cancel", style: "cancel" },
+        { text: "Cancelar", style: "cancel" },
         {
-          text: "Delete",
+          text: "Eliminar",
           style: "destructive",
           onPress: async () => {
             try {
@@ -276,7 +276,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
               await onDelete(product.id);
               onClose();
             } catch (err) {
-              Alert.alert("Error", err.message || "Could not delete product.");
+              Alert.alert("Error", err.message || "No se pudo eliminar el producto.");
             }
           },
         },
@@ -289,14 +289,14 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       <Pressable style={styles.modalOverlay} onPress={onClose}>
         <Pressable style={styles.formModalContent} onPress={(e) => e.stopPropagation()}>
           <View style={styles.formModalHeader}>
-            <Text style={styles.formModalTitle}>{product ? "Edit product" : "Create product"}</Text>
+            <Text style={styles.formModalTitle}>{product ? "Editar producto" : "Crear producto"}</Text>
             <TouchableOpacity onPress={onClose} style={styles.modalCloseBtn}>
               <Text style={styles.modalCloseText}>✕</Text>
             </TouchableOpacity>
           </View>
           <ScrollView style={styles.formModalScroll} showsVerticalScrollIndicator={false}>
             <View style={styles.formField}>
-              <Text style={styles.formLabel}>Product name *</Text>
+              <Text style={styles.formLabel}>Nombre del producto *</Text>
               <TextInput
                 style={styles.formInput}
                 value={name}
@@ -306,13 +306,13 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
               />
             </View>
             <View style={styles.formField}>
-              <Text style={styles.formLabel}>Brand</Text>
+              <Text style={styles.formLabel}>Marca</Text>
               <View style={styles.brandPill}>
                 <Text style={styles.brandPillText}>{DEFAULT_BRAND}</Text>
               </View>
             </View>
             <View style={styles.formField}>
-              <Text style={styles.formLabel}>Category *</Text>
+              <Text style={styles.formLabel}>Categoría *</Text>
               <TouchableOpacity
                 style={styles.selectInput}
                 onPress={() => setCategoryPickerOpen(true)}
@@ -321,19 +321,19 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                 <Text style={styles.selectInputText}>
                   {(() => {
                     const c = (categoriesData || []).find((x) => (x?._id?.$oid || x?._id) === categoryId);
-                    return c ? c.name : "Select a category…";
+                    return c ? (c.name === "pendants" ? "Dijes" : c.name === "chains" ? "Cadenas" : c.name === "rings" ? "Anillos" : c.name === "bracelets" ? "Pulseras" : c.name) : "Selecciona una categoría…";
                   })()}
                 </Text>
                 <Text style={styles.selectChevron}>▾</Text>
               </TouchableOpacity>
             </View>
             <View style={styles.formField}>
-              <Text style={styles.formLabel}>Description</Text>
+              <Text style={styles.formLabel}>Descripción</Text>
               <TextInput
                 style={[styles.formInput, styles.formTextArea]}
                 value={description}
                 onChangeText={setDescription}
-                placeholder="Product description..."
+                placeholder="Descripción del producto..."
                 placeholderTextColor="#999"
                 multiline
                 numberOfLines={4}
@@ -341,7 +341,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
             </View>
             <View style={styles.formRow}>
               <View style={[styles.formField, { flex: 1, marginRight: 12 }]}>
-                <Text style={styles.formLabel}>Price</Text>
+                <Text style={styles.formLabel}>Precio</Text>
                 <TextInput
                   style={styles.formInput}
                   value={price}
@@ -364,7 +364,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
               </View>
             </View>
             <View style={styles.formField}>
-              <Text style={styles.formLabel}>Product images (1–3) *</Text>
+              <Text style={styles.formLabel}>Imágenes del producto (1–3) *</Text>
               <Text style={styles.formHint}>
                 Upload at least 1 image (you can add up to 3). The first image will be used as the cover in the product grid.
               </Text>
@@ -442,7 +442,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                   onPress={handleDelete}
                   disabled={saving}
                 >
-                  <Text style={styles.deleteBtnText}>Delete</Text>
+                  <Text style={styles.deleteBtnText}>Eliminar</Text>
                 </TouchableOpacity>
               )}
               <View style={styles.formActionsRight}>
@@ -451,7 +451,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                   onPress={onClose}
                   disabled={saving}
                 >
-                  <Text style={styles.cancelBtnText}>Cancel</Text>
+                  <Text style={styles.cancelBtnText}>Cancelar</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={[styles.saveBtn, (saving || uploading) && styles.saveBtnDisabled]}
@@ -461,7 +461,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                   {saving ? (
                     <ActivityIndicator size="small" color="#fff" />
                   ) : (
-                    <Text style={styles.saveBtnText}>Save</Text>
+                    <Text style={styles.saveBtnText}>Guardar</Text>
                   )}
                 </TouchableOpacity>
               </View>
@@ -478,7 +478,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
         <Pressable style={styles.modalOverlay} onPress={() => setCategoryPickerOpen(false)}>
           <Pressable style={styles.categoryModal} onPress={(e) => e.stopPropagation()}>
             <View style={styles.categoryModalHeader}>
-              <Text style={styles.categoryModalTitle}>Select category</Text>
+              <Text style={styles.categoryModalTitle}>Seleccionar categoría</Text>
               <TouchableOpacity onPress={() => setCategoryPickerOpen(false)} style={styles.modalCloseBtn}>
                 <Text style={styles.modalCloseText}>✕</Text>
               </TouchableOpacity>
@@ -497,7 +497,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                     }}
                   >
                     <Text style={[styles.categoryRowText, isSelected && styles.categoryRowTextSelected]}>
-                      {c.name}
+                      {c.name === "pendants" ? "Dijes" : c.name === "chains" ? "Cadenas" : c.name === "rings" ? "Anillos" : c.name === "bracelets" ? "Pulseras" : c.name}
                     </Text>
                     {isSelected && <Text style={styles.categoryRowCheck}>✓</Text>}
                   </TouchableOpacity>
@@ -577,13 +577,13 @@ export default function AdminListings() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={styles.headerTop}>
-          <Text style={styles.title}>Admin</Text>
+          <Text style={styles.title}>Administración</Text>
           <View style={styles.headerActions}>
             <TouchableOpacity style={styles.storeLink} onPress={() => navigate("/")}>
-              <Text style={styles.storeLinkText}>← Store</Text>
+              <Text style={styles.storeLinkText}>← Tienda</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.signOutBtn} onPress={signOut}>
-              <Text style={styles.signOutText}>Sign out</Text>
+              <Text style={styles.signOutText}>Cerrar sesión</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -592,16 +592,16 @@ export default function AdminListings() {
 
       <View style={styles.content}>
         <View style={styles.hero}>
-          <Text style={styles.heroTitle}>Product listings</Text>
+          <Text style={styles.heroTitle}>Productos</Text>
           <Text style={styles.heroSubtitle}>
-            Create and manage products for the store. Images are stored in Google Drive.
+            Crea y gestiona los productos de la tienda. Las imágenes se guardan en Google Drive.
           </Text>
         </View>
 
         <View style={styles.actionsBar}>
           <TextInput
             style={styles.searchInput}
-            placeholder="Search products..."
+            placeholder="Buscar productos..."
             placeholderTextColor="#8a8a8a"
             value={searchQuery}
             onChangeText={setSearchQuery}
@@ -613,24 +613,24 @@ export default function AdminListings() {
               setFormVisible(true);
             }}
           >
-            <Text style={styles.createBtnText}>+ Create product</Text>
+            <Text style={styles.createBtnText}>+ Crear producto</Text>
           </TouchableOpacity>
         </View>
 
         {loading ? (
           <View style={styles.loaderWrap}>
             <ActivityIndicator size="large" color="#1a1a1a" />
-            <Text style={styles.loaderText}>Loading products…</Text>
+            <Text style={styles.loaderText}>Cargando productos…</Text>
           </View>
         ) : filteredProducts.length === 0 ? (
           <View style={styles.emptyCard}>
             <Text style={styles.emptyText}>
-              {products.length === 0 ? "No products yet" : "No products found"}
+              {products.length === 0 ? "Aún no hay productos" : "No se encontraron productos"}
             </Text>
             <Text style={styles.emptySubtext}>
               {products.length === 0
-                ? "Create your first product to start selling."
-                : "Try a different search term."}
+                ? "Crea tu primer producto para empezar a vender."
+                : "Prueba con otro término de búsqueda."}
             </Text>
           </View>
         ) : (
@@ -660,7 +660,7 @@ export default function AdminListings() {
                     )}
                     {product.isFeatured && (
                       <View style={styles.featuredBadge}>
-                        <Text style={styles.featuredBadgeText}>Most popular</Text>
+                        <Text style={styles.featuredBadgeText}>Más popular</Text>
                       </View>
                     )}
                   </View>
@@ -679,7 +679,7 @@ export default function AdminListings() {
                       </Text>
                     )}
                     <Text style={styles.productStock}>
-                      Stock: {product.countInStock || 0}
+                      Stock: {product.countInStock ?? 0}
                     </Text>
                     <Text style={styles.productDate}>
                       {formatDate(product.createdAt)}

@@ -27,7 +27,7 @@ const CategoriesSection = ({ categories, onCategorySelect }) => {
         <Text
           style={[styles.sectionTitle, { fontSize: isSmallScreen ? 24 : 28 }]}
         >
-          Browse our Jewelry
+          Explora nuestra joyería
         </Text>
         <Text
           style={[
@@ -35,7 +35,7 @@ const CategoriesSection = ({ categories, onCategorySelect }) => {
             { fontSize: isSmallScreen ? 14 : 16 },
           ]}
         >
-          Choose your timeless piece
+          Elige tu pieza atemporal
         </Text>
       </View>
 

@@ -57,7 +57,7 @@ const Collections = ({ onCategorySelect, onNavigate }) => {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.header}>
-        <Text style={styles.title}>Catalog</Text>
+        <Text style={styles.title}>Catálogo</Text>
       </View>
       <CategoriesSection
         categories={categories}

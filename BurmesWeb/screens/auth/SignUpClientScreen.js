@@ -28,15 +28,15 @@ export default function SignUpClientScreen({ onBack, onSignIn, onSignUpSuccess }
     const p = password || "";
     const r = repeatPassword || "";
     if (!e || !p) {
-      Alert.alert("Required", "Please enter email and password.");
+      Alert.alert("Requerido", "Ingresa correo y contraseña.");
       return;
     }
     if (p.length < 6) {
-      Alert.alert("Password", "Password should be at least 6 characters.");
+      Alert.alert("Contraseña", "La contraseña debe tener al menos 6 caracteres.");
       return;
     }
     if (p !== r) {
-      Alert.alert("Password", "Passwords do not match.");
+      Alert.alert("Contraseña", "Las contraseñas no coinciden.");
       return;
     }
     setLoading(true);
@@ -44,7 +44,7 @@ export default function SignUpClientScreen({ onBack, onSignIn, onSignUpSuccess }
       await signUpClient(e, p, "");
       onSignUpSuccess?.();
     } catch (err) {
-      Alert.alert("Sign up failed", err.message || "Could not create account.");
+      Alert.alert("Error al registrarse", err.message || "No se pudo crear la cuenta.");
     } finally {
       setLoading(false);
     }
@@ -56,7 +56,7 @@ export default function SignUpClientScreen({ onBack, onSignIn, onSignUpSuccess }
       await signInWithGoogle();
       onSignUpSuccess?.();
     } catch (err) {
-      Alert.alert("Sign up failed", err.message || "Could not sign up with Google.");
+      Alert.alert("Error al registrarse", err.message || "No se pudo registrar con Google.");
     } finally {
       setLoading(false);
     }
@@ -93,10 +93,10 @@ export default function SignUpClientScreen({ onBack, onSignIn, onSignUpSuccess }
         showsVerticalScrollIndicator={false}
       >
         <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-          <Text style={styles.backBtnText}>← Back</Text>
+          <Text style={styles.backBtnText}>← Atrás</Text>
         </TouchableOpacity>
 
-        <Text style={titleStyle}>Create account</Text>
+        <Text style={titleStyle}>Crear cuenta</Text>
         <Text style={subtitleStyle}>
           Email and password, or continue with Google. You’ll complete your profile next.
         </Text>
@@ -104,7 +104,7 @@ export default function SignUpClientScreen({ onBack, onSignIn, onSignUpSuccess }
         <Text style={styles.label}>Email</Text>
         <TextInput
           style={inputStyle}
-          placeholder="you@example.com"
+          placeholder="tu@ejemplo.com"
           placeholderTextColor="rgba(255,255,255,0.35)"
           value={email}
           onChangeText={setEmail}
@@ -112,20 +112,20 @@ export default function SignUpClientScreen({ onBack, onSignIn, onSignUpSuccess }
           keyboardType="email-address"
           editable={!loading}
         />
-        <Text style={styles.label}>Password</Text>
+        <Text style={styles.label}>Contraseña</Text>
         <TextInput
           style={inputStyle}
-          placeholder="Min. 6 characters"
+          placeholder="Mín. 6 caracteres"
           placeholderTextColor="rgba(255,255,255,0.35)"
           value={password}
           onChangeText={setPassword}
           secureTextEntry
           editable={!loading}
         />
-        <Text style={styles.label}>Repeat password</Text>
+        <Text style={styles.label}>Repetir contraseña</Text>
         <TextInput
           style={inputStyle}
-          placeholder="Repeat password"
+          placeholder="Repetir contraseña"
           placeholderTextColor="rgba(255,255,255,0.35)"
           value={repeatPassword}
           onChangeText={setRepeatPassword}
@@ -141,13 +141,13 @@ export default function SignUpClientScreen({ onBack, onSignIn, onSignUpSuccess }
           {loading ? (
             <ActivityIndicator size="small" color="#0a0a0a" />
           ) : (
-            <Text style={styles.primaryButtonText}>Continue with email</Text>
+            <Text style={styles.primaryButtonText}>Continuar con correo</Text>
           )}
         </TouchableOpacity>
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or</Text>
+          <Text style={styles.dividerText}>o</Text>
           <View style={styles.dividerLine} />
         </View>
 
@@ -156,11 +156,11 @@ export default function SignUpClientScreen({ onBack, onSignIn, onSignUpSuccess }
           onPress={handleGoogleSignUp}
           disabled={loading}
         >
-          <Text style={styles.googleButtonText}>Sign up with Google</Text>
+          <Text style={styles.googleButtonText}>Registrarse con Google</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.link} onPress={onSignIn} disabled={loading}>
-          <Text style={styles.linkText}>Already have an account? Sign in</Text>
+          <Text style={styles.linkText}>¿Ya tienes cuenta? Inicia sesión</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

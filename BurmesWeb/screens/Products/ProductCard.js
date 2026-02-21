@@ -13,8 +13,8 @@ const ProductCard = (props) => {
   const currentImage = imgList[idx] || imgList[0] || null;
 
   const formatPrice = (price) => {
-    if (!price) return "Price on request";
-    return `$${price.toLocaleString("en-US", {
+    if (!price) return "Precio a consultar";
+    return `$${price.toLocaleString("es-PE", {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     })}`;
@@ -60,7 +60,7 @@ const ProductCard = (props) => {
         )}
         {countInStock === 0 && (
           <View style={styles.outOfStockOverlay}>
-            <Text style={styles.outOfStockText}>Out of Stock</Text>
+            <Text style={styles.outOfStockText}>Agotado</Text>
           </View>
         )}
       </View>
@@ -71,8 +71,8 @@ const ProductCard = (props) => {
         <Text style={styles.price}>{formatPrice(price)}</Text>
         {typeof countInStock === "number" && (
           <Text style={[styles.stockText, countInStock === 0 && styles.stockTextZero]}>
-            {countInStock === 0 ? "Out of stock" : `${countInStock} in stock`}
-            {countInStock > 0 && countInStock <= 5 ? ` · Only ${countInStock} left` : ""}
+            {countInStock === 0 ? "Agotado" : `${countInStock} en stock`}
+            {countInStock > 0 && countInStock <= 5 ? ` · Solo quedan ${countInStock}` : ""}
           </Text>
         )}
       </View>

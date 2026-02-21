@@ -435,7 +435,7 @@ const FromBurmesSection = ({ onShopNew }) => {
               },
             ]}
           >
-            Brand new
+            Novedad
           </Text>
           <Text
             style={[
@@ -447,7 +447,7 @@ const FromBurmesSection = ({ onShopNew }) => {
               },
             ]}
           >
-            From Burmes
+            De Burmes
           </Text>
           <Text
             style={[
@@ -460,8 +460,8 @@ const FromBurmesSection = ({ onShopNew }) => {
               },
             ]}
           >
-            Shop the latest jewellery by Burmes Jewelry. Created by hand from
-            our studio. Ready to ship worldwide.
+            Las últimas joyas de Burmes Jewelry. Creadas a mano en nuestro
+            taller. Envíos a todo el mundo.
           </Text>
           <TouchableOpacity
             style={[
@@ -483,7 +483,7 @@ const FromBurmesSection = ({ onShopNew }) => {
                 },
               ]}
             >
-              Shop NEW
+              VER NOVEDADES
             </Text>
           </TouchableOpacity>
         </View>

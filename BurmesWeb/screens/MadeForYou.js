@@ -156,7 +156,7 @@ const MadeForYou = ({ onNavigate }) => {
               },
             ]}
           >
-            CREATE YOUR OWN
+            CREA EL TUYO
           </Text>
           <Text
             style={[
@@ -169,7 +169,7 @@ const MadeForYou = ({ onNavigate }) => {
               },
             ]}
           >
-            BESPOKE RING
+            ANILLO A LA MEDIDA
           </Text>
           <Text
             style={[
@@ -181,9 +181,9 @@ const MadeForYou = ({ onNavigate }) => {
               },
             ]}
           >
-            Looking to have a bespoke ring designed and made by hand from the
-            Burmes Jewelry studio? All are created within your price range and
-            shipped worldwide to your door. Complete the form below for a quote.
+            ¿Buscas un anillo a la medida diseñado y hecho a mano en el taller
+            de Burmes? Todos se crean dentro de tu rango de precio y se envían
+            a todo el mundo. Completa el formulario de abajo para una cotización.
           </Text>
         </View>
       </View>
@@ -208,7 +208,7 @@ const MadeForYou = ({ onNavigate }) => {
             },
           ]}
         >
-          Made for you
+          Hecho para ti
         </Text>
         <View
           style={[
@@ -227,11 +227,11 @@ const MadeForYou = ({ onNavigate }) => {
               },
             ]}
           >
-            We work with 18ct golds, platinum, precious gems, diamonds,
-            sapphires, and emeralds. All our diamonds over 0.40ct come with a
-            GIA report. Complimentary worldwide shipping on all our engagement
-            rings.{"\n\n"}Please complete the form below in full and we will get
-            back to you shortly.
+            Trabajamos con oro de 18k, platino, piedras preciosas, diamantes,
+            zafiros y esmeraldas. Todos nuestros diamantes mayores a 0.40 ct
+            incluyen informe GIA. Envío gratuito a todo el mundo en anillos de
+            compromiso.{"\n\n"}Completa el formulario de abajo por favor y te
+            responderemos pronto.
           </Text>
         </View>
       </View>

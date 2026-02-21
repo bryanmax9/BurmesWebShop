@@ -48,45 +48,30 @@ const Footer = ({ onNavigate }) => {
 
   const footerLinks = {
     shop: [
-      { label: "Jewellery", route: "jewellery" },
-      { label: "Engagement Rings", route: "engagement" },
-      { label: "Watches", route: "watches" },
-      { label: "Collections", route: "collections" },
+      { label: "Joyas", route: "jewellery" },
+      { label: "Anillos de compromiso", route: "engagement" },
+      { label: "Relojes", route: "watches" },
+      { label: "Colecciones", route: "collections" },
     ],
     about: [
-      { label: "About Us", route: "about" },
-      { label: "Made for You", route: "made-for-you" },
-      { label: "Contact", route: "contact" },
-      { label: "Shipping & Returns", route: "shipping" },
+      { label: "Nosotros", route: "about" },
+      { label: "Hecho para ti", route: "made-for-you" },
+      { label: "Contacto", route: "contact" },
+      { label: "Envíos y devoluciones", route: "shipping" },
     ],
     customer: [
-      { label: "My Account", route: "account" },
-      { label: "Order Tracking", route: "tracking" },
-      { label: "Size Guide", route: "size-guide" },
-      { label: "FAQ", route: "faq" },
+      { label: "Mi cuenta", route: "account" },
+      { label: "Seguimiento de pedido", route: "tracking" },
+      { label: "Guía de tallas", route: "size-guide" },
+      { label: "Preguntas frecuentes", route: "faq" },
     ],
   };
 
   const socialLinks = [
     {
       name: "instagram",
-      url: "https://www.instagram.com",
+      url: "https://www.instagram.com/burmesandco/",
       icon: "logo-instagram",
-    },
-    {
-      name: "facebook",
-      url: "https://www.facebook.com",
-      icon: "logo-facebook",
-    },
-    {
-      name: "twitter",
-      url: "https://www.twitter.com",
-      icon: "logo-twitter",
-    },
-    {
-      name: "pinterest",
-      url: "https://www.pinterest.com",
-      icon: "logo-pinterest",
     },
   ];
 
@@ -129,8 +114,8 @@ const Footer = ({ onNavigate }) => {
               },
             ]}
           >
-            Handcrafted jewellery from our studio in Peru. Created with
-            precision, shipped worldwide.
+            Joyería artesanal desde nuestro taller en Perú. Hecha con
+            precisión, envíos a todo el mundo.
           </Text>
         </View>
 
@@ -153,7 +138,7 @@ const Footer = ({ onNavigate }) => {
               },
             ]}
           >
-            SHOP
+            TIENDA
           </Text>
           {footerLinks.shop.map((link, index) => (
             <TouchableOpacity
@@ -195,7 +180,7 @@ const Footer = ({ onNavigate }) => {
               },
             ]}
           >
-            ABOUT
+            NOSOTROS
           </Text>
           {footerLinks.about.map((link, index) => (
             <TouchableOpacity
@@ -237,7 +222,7 @@ const Footer = ({ onNavigate }) => {
               },
             ]}
           >
-            CUSTOMER SERVICE
+            ATENCIÓN AL CLIENTE
           </Text>
           {footerLinks.customer.map((link, index) => (
             <TouchableOpacity
@@ -278,7 +263,7 @@ const Footer = ({ onNavigate }) => {
               },
             ]}
           >
-            CONTACT
+            CONTACTO
           </Text>
           <Text
             style={[
@@ -290,7 +275,19 @@ const Footer = ({ onNavigate }) => {
               },
             ]}
           >
-            Email:{"\n"}info@burmes.com
+            Email:{"\n"}burmes.jewelry@gmail.com
+          </Text>
+          <Text
+            style={[
+              styles.contactText,
+              {
+                fontSize: isSmallScreen ? 13 : 14,
+                marginBottom: isSmallScreen ? 8 : 10,
+                lineHeight: isSmallScreen ? 20 : 22,
+              },
+            ]}
+          >
+            Teléfono:{"\n"}+51 969 762 316
           </Text>
           <Text
             style={[
@@ -302,7 +299,7 @@ const Footer = ({ onNavigate }) => {
               },
             ]}
           >
-            Phone:{"\n"}+1 (555) 123-4567
+            Dirección:{"\n"}Av La Encalada 1415, tda 203-B. Santiago de Surco 15023
           </Text>
 
           {/* Social Media Icons */}
@@ -316,7 +313,7 @@ const Footer = ({ onNavigate }) => {
               },
             ]}
           >
-            FOLLOW US
+            SÍGUENOS
           </Text>
           <View style={styles.socialContainer}>
             {socialLinks.map((social, index) => (
@@ -360,7 +357,7 @@ const Footer = ({ onNavigate }) => {
             },
           ]}
         >
-          © {new Date().getFullYear()} Burmes & Co. All rights reserved.
+          © {new Date().getFullYear()} Burmes & Co. Todos los derechos reservados.
         </Text>
         <View
           style={[
@@ -384,7 +381,7 @@ const Footer = ({ onNavigate }) => {
                 },
               ]}
             >
-              Privacy Policy
+              Política de privacidad
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -401,7 +398,7 @@ const Footer = ({ onNavigate }) => {
                 },
               ]}
             >
-              Terms of Service
+              Términos de servicio
             </Text>
           </TouchableOpacity>
           <TouchableOpacity
@@ -416,7 +413,7 @@ const Footer = ({ onNavigate }) => {
                 },
               ]}
             >
-              Cookie Policy
+              Política de cookies
             </Text>
           </TouchableOpacity>
         </View>

@@ -66,7 +66,7 @@ const MostPopularSection = ({ onProductPress }) => {
             { fontSize: isSmallScreen ? 12 : 14 },
           ]}
         >
-          SHOP OUR
+          NUESTRA TIENDA
         </Text>
         <Text
           style={[
@@ -74,7 +74,7 @@ const MostPopularSection = ({ onProductPress }) => {
             { fontSize: isSmallScreen ? 28 : 36 },
           ]}
         >
-          Most Popular
+          Más populares
         </Text>
         <View style={styles.underline} />
       </View>
@@ -109,7 +109,7 @@ const MostPopularSection = ({ onProductPress }) => {
           </View>
         ) : (
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No products available</Text>
+            <Text style={styles.emptyText}>No hay productos disponibles</Text>
           </View>
         )}
       </View>

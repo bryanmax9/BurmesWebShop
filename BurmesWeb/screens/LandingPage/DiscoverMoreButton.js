@@ -31,7 +31,7 @@ const DiscoverMoreButton = ({ onPress }) => {
           },
         ]}
       >
-        DISCOVER MORE
+        DESCUBRIR MÁS
       </Text>
     </TouchableOpacity>
   );

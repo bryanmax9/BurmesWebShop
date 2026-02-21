@@ -1,30 +1,28 @@
 {
   "expo": {
-    "name": "ecommerce-web",
+    "name": "Burmes",
     "slug": "ecommerce-web",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/BurmesLogo.ico",
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "jsEngine": "jsc",
     "splash": {
-      "image": "./assets/splash-icon.png",
+      "image": "./assets/BurmesLogo.ico",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "ios": {
-      "supportsTablet": true
-    },
+    "ios": { "supportsTablet": true },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
+        "foregroundImage": "./assets/BurmesLogo.ico",
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/BurmesLogo.jpg",
+      "favicon": "./assets/BurmesLogo.ico",
       "bundler": "metro"
     }
   }

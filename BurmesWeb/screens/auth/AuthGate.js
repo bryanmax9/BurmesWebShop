@@ -27,7 +27,7 @@ export default function AuthGate() {
     return (
       <View style={styles.centered}>
         <ActivityIndicator size="large" color="#1a1a1a" />
-        <Text style={styles.loadingText}>Loading…</Text>
+        <Text style={styles.loadingText}>Cargando…</Text>
       </View>
     );
   }
@@ -64,14 +64,14 @@ export default function AuthGate() {
         style={styles.container}
       >
         <Text style={styles.title}>BURMES & CO.</Text>
-        <Text style={styles.subtitle}>Sign in or create an account</Text>
+        <Text style={styles.subtitle}>Inicia sesión o crea una cuenta</Text>
 
         <TouchableOpacity
           style={styles.primaryButton}
           onPress={() => setView(VIEW_SIGN_IN_CLIENT)}
           activeOpacity={0.85}
         >
-          <Text style={styles.primaryButtonText}>Sign in (Client)</Text>
+          <Text style={styles.primaryButtonText}>Iniciar sesión (Cliente)</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -79,12 +79,12 @@ export default function AuthGate() {
           onPress={() => setView(VIEW_SIGN_UP_CLIENT)}
           activeOpacity={0.85}
         >
-          <Text style={styles.secondaryButtonText}>Sign up (Client)</Text>
+          <Text style={styles.secondaryButtonText}>Registrarse (Cliente)</Text>
         </TouchableOpacity>
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>Admin</Text>
+          <Text style={styles.dividerText}>Administrador</Text>
           <View style={styles.dividerLine} />
         </View>
 
@@ -93,9 +93,9 @@ export default function AuthGate() {
           onPress={() => setView(VIEW_SIGN_IN_ADMIN)}
           activeOpacity={0.85}
         >
-          <Text style={styles.adminButtonText}>Sign in (Admin)</Text>
+          <Text style={styles.adminButtonText}>Iniciar sesión (Admin)</Text>
         </TouchableOpacity>
-        <Text style={styles.adminHint}>Email only. Admin access is granted by the store.</Text>
+        <Text style={styles.adminHint}>Solo correo. El acceso de administrador lo otorga la tienda.</Text>
       </KeyboardAvoidingView>
     </ScrollView>
   );

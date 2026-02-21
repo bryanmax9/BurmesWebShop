@@ -41,7 +41,7 @@ const SearchedProducts = ({ productsFiltered, onProductPress }) => {
         ))
       ) : (
         <View style={styles.center}>
-          <Text style={styles.noResultsText}>No products found</Text>
+          <Text style={styles.noResultsText}>No se encontraron productos</Text>
         </View>
       )}
     </ScrollView>

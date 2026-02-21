@@ -32,9 +32,9 @@ const formatDate = (iso) => {
 
 const statusLabel = (s) => {
   const v = (s || "").toLowerCase();
-  if (v === "completed" || v === "shipped") return "Completed";
-  if (v === "pending" || v === "in review") return "In review";
-  return s || "Requested";
+  if (v === "completed" || v === "shipped") return "Completado";
+  if (v === "pending" || v === "in review") return "En revisión";
+  return s || "Solicitado";
 };
 
 const toImageSource = (img) => {
@@ -59,11 +59,11 @@ function RequestItemRow({ item }) {
       </View>
       <View style={styles.cardItemInfo}>
         <Text style={styles.cardItemLine}>
-          {(item.quantity || 1) > 1 ? `${item.quantity}× ` : ""}{item.productName || "Item"}
+          {(item.quantity || 1) > 1 ? `${item.quantity}× ` : ""}{item.productName || "Artículo"}
         </Text>
         {item.price != null && (
           <Text style={styles.cardItemPrice}>
-            ${Number(item.price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            ${Number(item.price).toLocaleString("es-PE", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
           </Text>
         )}
       </View>
@@ -115,7 +115,7 @@ export default function ClientDashboard() {
       setDeletePassword("");
       navigate("/", { replace: true });
     } catch (err) {
-      const msg = err?.message || "Could not delete account.";
+      const msg = err?.message || "No se pudo eliminar la cuenta.";
       if (typeof alert !== "undefined") alert(msg);
       else Alert.alert("Error", msg);
     } finally {
@@ -141,14 +141,14 @@ export default function ClientDashboard() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.title}>My orders</Text>
+        <Text style={styles.title}>Mis pedidos</Text>
         <Text style={styles.email}>{user.email}</Text>
         <View style={styles.headerActions}>
           <TouchableOpacity style={styles.signOutBtn} onPress={signOut}>
-            <Text style={styles.signOutText}>Sign out</Text>
+            <Text style={styles.signOutText}>Cerrar sesión</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.storeLink} onPress={() => navigate("/")}>
-            <Text style={styles.storeLinkText}>← Back to store</Text>
+            <Text style={styles.storeLinkText}>← Volver a la tienda</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -158,14 +158,14 @@ export default function ClientDashboard() {
         ) : (
           <>
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Requests (in review)</Text>
-              <Text style={styles.sectionSubtitle}>These will become completed orders once the store confirms.</Text>
+              <Text style={styles.sectionTitle}>Solicitudes (en revisión)</Text>
+              <Text style={styles.sectionSubtitle}>Se convertirán en pedidos completados cuando la tienda los confirme.</Text>
               {inReviewRequests.length === 0 ? (
                 <View style={styles.emptyCard}>
-                  <Text style={styles.emptyText}>No requests in review.</Text>
-                  <Text style={styles.emptySubtext}>Add items to cart and submit a request from the store to see them here.</Text>
+                  <Text style={styles.emptyText}>No hay solicitudes en revisión.</Text>
+                  <Text style={styles.emptySubtext}>Añade productos al carrito y envía una solicitud desde la tienda para verlas aquí.</Text>
                   <TouchableOpacity style={styles.emptyBtn} onPress={() => navigate("/")}>
-                    <Text style={styles.emptyBtnText}>Go to store</Text>
+                    <Text style={styles.emptyBtnText}>Ir a la tienda</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -178,7 +178,7 @@ export default function ClientDashboard() {
                       </View>
                     </View>
                     {(req.requestNumber || req.id) && (
-                      <Text style={styles.requestNumber} selectable>Request # {req.requestNumber || req.id}</Text>
+                      <Text style={styles.requestNumber} selectable>Solicitud # {req.requestNumber || req.id}</Text>
                     )}
                     <View style={styles.cardBody}>
                       {(req.items || []).map((item, idx) => (
@@ -191,14 +191,14 @@ export default function ClientDashboard() {
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionTitle}>Completed orders</Text>
-              <Text style={styles.sectionSubtitle}>Requests that the store has marked as completed.</Text>
+              <Text style={styles.sectionTitle}>Pedidos completados</Text>
+              <Text style={styles.sectionSubtitle}>Solicitudes que la tienda ha marcado como completadas.</Text>
               {completedRequests.length === 0 ? (
                 <View style={styles.emptyCard}>
-                  <Text style={styles.emptyText}>No completed orders yet.</Text>
-                  <Text style={styles.emptySubtext}>Once the store confirms your requests, they will appear here.</Text>
+                  <Text style={styles.emptyText}>Aún no hay pedidos completados.</Text>
+                  <Text style={styles.emptySubtext}>Cuando la tienda confirme tus solicitudes, aparecerán aquí.</Text>
                   <TouchableOpacity style={styles.emptyBtn} onPress={() => navigate("/")}>
-                    <Text style={styles.emptyBtnText}>Go to store</Text>
+                    <Text style={styles.emptyBtnText}>Ir a la tienda</Text>
                   </TouchableOpacity>
                 </View>
               ) : (
@@ -211,7 +211,7 @@ export default function ClientDashboard() {
                       </View>
                     </View>
                     {(req.requestNumber || req.id) && (
-                      <Text style={styles.requestNumber} selectable>Request # {req.requestNumber || req.id}</Text>
+                      <Text style={styles.requestNumber} selectable>Solicitud # {req.requestNumber || req.id}</Text>
                     )}
                     <View style={styles.cardBody}>
                       {(req.items || []).map((item, idx) => (
@@ -224,8 +224,8 @@ export default function ClientDashboard() {
             </View>
 
             <View style={styles.dangerZone}>
-              <Text style={styles.dangerZoneTitle}>Account</Text>
-              <Text style={styles.dangerZoneSubtitle}>Permanently delete your account and all stored data. This cannot be undone.</Text>
+              <Text style={styles.dangerZoneTitle}>Cuenta</Text>
+              <Text style={styles.dangerZoneSubtitle}>Eliminar permanentemente tu cuenta y todos los datos. No se puede deshacer.</Text>
               <TouchableOpacity
                 style={[styles.deleteAccountBtn, deleting && styles.deleteAccountBtnDisabled]}
                 onPress={handleDeleteAccount}
@@ -234,7 +234,7 @@ export default function ClientDashboard() {
                 {deleting ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <Text style={styles.deleteAccountBtnText}>Delete account</Text>
+                  <Text style={styles.deleteAccountBtnText}>Eliminar cuenta</Text>
                 )}
               </TouchableOpacity>
             </View>
@@ -242,16 +242,16 @@ export default function ClientDashboard() {
             <Modal visible={deleteConfirmVisible} transparent animationType="fade">
               <Pressable style={styles.modalOverlay} onPress={() => setDeleteConfirmVisible(false)}>
                 <Pressable style={styles.confirmModalContent} onPress={(e) => e.stopPropagation()}>
-                  <Text style={styles.confirmModalTitle}>Delete account?</Text>
+                  <Text style={styles.confirmModalTitle}>¿Eliminar cuenta?</Text>
                   <Text style={styles.confirmModalSubtitle}>
-                    This will permanently delete your account and data. You will need to sign up again to use the store. This cannot be undone.
+                    Se eliminará permanentemente tu cuenta y datos. Tendrás que registrarte de nuevo para usar la tienda. No se puede deshacer.
                   </Text>
                   <View style={styles.confirmModalActions}>
                     <TouchableOpacity style={styles.confirmModalCancel} onPress={() => setDeleteConfirmVisible(false)}>
-                      <Text style={styles.confirmModalCancelText}>Cancel</Text>
+                      <Text style={styles.confirmModalCancelText}>Cancelar</Text>
                     </TouchableOpacity>
                     <TouchableOpacity style={styles.confirmModalContinue} onPress={onConfirmDeleteContinue} disabled={deleting}>
-                      <Text style={styles.confirmModalContinueText}>Continue</Text>
+                      <Text style={styles.confirmModalContinueText}>Continuar</Text>
                     </TouchableOpacity>
                   </View>
                 </Pressable>
@@ -267,11 +267,11 @@ export default function ClientDashboard() {
               <Pressable style={styles.modalOverlay} onPress={() => setDeleteModalVisible(false)}>
                 <KeyboardAvoidingView behavior={Platform.OS === "ios" ? "padding" : undefined} style={styles.modalContentWrap}>
                   <Pressable style={styles.modalContent} onPress={(e) => e.stopPropagation()}>
-                    <Text style={styles.modalTitle}>Confirm with password</Text>
-                    <Text style={styles.modalSubtitle}>Enter your password to permanently delete your account.</Text>
+                    <Text style={styles.modalTitle}>Confirmar con contraseña</Text>
+                    <Text style={styles.modalSubtitle}>Ingresa tu contraseña para eliminar permanentemente tu cuenta.</Text>
                     <TextInput
                       style={styles.modalInput}
-                      placeholder="Password"
+                      placeholder="Contraseña"
                       placeholderTextColor="#999"
                       value={deletePassword}
                       onChangeText={setDeletePassword}
@@ -281,14 +281,14 @@ export default function ClientDashboard() {
                     />
                     <View style={styles.modalActions}>
                       <TouchableOpacity style={styles.modalCancelBtn} onPress={() => { setDeleteModalVisible(false); setDeletePassword(""); }} disabled={deleting}>
-                        <Text style={styles.modalCancelText}>Cancel</Text>
+                        <Text style={styles.modalCancelText}>Cancelar</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         style={[styles.modalConfirmBtn, deleting && styles.modalConfirmBtnDisabled]}
                         onPress={() => runDeleteAccount(deletePassword)}
                         disabled={deleting || !deletePassword.trim()}
                       >
-                        {deleting ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.modalConfirmText}>Delete account</Text>}
+                        {deleting ? <ActivityIndicator size="small" color="#fff" /> : <Text style={styles.modalConfirmText}>Eliminar cuenta</Text>}
                       </TouchableOpacity>
                     </View>
                   </Pressable>

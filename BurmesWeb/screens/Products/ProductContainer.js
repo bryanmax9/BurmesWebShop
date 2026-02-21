@@ -65,7 +65,7 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress }) => {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#C9A961" />
-        <Text style={styles.loadingText}>Loading products...</Text>
+        <Text style={styles.loadingText}>Cargando productos...</Text>
       </View>
     );
   }
@@ -111,14 +111,22 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress }) => {
                   </View>
                   <Text style={styles.categoryHeaderTitle}>
                     {selectedCategory.name
-                      ? selectedCategory.name.charAt(0).toUpperCase() +
-                        selectedCategory.name.slice(1)
+                      ? (
+                          {
+                            pendants: "Dijes",
+                            chains: "Cadenas",
+                            rings: "Anillos",
+                            bracelets: "Pulseras",
+                          }[selectedCategory.name.toLowerCase()] ||
+                          selectedCategory.name.charAt(0).toUpperCase() +
+                            selectedCategory.name.slice(1)
+                        )
                       : selectedCategory.name}
                   </Text>
                 </View>
                 <Text style={styles.productCount}>
                   {products.length}{" "}
-                  {products.length === 1 ? "product" : "products"}
+                  {products.length === 1 ? "producto" : "productos"}
                 </Text>
               </View>
             </View>
@@ -143,9 +151,9 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress }) => {
           ) : (
             <View style={styles.emptyContainer}>
               <Ionicons name="cube-outline" size={64} color="#ccc" />
-              <Text style={styles.emptyText}>No products found</Text>
+              <Text style={styles.emptyText}>No se encontraron productos</Text>
               <Text style={styles.emptySubtext}>
-                Try selecting a different category
+                Prueba seleccionando otra categoría
               </Text>
             </View>
           )}

@@ -1,6 +1,18 @@
 import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { StyleSheet, Text, View, Platform } from "react-native";
+
+// Set document title and favicon for web (so tab shows "Burmes" and icon works when deployed)
+if (typeof document !== "undefined") {
+  document.title = "Burmes";
+  const existingFavicon = document.querySelector('link[rel="icon"]');
+  if (!existingFavicon || !existingFavicon.getAttribute("href")) {
+    const link = document.createElement("link");
+    link.rel = "icon";
+    link.href = "/favicon.jpg";
+    document.head.appendChild(link);
+  }
+}
 import { BrowserRouter, MemoryRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./contexts/AuthContext";
 import StoreLayout from "./screens/StoreLayout";

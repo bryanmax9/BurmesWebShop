@@ -152,7 +152,7 @@ const DiscoverMoreSection = ({ onDiscoverMore }) => {
             },
           ]}
         >
-          MADE TO ORDER
+          HECHO A LA MEDIDA
         </Text>
         <Text
           style={[
@@ -165,7 +165,7 @@ const DiscoverMoreSection = ({ onDiscoverMore }) => {
             },
           ]}
         >
-          BESPOKE ENGAGEMENT RINGS
+          ANILLOS DE COMPROMISO A LA MEDIDA
         </Text>
         <Text
           style={[
@@ -177,8 +177,8 @@ const DiscoverMoreSection = ({ onDiscoverMore }) => {
             },
           ]}
         >
-          At Bobby White, we design and create your bespoke engagement ring from
-          our studio in London. All within your price range.
+          En Burmes diseñamos y creamos tu anillo de compromiso a la medida desde
+          nuestro taller en Perú. Todo dentro de tu rango de precio.
         </Text>
         <DiscoverMoreButton onPress={onDiscoverMore} />
       </View>

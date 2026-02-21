@@ -22,17 +22,17 @@ export default function SignInAdminScreen({ onBack }) {
     const code = err?.code || "";
     switch (code) {
       case "auth/user-not-found":
-        return "No account found with this email address.";
+        return "No hay cuenta con este correo.";
       case "auth/wrong-password":
-        return "Incorrect password.";
+        return "Contraseña incorrecta.";
       case "auth/invalid-credential":
-        return "Incorrect email or password. Please try again.";
+        return "Correo o contraseña incorrectos. Intenta de nuevo.";
       case "auth/invalid-email":
-        return "Please enter a valid email address.";
+        return "Ingresa un correo electrónico válido.";
       case "auth/too-many-requests":
-        return "Too many failed attempts. Please try again later.";
+        return "Demasiados intentos fallidos. Intenta más tarde.";
       default:
-        return err?.message || "Incorrect email or password. Please try again.";
+        return err?.message || "Correo o contraseña incorrectos. Intenta de nuevo.";
     }
   };
 
@@ -40,7 +40,7 @@ export default function SignInAdminScreen({ onBack }) {
     const e = (email || "").trim();
     const p = password || "";
     if (!e || !p) {
-      Alert.alert("Error", "Please enter email and password.");
+      Alert.alert("Error", "Ingresa correo y contraseña.");
       return;
     }
     setLoading(true);
@@ -48,7 +48,7 @@ export default function SignInAdminScreen({ onBack }) {
       await signInAdmin(e, p);
     } catch (err) {
       const message = getAdminSignInErrorMessage(err);
-      Alert.alert("Admin sign-in failed", message);
+      Alert.alert("Error al iniciar sesión (Admin)", message);
     } finally {
       setLoading(false);
     }
@@ -60,15 +60,15 @@ export default function SignInAdminScreen({ onBack }) {
       style={styles.container}
     >
       <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-        <Text style={styles.backBtnText}>← Back</Text>
+        <Text style={styles.backBtnText}>← Atrás</Text>
       </TouchableOpacity>
 
-      <Text style={styles.title}>Sign in (Admin)</Text>
-      <Text style={styles.subtitle}>Email and password only. Admin access is set in the store.</Text>
+      <Text style={styles.title}>Iniciar sesión (Admin)</Text>
+      <Text style={styles.subtitle}>Solo correo y contraseña. El acceso de administrador lo asigna la tienda.</Text>
 
       <TextInput
         style={styles.input}
-        placeholder="Email"
+        placeholder="Correo electrónico"
         placeholderTextColor="#999"
         value={email}
         onChangeText={setEmail}
@@ -78,7 +78,7 @@ export default function SignInAdminScreen({ onBack }) {
       />
       <TextInput
         style={styles.input}
-        placeholder="Password"
+        placeholder="Contraseña"
         placeholderTextColor="#999"
         value={password}
         onChangeText={setPassword}
@@ -94,7 +94,7 @@ export default function SignInAdminScreen({ onBack }) {
         {loading ? (
           <ActivityIndicator size="small" color="#fff" />
         ) : (
-          <Text style={styles.buttonText}>Sign in as Admin</Text>
+          <Text style={styles.buttonText}>Iniciar sesión como Admin</Text>
         )}
       </TouchableOpacity>
     </KeyboardAvoidingView>

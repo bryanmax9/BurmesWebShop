@@ -26,14 +26,14 @@ export default function SignInClientScreen({ onBack, onSignUp }) {
     const e = (email || "").trim();
     const p = password || "";
     if (!e || !p) {
-      Alert.alert("Error", "Please enter email and password.");
+      Alert.alert("Error", "Ingresa correo y contraseña.");
       return;
     }
     setLoading(true);
     try {
       await signInClientEmail(e, p);
     } catch (err) {
-      Alert.alert("Sign in failed", err.message || "Invalid email or password.");
+      Alert.alert("Error al iniciar sesión", err.message || "Correo o contraseña incorrectos.");
     } finally {
       setLoading(false);
     }
@@ -44,7 +44,7 @@ export default function SignInClientScreen({ onBack, onSignUp }) {
     try {
       await signInWithGoogle();
     } catch (err) {
-      Alert.alert("Sign in failed", err.message || "Could not sign in with Google.");
+      Alert.alert("Error al iniciar sesión", err.message || "No se pudo iniciar sesión con Google.");
     } finally {
       setLoading(false);
     }
@@ -80,15 +80,15 @@ export default function SignInClientScreen({ onBack, onSignUp }) {
         showsVerticalScrollIndicator={false}
       >
         <TouchableOpacity style={styles.backBtn} onPress={onBack}>
-          <Text style={styles.backBtnText}>← Back</Text>
+          <Text style={styles.backBtnText}>← Atrás</Text>
         </TouchableOpacity>
 
-        <Text style={titleStyle}>Sign in</Text>
-        <Text style={styles.subtitle}>Email or Google</Text>
+        <Text style={titleStyle}>Iniciar sesión</Text>
+        <Text style={styles.subtitle}>Correo o Google</Text>
 
         <TextInput
           style={inputStyle}
-          placeholder="Email"
+          placeholder="Correo electrónico"
           placeholderTextColor="rgba(255,255,255,0.35)"
           value={email}
           onChangeText={setEmail}
@@ -98,7 +98,7 @@ export default function SignInClientScreen({ onBack, onSignUp }) {
         />
         <TextInput
           style={inputStyle}
-          placeholder="Password"
+          placeholder="Contraseña"
           placeholderTextColor="rgba(255,255,255,0.35)"
           value={password}
           onChangeText={setPassword}
@@ -114,13 +114,13 @@ export default function SignInClientScreen({ onBack, onSignUp }) {
           {loading ? (
             <ActivityIndicator size="small" color="#0a0a0a" />
           ) : (
-            <Text style={styles.buttonText}>Sign in with Email</Text>
+            <Text style={styles.buttonText}>Iniciar sesión con correo</Text>
           )}
         </TouchableOpacity>
 
         <View style={styles.divider}>
           <View style={styles.dividerLine} />
-          <Text style={styles.dividerText}>or</Text>
+          <Text style={styles.dividerText}>o</Text>
           <View style={styles.dividerLine} />
         </View>
 
@@ -129,11 +129,11 @@ export default function SignInClientScreen({ onBack, onSignUp }) {
           onPress={handleGoogleSignIn}
           disabled={loading}
         >
-          <Text style={styles.googleButtonText}>Sign in with Google</Text>
+          <Text style={styles.googleButtonText}>Iniciar sesión con Google</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.link} onPress={onSignUp} disabled={loading}>
-          <Text style={styles.linkText}>Don’t have an account? Sign up</Text>
+          <Text style={styles.linkText}>¿No tienes cuenta? Regístrate</Text>
         </TouchableOpacity>
       </ScrollView>
     </KeyboardAvoidingView>

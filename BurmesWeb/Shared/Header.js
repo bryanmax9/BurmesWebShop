@@ -16,10 +16,10 @@ import { useAuth } from "../contexts/AuthContext";
 
 // Default navigation items - can be overridden via props
 const DEFAULT_NAV_ITEMS = [
-  { id: "home", label: "HOME", route: "home" },
-  { id: "jewellery", label: "JEWELLERY", route: "jewellery" },
-  { id: "engagement", label: "ENGAGEMENT", route: "engagement" },
-  { id: "watches", label: "WATCHES", route: "watches" },
+  { id: "home", label: "INICIO", route: "home" },
+  { id: "jewellery", label: "JOYAS", route: "jewellery" },
+  { id: "engagement", label: "COMPROMISO", route: "engagement" },
+  { id: "watches", label: "RELOJES", route: "watches" },
 ];
 
 const Header = ({
@@ -292,7 +292,7 @@ const Header = ({
                                   navigate("/client/dashboard");
                                 }}
                               >
-                                <Text style={styles.dropdownItemText}>My orders</Text>
+                                <Text style={styles.dropdownItemText}>Mis pedidos</Text>
                               </TouchableOpacity>
                             )}
                             {isAdmin && (
@@ -303,7 +303,7 @@ const Header = ({
                                   navigate("/admin/dashboard");
                                 }}
                               >
-                                <Text style={styles.dropdownItemText}>Admin dashboard</Text>
+                                <Text style={styles.dropdownItemText}>Panel de administración</Text>
                               </TouchableOpacity>
                             )}
                             {onSignOut && (
@@ -314,7 +314,7 @@ const Header = ({
                                   onSignOut();
                                 }}
                               >
-                                <Text style={styles.dropdownItemText}>Sign out</Text>
+                                <Text style={styles.dropdownItemText}>Cerrar sesión</Text>
                               </TouchableOpacity>
                             )}
                           </>
@@ -327,7 +327,7 @@ const Header = ({
                                 navigate("/sign-in");
                               }}
                             >
-                              <Text style={styles.dropdownItemText}>Sign in</Text>
+                              <Text style={styles.dropdownItemText}>Iniciar sesión</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                               style={styles.dropdownItem}
@@ -336,7 +336,7 @@ const Header = ({
                                 navigate("/sign-up");
                               }}
                             >
-                              <Text style={styles.dropdownItemText}>Sign up</Text>
+                              <Text style={styles.dropdownItemText}>Registrarse</Text>
                             </TouchableOpacity>
                           </>
                         )}
@@ -400,7 +400,7 @@ const Header = ({
                                   navigate("/client/dashboard");
                                 }}
                               >
-                                <Text style={styles.dropdownItemText}>My orders</Text>
+                                <Text style={styles.dropdownItemText}>Mis pedidos</Text>
                               </TouchableOpacity>
                             )}
                             {isAdmin && (
@@ -411,7 +411,7 @@ const Header = ({
                                   navigate("/admin/dashboard");
                                 }}
                               >
-                                <Text style={styles.dropdownItemText}>Admin dashboard</Text>
+                                <Text style={styles.dropdownItemText}>Panel de administración</Text>
                               </TouchableOpacity>
                             )}
                             {onSignOut && (
@@ -422,7 +422,7 @@ const Header = ({
                                   onSignOut();
                                 }}
                               >
-                                <Text style={styles.dropdownItemText}>Sign out</Text>
+                                <Text style={styles.dropdownItemText}>Cerrar sesión</Text>
                               </TouchableOpacity>
                             )}
                           </>
@@ -435,7 +435,7 @@ const Header = ({
                                 navigate("/sign-in");
                               }}
                             >
-                              <Text style={styles.dropdownItemText}>Sign in</Text>
+                              <Text style={styles.dropdownItemText}>Iniciar sesión</Text>
                             </TouchableOpacity>
                             <TouchableOpacity
                               style={styles.dropdownItem}
@@ -444,7 +444,7 @@ const Header = ({
                                 navigate("/sign-up");
                               }}
                             >
-                              <Text style={styles.dropdownItemText}>Sign up</Text>
+                              <Text style={styles.dropdownItemText}>Registrarse</Text>
                             </TouchableOpacity>
                           </>
                         )}
@@ -476,7 +476,7 @@ const Header = ({
               style={styles.searchIcon}
             />
             <TextInput
-              placeholder="Search products..."
+              placeholder="Buscar productos..."
               placeholderTextColor="#999"
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -516,7 +516,7 @@ const Header = ({
         <View style={styles.mobileMenu}>
           {/* Close Button Header */}
           <View style={styles.mobileMenuHeader}>
-            <Text style={styles.mobileMenuTitle}>MENU</Text>
+            <Text style={styles.mobileMenuTitle}>MENÚ</Text>
             <TouchableOpacity
               style={styles.closeButton}
               onPress={() => {
