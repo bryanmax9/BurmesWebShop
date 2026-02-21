@@ -22,7 +22,6 @@
       "edgeToEdgeEnabled": true
     },
     "web": {
-      "favicon": "./assets/BurmesLogo.ico",
       "bundler": "metro"
     }
   }
