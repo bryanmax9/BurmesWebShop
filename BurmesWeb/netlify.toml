@@ -1,3 +1,4 @@
+# With Base directory = BurmesWeb in Netlify UI, use Publish directory = dist (not BurmesWeb/dist)
 [build]
   command = "npx expo export -p web && cp -r public/* dist/ 2>/dev/null || true"
   publish = "dist"
