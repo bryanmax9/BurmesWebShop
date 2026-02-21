@@ -1,0 +1,7 @@
+{
+  "name": "burmes-webshop-root",
+  "private": true,
+  "scripts": {
+    "build": "cd BurmesWeb && npx expo export -p web && (cp -r public/* dist/ 2>/dev/null || true)"
+  }
+}
