@@ -41,6 +41,11 @@ function AppRoutes() {
       <Route path="/complete-profile" element={<CompleteProfilePage />} />
       <Route path="/client/dashboard" element={<ClientDashboard />} />
       <Route path="/cart" element={<CartPage />} />
+      <Route path="/collections" element={<StoreLayout />} />
+      <Route path="/made-for-you" element={<StoreLayout />} />
+      <Route path="/category/:categoryId" element={<StoreLayout />} />
+      <Route path="/product/:productId" element={<StoreLayout />} />
+      <Route path="/" element={<StoreLayout />} />
       <Route path="*" element={<StoreLayout />} />
     </Routes>
   );
