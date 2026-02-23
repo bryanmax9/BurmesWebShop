@@ -1,7 +1,7 @@
 # Build from repo root so Publish directory "BurmesWeb/dist" (locked in UI) is correct.
 # In Netlify UI: set Base directory to empty (or ".") so this file is used.
 [build]
-  command = "cd BurmesWeb && npx expo export -p web && (cp -r public/* dist/ 2>/dev/null || true)"
+  command = "cd BurmesWeb && npm install && npx expo export -p web && (cp -r public/* dist/ 2>/dev/null || true)"
   publish = "BurmesWeb/dist"
 
 [functions]
