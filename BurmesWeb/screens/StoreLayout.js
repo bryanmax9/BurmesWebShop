@@ -165,23 +165,6 @@ export default function StoreLayout() {
 
   return (
     <View style={styles.container}>
-      {/* Semantic H1 for SEO Crawlers */}
-      {Platform.OS === "web" && (
-        <View 
-          style={{ position: "absolute", width: 1, height: 1, padding: 0, margin: -1, overflow: "hidden", clip: "rect(0,0,0,0)", whiteSpace: "nowrap", border: 0 }}
-          accessibilityRole="header"
-          aria-level={1}
-        >
-          <Text>Burmes & Co. | Joyería Fina y Relojes de Lujo</Text>
-          <Text>
-            Burmes & Co. es una joyería de lujo especializada en anillos de compromiso, 
-            joyas finas, relojes de alta gama y piezas personalizadas en oro y diamantes. 
-            Explora nuestras colecciones exclusivas de colgantes, cadenas, sortijas y pulseras. 
-            Calidad artesanal y diseño elegante para momentos inolvidables.
-          </Text>
-        </View>
-      )}
-
       <Header
         scrollY={scrollY}
         onNavigate={handleNavigate}
