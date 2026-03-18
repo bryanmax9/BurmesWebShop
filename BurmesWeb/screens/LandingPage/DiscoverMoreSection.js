@@ -19,6 +19,15 @@ try {
   // expo-av not available, will use fallback
 }
 
+// Try to import expo-asset for resolving asset URIs on web
+let Asset = null;
+try {
+  const expoAsset = require("expo-asset");
+  Asset = expoAsset.Asset;
+} catch (e) {
+  // expo-asset not available
+}
+
 const DiscoverMoreSection = ({ onDiscoverMore }) => {
   const windowDimensions = Dimensions.get("window");
   const isSmallScreen = windowDimensions.width < 768;
@@ -26,28 +35,41 @@ const DiscoverMoreSection = ({ onDiscoverMore }) => {
   const [videoError, setVideoError] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
 
+  // Must be declared before any useEffect that references it
+  const videoAsset = require("../../assets/DiscoverMore.mp4");
+  const [videoUri, setVideoUri] = useState(null);
+
+  // Step 1: Resolve the asset URI (web needs a real URL, not a module number)
   useEffect(() => {
-    if (Platform.OS === "web" && videoRef.current) {
-      const video = videoRef.current;
-      // Set video properties
-      video.loop = true;
-      video.muted = true;
-      // Try to play, but don't treat play() failure as error
-      // Mobile browsers often require user interaction for autoplay
-      video.play().catch(() => {
-        // Play failed (likely autoplay policy), but video might still load
-        // Only show error if video actually fails to load (handled by onError)
-      });
-    } else if (Platform.OS !== "web" && Video && videoRef.current) {
-      // For native, try to play but don't treat failure as immediate error
-      videoRef.current.playAsync().catch(() => {
-        // Play failed, but video might still be loading
-      });
+    if (Platform.OS === "web") {
+      if (Asset) {
+        const asset = Asset.fromModule(videoAsset);
+        asset.downloadAsync().then(() => {
+          setVideoUri(asset.uri);
+        }).catch(() => {
+          setVideoUri(videoAsset);
+        });
+      } else {
+        setVideoUri(videoAsset);
+      }
     }
   }, []);
 
+  // Step 2: Once videoUri is set, attempt to play
+  useEffect(() => {
+    if (Platform.OS === "web" && videoRef.current && videoUri) {
+      const video = videoRef.current;
+      video.loop = true;
+      video.muted = true;
+      video.play().catch(() => {
+        // Autoplay policy may block — video will still show once canplay fires
+      });
+    } else if (Platform.OS !== "web" && Video && videoRef.current) {
+      videoRef.current.playAsync().catch(() => {});
+    }
+  }, [videoUri]);
+
   const handleVideoError = (e) => {
-    // Only set error when video actually fails to load
     console.log("Video error:", e);
     setVideoError(true);
   };
@@ -56,8 +78,6 @@ const DiscoverMoreSection = ({ onDiscoverMore }) => {
     setVideoLoaded(true);
     setVideoError(false);
   };
-
-  const videoSource = require("../../assets/DiscoverMore.mp4");
 
   const screenHeight = Dimensions.get("window").height;
   const screenWidth = Dimensions.get("window").width;
@@ -101,26 +121,28 @@ const DiscoverMoreSection = ({ onDiscoverMore }) => {
           />
         </View>
       ) : Platform.OS === "web" && typeof document !== "undefined" ? (
-        <video
-          ref={videoRef}
-          src={videoSource}
-          style={{
-            ...StyleSheet.flatten(styles.videoBackground),
-            opacity: videoLoaded ? 1 : 0
-          }}
-          autoPlay
-          loop
-          muted
-          playsInline
-          preload="auto"
-          onError={handleVideoError}
-          onLoadedData={handleVideoLoaded}
-          onCanPlay={handleVideoLoaded}
-        />
+        videoUri ? (
+          <video
+            ref={videoRef}
+            src={videoUri}
+            style={{
+              ...StyleSheet.flatten(styles.videoBackground),
+              opacity: videoLoaded ? 1 : 0
+            }}
+            autoPlay
+            loop
+            muted
+            playsInline
+            preload="auto"
+            onError={handleVideoError}
+            onLoadedData={handleVideoLoaded}
+            onCanPlay={handleVideoLoaded}
+          />
+        ) : null
       ) : Video ? (
         <Video
           ref={videoRef}
-          source={videoSource}
+          source={videoAsset}
           style={[
             styles.videoBackground,
             { opacity: videoLoaded ? 1 : 0 }

@@ -63,6 +63,14 @@ const CollageSection = () => {
         },
       ]}
     >
+      {/* Gradient overlay always on top — zIndex must exceed both image layers */}
+      <View style={styles.gradientOverlay}>
+        <View style={styles.gradientLayer1} />
+        <View style={styles.gradientLayer2} />
+        <View style={styles.gradientLayer3} />
+        <View style={styles.gradientLayer4} />
+      </View>
+
       {/* Background Images with Crossfade Animation */}
       {/* Current Image - Fading Out */}
       <Animated.View
@@ -97,16 +105,9 @@ const CollageSection = () => {
           resizeMode="cover"
         />
       </Animated.View>
-
-      {/* Linear Gradient Overlay */}
-      <View style={styles.gradientOverlay}>
-        <View style={styles.gradientLayer1} />
-        <View style={styles.gradientLayer2} />
-        <View style={styles.gradientLayer3} />
-        <View style={styles.gradientLayer4} />
-      </View>
     </View>
   );
+
 };
 
 const styles = StyleSheet.create({
@@ -136,7 +137,7 @@ const styles = StyleSheet.create({
     bottom: 0,
     width: "100%",
     height: "100%",
-    zIndex: 1,
+    zIndex: 10,
   },
   gradientLayer1: {
     position: "absolute",
