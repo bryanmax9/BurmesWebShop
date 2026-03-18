@@ -6,6 +6,7 @@ import {
   Dimensions,
   Platform,
   ImageBackground,
+  ActivityIndicator,
 } from "react-native";
 import DiscoverMoreButton from "./DiscoverMoreButton";
 
@@ -83,6 +84,13 @@ const DiscoverMoreSection = ({ onDiscoverMore }) => {
         },
       ]}
     >
+      {/* Loading Indicator */}
+      {!videoLoaded && !videoError && (
+        <View style={styles.loaderContainer}>
+          <ActivityIndicator size="large" color="#C9A961" />
+        </View>
+      )}
+
       {/* Video Background */}
       {videoError ? (
         <View style={styles.videoPlaceholder}>
@@ -96,11 +104,15 @@ const DiscoverMoreSection = ({ onDiscoverMore }) => {
         <video
           ref={videoRef}
           src={videoSource}
-          style={styles.videoBackground}
+          style={{
+            ...StyleSheet.flatten(styles.videoBackground),
+            opacity: videoLoaded ? 1 : 0
+          }}
           autoPlay
           loop
           muted
           playsInline
+          preload="auto"
           onError={handleVideoError}
           onLoadedData={handleVideoLoaded}
           onCanPlay={handleVideoLoaded}
@@ -109,12 +121,16 @@ const DiscoverMoreSection = ({ onDiscoverMore }) => {
         <Video
           ref={videoRef}
           source={videoSource}
-          style={styles.videoBackground}
+          style={[
+            styles.videoBackground,
+            { opacity: videoLoaded ? 1 : 0 }
+          ]}
           resizeMode="cover"
           shouldPlay
           isLooping
           isMuted
           onError={handleVideoError}
+          onLoad={handleVideoLoaded}
         />
       ) : (
         <View style={styles.videoPlaceholder}>
@@ -220,6 +236,17 @@ const styles = StyleSheet.create({
   videoPlaceholderImage: {
     width: "100%",
     height: "100%",
+  },
+  loaderContainer: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#1a1a1a",
+    zIndex: 5,
   },
   contentBox: {
     backgroundColor: "#ffffff",

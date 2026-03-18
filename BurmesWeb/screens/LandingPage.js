@@ -73,13 +73,8 @@ const LandingPage = ({ onCategorySelect, onShopCollections, onMadeForYou, onNavi
       {/* Visible SEO Content / Brand Story */}
       <View style={styles.aboutSection}>
         <View style={styles.aboutContent}>
-          <View style={styles.aboutHeader}>
-            <View style={styles.line} />
-            <View style={styles.dot} />
-            <View style={styles.line} />
-          </View>
-          
-          <View style={styles.aboutTitleContainer}>
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionSubtitle}>CONOCE NUESTRA</Text>
             <Text 
               style={styles.aboutTitle}
               accessibilityRole="header"
@@ -87,7 +82,7 @@ const LandingPage = ({ onCategorySelect, onShopCollections, onMadeForYou, onNavi
             >
               Nuestra Herencia
             </Text>
-            <View style={styles.titleUnderline} />
+            <View style={styles.underline} />
           </View>
           
           <View style={styles.seoTextContainer}>
@@ -156,37 +151,30 @@ const styles = StyleSheet.create({
     width: "90%",
     alignItems: "center",
   },
-  aboutHeader: {
-    flexDirection: "row",
+  sectionHeader: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 50,
   },
-  line: {
-    height: 1,
-    width: 60,
-    backgroundColor: "#C9A961",
-  },
-  dot: {
-    width: 4,
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "#C9A961",
-    marginHorizontal: 15,
-  },
-  aboutTitleContainer: {
-    alignItems: "center",
-    marginBottom: 40,
+  sectionSubtitle: {
+    fontSize: 14,
+    fontWeight: "400",
+    color: "#C9A961",
+    textAlign: "center",
+    letterSpacing: 3,
+    marginBottom: 10,
+    fontFamily: "sans-serif",
   },
   aboutTitle: {
-    fontSize: 32,
-    fontFamily: "'Playfair Display', Georgia, serif",
+    fontSize: 36,
     color: "#1a1a1a",
-    letterSpacing: 2,
+    letterSpacing: 1,
     textTransform: "uppercase",
+    fontWeight: "700",
+    textAlign: "center",
   },
-  titleUnderline: {
-    height: 2,
-    width: 40,
+  underline: {
+    width: 100,
+    height: 3,
     backgroundColor: "#C9A961",
     marginTop: 15,
   },
@@ -194,12 +182,13 @@ const styles = StyleSheet.create({
     width: "100%",
   },
   aboutDescription: {
-    fontSize: 18,
-    color: "#4a4a4a",
-    lineHeight: 32,
+    fontSize: 20,
+    color: "#333",
+    lineHeight: 36,
     textAlign: "center",
-    marginBottom: 40,
+    marginBottom: 50,
     fontFamily: "serif",
+    fontStyle: "italic",
   },
   aboutPara: {
     marginBottom: 35,
