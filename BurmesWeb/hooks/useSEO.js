@@ -32,10 +32,11 @@ export default function useSEO({ title, description, ogImage, ogType = "website"
 
       // 3. Update Standard Meta Tags
       updateTag('meta[name="description"]', "content", description || "Burmes & Co. offers premium jewellery, engagement rings, and luxury watches. Explore our collections of pendants, chains, rings, and more.");
+      updateTag('meta[name="keywords"]', "content", "joyería, anillos de compromiso, relojes de lujo, perú, joyas personalizadas, diamantes, oro");
       updateTag('meta[name="robots"]', "content", "index, follow");
 
       // 4. Update Canonical Link
-      const canonicalUrl = typeof window !== "undefined" ? window.location.origin + window.location.pathname : "";
+      const canonicalUrl = typeof window !== "undefined" ? window.location.origin + window.location.pathname : "https://burmes.com.pe/";
       updateTag('link[rel="canonical"]', "href", canonicalUrl, true);
 
       // 5. Update Apple Touch Icon
@@ -45,6 +46,8 @@ export default function useSEO({ title, description, ogImage, ogType = "website"
       updateTag('meta[property="og:title"]', "content", fullTitle);
       updateTag('meta[property="og:description"]', "content", description || "Burmes & Co. | Fine Jewellery & Watches");
       updateTag('meta[property="og:type"]', "content", ogType);
+      updateTag('meta[property="og:url"]', "content", canonicalUrl);
+      updateTag('meta[property="og:site_name"]', "content", "Burmes & Co.");
       if (ogImage) {
         updateTag('meta[property="og:image"]', "content", ogImage);
       }
@@ -56,6 +59,7 @@ export default function useSEO({ title, description, ogImage, ogType = "website"
       if (ogImage) {
         updateTag('meta[name="twitter:image"]', "content", ogImage);
       }
+      updateTag('meta[name="twitter:site"]', "content", "@BurmesCo"); // Placeholder or actual handle if desired
     }
   }, [title, description, ogImage, ogType]);
 }
