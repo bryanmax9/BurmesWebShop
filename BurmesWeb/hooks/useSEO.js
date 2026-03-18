@@ -8,7 +8,7 @@ export default function useSEO({ title, description, ogImage, ogType = "website"
   useEffect(() => {
     if (typeof document !== "undefined") {
       // 1. Set Document Title
-      const fullTitle = title ? `${title} | Burmes & Co. | Fine Jewellery & Watches` : "Burmes & Co. | Fine Jewellery, Engagement Rings & Luxury Watches";
+      const fullTitle = title ? `${title} | Burmes & Co.` : "Burmes & Co. | Joyería Fina y Relojes de Lujo en Perú";
       document.title = fullTitle;
 
       // 2. Helper to find/create/update meta tags
@@ -31,7 +31,7 @@ export default function useSEO({ title, description, ogImage, ogType = "website"
       };
 
       // 3. Update Standard Meta Tags
-      updateTag('meta[name="description"]', "content", description || "Burmes & Co. offers premium jewellery, engagement rings, and luxury watches. Explore our collections of pendants, chains, rings, and more.");
+      updateTag('meta[name="description"]', "content", description || "Burmes & Co.: La mejor joyería en Perú. Especialistas en anillos de compromiso, joyas de oro de 18k y relojes de lujo. Diseños exclusivos y piezas hechas a mano.");
       updateTag('meta[name="keywords"]', "content", "joyería, anillos de compromiso, relojes de lujo, perú, joyas personalizadas, diamantes, oro");
       updateTag('meta[name="robots"]', "content", "index, follow");
 
@@ -44,7 +44,7 @@ export default function useSEO({ title, description, ogImage, ogType = "website"
 
       // 6. Update Open Graph Meta Tags (for Facebook, WhatsApp, etc.)
       updateTag('meta[property="og:title"]', "content", fullTitle);
-      updateTag('meta[property="og:description"]', "content", description || "Burmes & Co. | Fine Jewellery & Watches");
+      updateTag('meta[property="og:description"]', "content", description || "Joyas exclusivas, anillos de compromiso y relojes de alta gama en Perú.");
       updateTag('meta[property="og:type"]', "content", ogType);
       updateTag('meta[property="og:url"]', "content", canonicalUrl);
       updateTag('meta[property="og:site_name"]', "content", "Burmes & Co.");
@@ -55,7 +55,7 @@ export default function useSEO({ title, description, ogImage, ogType = "website"
       // 7. Update Twitter Meta Tags
       updateTag('meta[name="twitter:card"]', "content", "summary_large_image");
       updateTag('meta[name="twitter:title"]', "content", fullTitle);
-      updateTag('meta[name="twitter:description"]', "content", description || "Burmes & Co. | Fine Jewellery & Watches");
+      updateTag('meta[name="twitter:description"]', "content", description || "Elegancia y tradición en joyería fina y relojes de lujo peruana.");
       if (ogImage) {
         updateTag('meta[name="twitter:image"]', "content", ogImage);
       }
