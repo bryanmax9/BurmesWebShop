@@ -26,6 +26,8 @@ const CategoriesSection = ({ categories, onCategorySelect }) => {
       <View style={styles.sectionHeader}>
         <Text
           style={[styles.sectionTitle, { fontSize: isSmallScreen ? 24 : 28 }]}
+          accessibilityRole="header"
+          aria-level={2}
         >
           Explora nuestra joyería
         </Text>

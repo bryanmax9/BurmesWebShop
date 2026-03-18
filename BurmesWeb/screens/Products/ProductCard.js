@@ -65,7 +65,12 @@ const ProductCard = (props) => {
         )}
       </View>
       <View style={styles.contentContainer}>
-        <Text style={styles.title} numberOfLines={2}>
+        <Text 
+          style={styles.title} 
+          numberOfLines={2}
+          accessibilityRole="header"
+          aria-level={3}
+        >
           {name}
         </Text>
         <Text style={styles.price}>{formatPrice(price)}</Text>

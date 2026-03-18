@@ -73,6 +73,8 @@ const MostPopularSection = ({ onProductPress }) => {
             styles.sectionTitle,
             { fontSize: isSmallScreen ? 28 : 36 },
           ]}
+          accessibilityRole="header"
+          aria-level={2}
         >
           Más populares
         </Text>

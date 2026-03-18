@@ -82,6 +82,8 @@ const CategoryCard = ({ category, onPress, isSmallScreen }) => {
                 letterSpacing: isSmallScreen ? 1 : 1.5,
               },
             ]}
+            accessibilityRole="header"
+            aria-level={3}
           >
             {displayName}
           </Text>

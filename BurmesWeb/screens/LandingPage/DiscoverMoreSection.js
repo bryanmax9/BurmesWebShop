@@ -164,6 +164,8 @@ const DiscoverMoreSection = ({ onDiscoverMore }) => {
               lineHeight: isSmallScreen ? 30 : 44,
             },
           ]}
+          accessibilityRole="header"
+          aria-level={2}
         >
           ANILLOS DE COMPROMISO A LA MEDIDA
         </Text>
