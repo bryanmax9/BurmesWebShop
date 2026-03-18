@@ -2,11 +2,17 @@ import React, { useEffect } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import useSEO from "../../hooks/useSEO";
 import SignUpClientScreen from "./SignUpClientScreen";
 
 export default function SignUpClientPage() {
   const navigate = useNavigate();
   const { user, isAdmin, profileNeedsCompletion, loading } = useAuth();
+
+  useSEO({
+    title: "Crear Cuenta",
+    description: "Regístrate en Burmes & Co. para una experiencia personalizada.",
+  });
 
   useEffect(() => {
     if (loading) return;

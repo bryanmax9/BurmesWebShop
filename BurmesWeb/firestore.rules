@@ -11,9 +11,9 @@ service cloud.firestore {
     match /users/{userId} {
       allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
       allow create: if request.auth != null && request.auth.uid == userId
-        && (!('role' in request.resource.data) || request.resource.data.role == 'client' || request.resource.data.role == 'admin');
+        && (!('role' in request.resource.data) || request.resource.data.role == 'client');
       allow update: if request.auth != null && request.auth.uid == userId
-        && (request.resource.data.get('role', 'client') != 'admin' || resource.data.get('role', 'client') == 'admin');
+        && request.resource.data.get('role', 'client') == resource.data.get('role', 'client');
       allow delete: if request.auth != null && request.auth.uid == userId;
     }
 

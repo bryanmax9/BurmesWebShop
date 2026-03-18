@@ -14,6 +14,7 @@ import {
 } from "react-native";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import useSEO from "../hooks/useSEO";
 
 const formatDate = (iso) => {
   if (!iso) return "—";
@@ -276,6 +277,11 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [viewMode, setViewMode] = useState("requests"); // "requests" or "clients"
   const [updatingId, setUpdatingId] = useState(null);
+
+  useSEO({
+    title: "Control de Administración",
+    description: "Gestión de solicitudes y clientes - Burmes & Co.",
+  });
 
   useEffect(() => {
     if (!user) {

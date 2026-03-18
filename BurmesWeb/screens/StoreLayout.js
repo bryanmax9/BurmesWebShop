@@ -8,6 +8,7 @@ import LandingPage from "./LandingPage";
 import Collections from "./Collections";
 import MadeForYou from "./MadeForYou";
 import Header from "../Shared/Header";
+import useSEO from "../hooks/useSEO";
 
 const categoriesData = require("../assets/data/categories.json");
 const categoryIcons = { pendants: "diamond-outline", chains: "link-outline", rings: "radio-button-on-outline", bracelets: "ellipse-outline" };
@@ -141,6 +142,26 @@ export default function StoreLayout() {
   const showCollections = pathname === "/collections";
   const showMadeForYou = pathname === "/made-for-you";
   const currentProduct = productFromState ?? resolvedProduct;
+
+  const seoTitle = useMemo(() => {
+    if (showSingleProduct && currentProduct) return currentProduct.name;
+    if (showProducts && selectedCategory) return selectedCategory.name;
+    if (showCollections) return "Collections";
+    if (showMadeForYou) return "Personalizado";
+    return "Inicio";
+  }, [showSingleProduct, currentProduct, showProducts, selectedCategory, showCollections, showMadeForYou]);
+
+  const seoDescription = useMemo(() => {
+    if (showSingleProduct && currentProduct) return currentProduct.description;
+    if (showProducts && selectedCategory) return `Descubre nuestra colección de ${selectedCategory.name}.`;
+    return "Burmes & Co. | Joyería fina, relojes y accesorios de lujo.";
+  }, [showSingleProduct, currentProduct, showProducts, selectedCategory]);
+
+  useSEO({
+    title: seoTitle,
+    description: seoDescription,
+    ogImage: showSingleProduct && currentProduct ? currentProduct.image : undefined,
+  });
 
   return (
     <View style={styles.container}>

@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import useSEO from "../hooks/useSEO";
 import { 
   uploadImageToDrive, 
   deleteFileFromDrive,
@@ -519,6 +520,11 @@ export default function AdminListings() {
   const [formVisible, setFormVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  useSEO({
+    title: "Gestión de Productos",
+    description: "Crea y gestiona el inventario de Burmes & Co.",
+  });
 
   useEffect(() => {
     if (!user) {

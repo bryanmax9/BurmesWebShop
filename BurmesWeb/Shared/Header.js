@@ -580,9 +580,9 @@ const styles = StyleSheet.create({
     color: "#ffffff",
     letterSpacing: 2,
     textTransform: "uppercase",
-    minWidth: 280,
     fontFamily: "'Cinzel', 'Playfair Display', Georgia, serif",
     flexShrink: 1,
+    paddingRight: 10,
   },
   navMenu: {
     flexDirection: "row",

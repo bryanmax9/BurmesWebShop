@@ -2,11 +2,17 @@ import React, { useEffect } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import useSEO from "../../hooks/useSEO";
 import CompleteProfileScreen from "./CompleteProfileScreen";
 
 export default function CompleteProfilePage() {
   const navigate = useNavigate();
   const { user, isAdmin, profileNeedsCompletion, loading } = useAuth();
+
+  useSEO({
+    title: "Completar Perfil",
+    description: "Completa tu información para finalizar tus pedidos en Burmes & Co.",
+  });
 
   useEffect(() => {
     if (loading) return;

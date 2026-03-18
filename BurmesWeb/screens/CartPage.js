@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
+import useSEO from "../hooks/useSEO";
 
 const WHATSAPP_NUMBER = "51969762316";
 const INSTAGRAM_URL = "https://www.instagram.com/burmesandco/";
@@ -32,6 +33,11 @@ const formatPrice = (price) => {
 export default function CartPage() {
   const navigate = useNavigate();
   const { user, isAdmin, userDoc, getCart, setCart, createRequest, profileNeedsCompletion } = useAuth();
+
+  useSEO({
+    title: "Tu Carrito",
+    description: "Revisa tus productos seleccionados y envía tu solicitud a Burmes & Co.",
+  });
   const [submitting, setSubmitting] = useState(false);
   const submittingRef = useRef(false);
   const [requestSent, setRequestSent] = useState(false);

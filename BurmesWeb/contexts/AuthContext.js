@@ -113,7 +113,18 @@ export function AuthProvider({ children }) {
 
   const signInClientEmail = async (email, password) => {
     if (!auth) throw new Error("Firebase not configured");
-    await signInWithEmailAndPassword(auth, email, password);
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+    } catch (err) {
+      if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+        console.log("❌ Client Login: Incorrect password for", email);
+      } else if (err.code === "auth/user-not-found") {
+        console.log("❌ Client Login: User not found:", email);
+      } else {
+        console.error("❌ Client Login Error:", err.code, err.message);
+      }
+      throw err;
+    }
   };
 
   const signInWithGoogle = async () => {
@@ -129,26 +140,25 @@ export function AuthProvider({ children }) {
   const signInAdmin = async (email, password) => {
     if (!auth) throw new Error("Firebase not configured");
     if (!db) throw new Error("Firestore not configured");
-    await signInWithEmailAndPassword(auth, email, password);
-    const userRef = doc(db, USERS_COLLECTION, auth.currentUser.uid);
-    const snap = await getDoc(userRef);
-    if (!snap.exists() || snap.data().role !== ROLE_ADMIN) {
-      await firebaseSignOut(auth);
-      throw new Error("This account is not an admin. Use client sign-in or contact support.");
+    try {
+      const cred = await signInWithEmailAndPassword(auth, email, password);
+      const userRef = doc(db, USERS_COLLECTION, cred.user.uid);
+      const snap = await getDoc(userRef);
+      if (!snap.exists() || snap.data().role !== ROLE_ADMIN) {
+        await firebaseSignOut(auth);
+        console.log("❌ Admin Login: Account is not an admin:", email);
+        throw new Error("This account is not an admin. Use client sign-in or contact support.");
+      }
+    } catch (err) {
+      if (err.code === "auth/wrong-password" || err.code === "auth/invalid-credential") {
+        console.log("❌ Admin Login: Incorrect password for", email);
+      } else if (err.code === "auth/user-not-found") {
+        console.log("❌ Admin Login: User not found:", email);
+      } else if (err.message !== "This account is not an admin. Use client sign-in or contact support.") {
+        console.error("❌ Admin Login Error:", err.code, err.message);
+      }
+      throw err;
     }
-  };
-
-  const signUpAdmin = async (email, password, displayName = "") => {
-    if (!auth) throw new Error("Firebase not configured");
-    if (!db) throw new Error("Firestore not configured");
-    const cred = await createUserWithEmailAndPassword(auth, email, password);
-    const userRef = doc(db, USERS_COLLECTION, cred.user.uid);
-    await setDoc(userRef, {
-      email: cred.user.email ?? email,
-      displayName: displayName || null,
-      role: ROLE_ADMIN,
-      createdAt: new Date().toISOString(),
-    });
   };
 
   const createOrder = async (productId, productName) => {
@@ -221,21 +231,37 @@ export function AuthProvider({ children }) {
     const reqRef = doc(requestsCol); // create id locally for transaction
 
     await runTransaction(db, async (tx) => {
-      // Decrement stock for each product (if countInStock exists)
-      for (const [productId, qty] of qtyByProduct.entries()) {
+      const itemsWithVerifiedPrices = [];
+      
+      for (const i of items) {
+        const productId = i.productId || i.id;
+        if (!productId) continue;
+        
         const productRef = doc(db, PRODUCTS_COLLECTION, String(productId));
         const pSnap = await tx.get(productRef);
-        if (!pSnap.exists()) continue; // if missing, skip stock check
         const p = pSnap.data() || {};
+        
+        // 1. Stock Check
+        const qty = qtyByProduct.get(productId) || 1;
         const stock = p.countInStock;
         if (typeof stock === "number") {
           const next = stock - qty;
           if (next < 0) {
-            const name = p.name || "this product";
-            throw new Error(`Not enough stock for ${name}. Only ${stock} left.`);
+            throw new Error(`Not enough stock for ${p.name || "this product"}. Only ${stock} left.`);
           }
           tx.update(productRef, { countInStock: next, updatedAt: now });
         }
+
+        // 2. Verified Item Data (Price from DB)
+        const imageUrl = typeof i.image === "string" && i.image.trim() ? i.image.trim() : null;
+        itemsWithVerifiedPrices.push({
+          productId: productId,
+          productName: p.name || i.productName || i.name,
+          quantity: Math.max(1, Number(i.quantity ?? 1) || 1),
+          image: p.image || imageUrl,
+          price: p.price != null ? p.price : null, // Trust DB price
+          description: p.description || i.description || null,
+        });
       }
 
       tx.set(
@@ -247,17 +273,7 @@ export function AuthProvider({ children }) {
           address: data.address || null,
           phone: data.phone || null,
           hasWhatsApp: data.hasWhatsApp !== false,
-          items: items.map((i) => {
-            const imageUrl = typeof i.image === "string" && i.image.trim() ? i.image.trim() : null;
-            return {
-              productId: i.productId || i.id,
-              productName: i.productName || i.name,
-              quantity: Math.max(1, Number(i.quantity ?? 1) || 1),
-              image: imageUrl,
-              price: i.price != null ? i.price : null,
-              description: i.description || null,
-            };
-          }),
+          items: itemsWithVerifiedPrices,
           status: "pending",
           requestNumber: reqRef.id,
           createdAt: now,
@@ -483,7 +499,6 @@ export function AuthProvider({ children }) {
     signInClientEmail,
     signInWithGoogle,
     signInAdmin,
-    signUpAdmin,
     signOut,
     deleteUserAccount,
     updateUserProfile,

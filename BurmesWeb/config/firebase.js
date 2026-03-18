@@ -17,9 +17,18 @@ const firebaseConfig = {
 };
 
 // Initialize only if we have the required config (avoids errors before .env is set)
-const app = firebaseConfig.apiKey && firebaseConfig.projectId
-  ? initializeApp(firebaseConfig)
-  : null;
+const hasRequiredConfig = firebaseConfig.apiKey && firebaseConfig.projectId;
+
+if (!hasRequiredConfig && typeof window !== "undefined") {
+  console.warn(
+    "⚠️ Firebase configuration missing! Ensure you have a .env file with:\n" +
+    "EXPO_PUBLIC_FIREBASE_API_KEY\n" +
+    "EXPO_PUBLIC_FIREBASE_PROJECT_ID\n" +
+    "Check FIREBASE_SETUP.md for instructions."
+  );
+}
+
+const app = hasRequiredConfig ? initializeApp(firebaseConfig) : null;
 
 export const auth = app ? getAuth(app) : null;
 export const db = app ? getFirestore(app) : null;

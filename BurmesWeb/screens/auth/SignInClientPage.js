@@ -2,11 +2,17 @@ import React, { useEffect } from "react";
 import { View, StyleSheet, Platform } from "react-native";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import useSEO from "../../hooks/useSEO";
 import SignInClientScreen from "./SignInClientScreen";
 
 export default function SignInClientPage() {
   const navigate = useNavigate();
   const { user, isAdmin, profileNeedsCompletion, loading } = useAuth();
+
+  useSEO({
+    title: "Iniciar Sesión",
+    description: "Inicia sesión en Burmes & Co. para gestionar tus pedidos.",
+  });
 
   useEffect(() => {
     if (loading) return;
