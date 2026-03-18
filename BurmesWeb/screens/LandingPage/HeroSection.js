@@ -36,7 +36,7 @@ const HeroSection = ({ onShopCollections }) => {
   const [videoLoaded, setVideoLoaded] = useState(false);
 
   // Must be declared before any useEffect that references it
-  const videoAsset = require("../../assets/DiscoverMore.mp4");
+  const videoAsset = require("../../assets/hero.mp4");
   const [videoUri, setVideoUri] = useState(null);
 
   // Step 1: Resolve the asset URI (web needs a real URL, not a module number)
