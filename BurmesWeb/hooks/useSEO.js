@@ -8,7 +8,7 @@ export default function useSEO({ title, description, ogImage, ogType = "website"
   useEffect(() => {
     if (typeof document !== "undefined") {
       // 1. Set Document Title
-      const fullTitle = title ? `${title} | Burmes & Co.` : "Burmes & Co. | Joyería Fina y Relojes de Lujo en Perú";
+      const fullTitle = title ? `${title} | Burmes & Co.` : "Burmes & Co. | Joyería Fina y Relojes en Perú";
       document.title = fullTitle;
 
       // 2. Helper to find/create/update meta tags
@@ -31,7 +31,7 @@ export default function useSEO({ title, description, ogImage, ogType = "website"
       };
 
       // 3. Update Standard Meta Tags
-      updateTag('meta[name="description"]', "content", description || "Burmes & Co.: La mejor joyería en Perú. Especialistas en anillos de compromiso, joyas de oro de 18k y relojes de lujo. Diseños exclusivos y piezas hechas a mano.");
+      updateTag('meta[name="description"]', "content", description || "Burmes & Co.: Joyería líder en Perú. Anillos de compromiso, joyas de oro 18k y relojes de lujo. Diseños exclusivos y artesanía de clase mundial.");
       updateTag('meta[name="keywords"]', "content", "joyería, anillos de compromiso, relojes de lujo, perú, joyas personalizadas, diamantes, oro");
       updateTag('meta[name="robots"]', "content", "index, follow");
 
