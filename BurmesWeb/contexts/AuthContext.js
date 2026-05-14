@@ -399,6 +399,7 @@ export function AuthProvider({ children }) {
       numReviews: productData.numReviews != null ? Number(productData.numReviews) : 0,
       driveFileId: productData.driveFileId || null,
       driveFileIds: productData.driveFileIds && Array.isArray(productData.driveFileIds) ? productData.driveFileIds : [],
+      sku: productData.sku || null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
@@ -422,6 +423,7 @@ export function AuthProvider({ children }) {
       numReviews: productData.numReviews != null ? Number(productData.numReviews) : 0,
       driveFileId: productData.driveFileId || null,
       driveFileIds: productData.driveFileIds && Array.isArray(productData.driveFileIds) ? productData.driveFileIds : [],
+      sku: productData.sku || null,
       updatedAt: new Date().toISOString(),
     });
   };

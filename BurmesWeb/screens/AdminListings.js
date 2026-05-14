@@ -50,6 +50,7 @@ const DEFAULT_BRAND = "Burmes & Co";
 function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
   const [name, setName] = useState("");
   const [brand, setBrand] = useState(DEFAULT_BRAND);
+  const [sku, setSku] = useState("");
   const [description, setDescription] = useState("");
   const [price, setPrice] = useState("");
   const [countInStock, setCountInStock] = useState("");
@@ -69,6 +70,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
     if (product) {
       setName(product.name || "");
       setBrand(product.brand || DEFAULT_BRAND);
+      setSku(product.sku || "");
       setDescription(product.description || "");
       setPrice(product.price != null ? String(product.price) : "");
       setCountInStock(product.countInStock != null ? String(product.countInStock) : "");
@@ -93,6 +95,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
     } else {
       setName("");
       setBrand(DEFAULT_BRAND);
+      setSku("");
       setDescription("");
       setPrice("");
       setCountInStock("");
@@ -179,6 +182,8 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
   };
 
 
+  const SKU_REGEX = /^[A-Z]{3}-\d{5}$/;
+
   const handleSave = async () => {
     if (!name.trim()) {
       Alert.alert("Error", "El nombre del producto es obligatorio.");
@@ -188,7 +193,16 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       Alert.alert("Error", "Selecciona una categoría.");
       return;
     }
-    
+    const skuValue = sku.trim().toUpperCase();
+    if (!skuValue) {
+      Alert.alert("Error", "El SKU es obligatorio.");
+      return;
+    }
+    if (!SKU_REGEX.test(skuValue)) {
+      Alert.alert("Error", "El SKU debe tener el formato AAA-12345 (3 letras mayúsculas, guión, 5 dígitos).");
+      return;
+    }
+
     setSaving(true);
     try {
       const imageUrls = images.map((x) => x?.imageUrl).filter(Boolean);
@@ -211,6 +225,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
         images: imageUrls.slice(0, 3),
         driveFileId: driveFileIds[0] || null,
         driveFileIds: driveFileIds.slice(0, 3),
+        sku: skuValue,
       };
       
       if (product) {
@@ -311,6 +326,19 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
               <View style={styles.brandPill}>
                 <Text style={styles.brandPillText}>{DEFAULT_BRAND}</Text>
               </View>
+            </View>
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>SKU *</Text>
+              <TextInput
+                style={[styles.formInput, styles.skuInput]}
+                value={sku}
+                onChangeText={(v) => setSku(v.toUpperCase())}
+                placeholder="AAA-12345"
+                placeholderTextColor="#bbb"
+                autoCapitalize="characters"
+                maxLength={9}
+              />
+              <Text style={styles.skuHint}>Formato: 3 letras + guión + 5 dígitos (ej. ARE-78445)</Text>
             </View>
             <View style={styles.formField}>
               <Text style={styles.formLabel}>Categoría *</Text>
@@ -574,7 +602,8 @@ export default function AdminListings() {
     if (!q) return true;
     const name = (p.name || "").toLowerCase();
     const brand = (p.brand || "").toLowerCase();
-    return name.includes(q) || brand.includes(q);
+    const sku = (p.sku || "").toLowerCase();
+    return name.includes(q) || brand.includes(q) || sku.includes(q);
   });
 
   if (!user || !isAdmin) return null;
@@ -683,6 +712,11 @@ export default function AdminListings() {
                       <Text style={styles.productPrice}>
                         ${Number(product.price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                       </Text>
+                    )}
+                    {product.sku && (
+                      <View style={styles.skuBadge}>
+                        <Text style={styles.skuBadgeText}>{product.sku}</Text>
+                      </View>
                     )}
                     <Text style={styles.productStock}>
                       Stock: {product.countInStock ?? 0}
@@ -821,6 +855,19 @@ const styles = StyleSheet.create({
   productName: { fontSize: 16, fontWeight: "600", color: "#1a1a1a", marginBottom: 4 },
   productBrand: { fontSize: 13, color: "#666", marginBottom: 6 },
   productPrice: { fontSize: 18, fontWeight: "700", color: "#1a1a1a", marginBottom: 4 },
+  skuBadge: {
+    alignSelf: "flex-start",
+    backgroundColor: "#f0ede8",
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    marginBottom: 6,
+    borderWidth: 1,
+    borderColor: "#e0ddd8",
+  },
+  skuBadgeText: { fontSize: 11, fontWeight: "700", color: "#5a5550", letterSpacing: 0.8, fontFamily: Platform.OS === "web" ? "monospace" : "Courier" },
+  skuInput: { fontFamily: Platform.OS === "web" ? "monospace" : "Courier", letterSpacing: 1.2, fontWeight: "700", textTransform: "uppercase" },
+  skuHint: { fontSize: 11, color: "#aaa", marginTop: 5 },
   productStock: { fontSize: 12, color: "#999", marginBottom: 2 },
   productDate: { fontSize: 11, color: "#bbb" },
   modalOverlay: {
