@@ -18,30 +18,36 @@ const CategoriesSection = ({ categories, onCategorySelect }) => {
         styles.mainContent,
         {
           paddingHorizontal: getContainerPadding(),
-          paddingTop: isSmallScreen ? 60 : 80,
-          paddingBottom: isSmallScreen ? 60 : 100,
+          paddingTop: isSmallScreen ? 56 : 80,
+          paddingBottom: isSmallScreen ? 56 : 100,
         },
       ]}
     >
+      {/* Section Header */}
       <View style={styles.sectionHeader}>
+        <Text style={styles.eyebrow}>Colecciones</Text>
         <Text
-          style={[styles.sectionTitle, { fontSize: isSmallScreen ? 24 : 28 }]}
+          style={[styles.sectionTitle, { fontSize: isSmallScreen ? 26 : 34 }]}
           accessibilityRole="header"
           aria-level={2}
         >
           Explora nuestra joyería
         </Text>
+        <View style={styles.titleDivider} />
         <Text
-          style={[
-            styles.sectionSubtitle,
-            { fontSize: isSmallScreen ? 14 : 16 },
-          ]}
+          style={[styles.sectionSubtitle, { fontSize: isSmallScreen ? 14 : 16 }]}
         >
           Elige tu pieza atemporal
         </Text>
       </View>
 
-      <View style={styles.categoriesGrid}>
+      {/* Grid */}
+      <View
+        style={[
+          styles.categoriesGrid,
+          { gap: isSmallScreen ? 16 : 20 },
+        ]}
+      >
         {categories.map((category) => (
           <CategoryCard
             key={category._id || category.id}
@@ -57,30 +63,41 @@ const CategoriesSection = ({ categories, onCategorySelect }) => {
 
 const styles = StyleSheet.create({
   mainContent: {
-    paddingTop: 80,
-    paddingBottom: 100,
-    backgroundColor: "#ffffff",
+    backgroundColor: "#fafaf8",
     width: "100%",
   },
   sectionHeader: {
     alignItems: "center",
-    marginBottom: 60,
+    marginBottom: 48,
+  },
+  eyebrow: {
+    fontSize: 11,
+    fontWeight: "600",
+    color: "#9b8c6e",
+    letterSpacing: 3,
+    textTransform: "uppercase",
+    marginBottom: 12,
   },
   sectionTitle: {
-    fontSize: 28,
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#1a1a1a",
     textAlign: "center",
-    marginBottom: 12,
-    letterSpacing: 1,
+    marginBottom: 16,
+    letterSpacing: 0.5,
     fontFamily: "'Playfair Display', Georgia, serif",
   },
+  titleDivider: {
+    width: 40,
+    height: 2,
+    backgroundColor: "#9b8c6e",
+    borderRadius: 1,
+    marginBottom: 16,
+  },
   sectionSubtitle: {
-    fontSize: 16,
     fontWeight: "400",
-    color: "#757575",
+    color: "#888",
     textAlign: "center",
-    letterSpacing: 0.5,
+    letterSpacing: 0.4,
   },
   categoriesGrid: {
     flexDirection: "row",

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   View,
   StyleSheet,
@@ -9,7 +9,6 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-// Map category names to images
 const categoryImages = {
   pendants: require("../../assets/pendants.png"),
   chains: require("../../assets/chains.png"),
@@ -19,7 +18,6 @@ const categoryImages = {
   relojes: require("../../assets/relojesCategory.png"),
 };
 
-// Display names in Spanish
 const categoryNamesEs = {
   pendants: "Dijes",
   chains: "Cadenas",
@@ -30,71 +28,92 @@ const categoryNamesEs = {
 };
 
 const CategoryCard = ({ category, onPress, isSmallScreen }) => {
+  const [hovered, setHovered] = useState(false);
+
   const displayName = category?.name
-    ? (categoryNamesEs[category.name.toLowerCase()] ||
-        category.name.charAt(0).toUpperCase() + category.name.slice(1))
+    ? categoryNamesEs[category.name.toLowerCase()] ||
+      category.name.charAt(0).toUpperCase() + category.name.slice(1)
     : "";
+
+  const webGradientStyle =
+    Platform.OS === "web"
+      ? {
+          backgroundImage:
+            "linear-gradient(to top, rgba(0,0,0,0.82) 0%, rgba(0,0,0,0.45) 35%, rgba(0,0,0,0.08) 65%, rgba(0,0,0,0) 100%)",
+        }
+      : {};
+
   return (
     <TouchableOpacity
       style={[
         styles.categoryCard,
         {
-          width: isSmallScreen ? "100%" : "48%",
-          marginBottom: isSmallScreen ? 20 : 30,
-          height: isSmallScreen ? 180 : 250,
+          width: isSmallScreen ? "100%" : "48.5%",
+          height: isSmallScreen ? 200 : 270,
+          marginBottom: isSmallScreen ? 16 : 20,
         },
+        hovered && styles.categoryCardHovered,
       ]}
       onPress={() => onPress && onPress(category)}
-      activeOpacity={0.9}
+      activeOpacity={0.92}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
     >
       <ImageBackground
         source={
           categoryImages[category.name?.toLowerCase()] ||
           categoryImages.pendants
         }
-        style={[
-          styles.categoryImageBackground,
-          {
-            height: isSmallScreen ? 180 : 250,
-            minHeight: isSmallScreen ? 180 : 250,
-          },
+        style={styles.categoryImageBackground}
+        imageStyle={[
+          styles.categoryImage,
+          hovered && styles.categoryImageHovered,
         ]}
-        imageStyle={styles.categoryImage}
         resizeMode="cover"
       >
-        {/* Linear Gradient Overlay */}
-        <View style={styles.gradientOverlay}>
-          <View style={styles.gradientLayer1} />
-          <View style={styles.gradientLayer2} />
-          <View style={styles.gradientLayer3} />
-          <View style={styles.gradientLayer4} />
-          <View style={styles.gradientLayer5} />
-        </View>
-
-        {/* Content */}
+        {/* Smooth gradient overlay */}
         <View
           style={[
-            styles.categoryCardContent,
-            { padding: isSmallScreen ? 20 : 30 },
+            StyleSheet.absoluteFill,
+            styles.gradientOverlay,
+            webGradientStyle,
           ]}
         >
-          <Text
-            style={[
-              styles.categoryName,
-              {
-                fontSize: isSmallScreen ? 20 : 24,
-                letterSpacing: isSmallScreen ? 1 : 1.5,
-              },
-            ]}
-            accessibilityRole="header"
-            aria-level={3}
-          >
-            {displayName}
-          </Text>
-          <View style={styles.categoryArrow}>
+          {/* Fallback layered gradient for native */}
+          {Platform.OS !== "web" && (
+            <>
+              <View style={[styles.nativeLayer, { top: "0%", height: "12%", backgroundColor: "rgba(0,0,0,0.0)" }]} />
+              <View style={[styles.nativeLayer, { top: "12%", height: "12%", backgroundColor: "rgba(0,0,0,0.04)" }]} />
+              <View style={[styles.nativeLayer, { top: "24%", height: "12%", backgroundColor: "rgba(0,0,0,0.1)" }]} />
+              <View style={[styles.nativeLayer, { top: "36%", height: "12%", backgroundColor: "rgba(0,0,0,0.2)" }]} />
+              <View style={[styles.nativeLayer, { top: "48%", height: "12%", backgroundColor: "rgba(0,0,0,0.32)" }]} />
+              <View style={[styles.nativeLayer, { top: "60%", height: "12%", backgroundColor: "rgba(0,0,0,0.48)" }]} />
+              <View style={[styles.nativeLayer, { top: "72%", height: "12%", backgroundColor: "rgba(0,0,0,0.62)" }]} />
+              <View style={[styles.nativeLayer, { bottom: "0%", height: "16%", backgroundColor: "rgba(0,0,0,0.78)" }]} />
+            </>
+          )}
+        </View>
+
+        {/* Bottom content row */}
+        <View style={styles.cardContent}>
+          <View style={styles.textBlock}>
+            <Text
+              style={[
+                styles.categoryName,
+                { fontSize: isSmallScreen ? 18 : 22 },
+              ]}
+              accessibilityRole="header"
+              aria-level={3}
+            >
+              {displayName}
+            </Text>
+            <View style={styles.underline} />
+          </View>
+
+          <View style={[styles.arrowButton, hovered && styles.arrowButtonHovered]}>
             <Ionicons
               name="arrow-forward"
-              size={isSmallScreen ? 18 : 20}
+              size={isSmallScreen ? 16 : 18}
               color="#ffffff"
             />
           </View>
@@ -106,100 +125,83 @@ const CategoryCard = ({ category, onPress, isSmallScreen }) => {
 
 const styles = StyleSheet.create({
   categoryCard: {
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: "hidden",
     shadowColor: "#000",
-    shadowOffset: {
-      width: 0,
-      height: 4,
-    },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 5,
-    position: "relative",
-    alignSelf: "stretch",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.22,
+    shadowRadius: 12,
+    elevation: 7,
+  },
+  categoryCardHovered: {
+    shadowOpacity: 0.35,
+    shadowRadius: 20,
+    elevation: 12,
   },
   categoryImageBackground: {
+    flex: 1,
     width: "100%",
-    justifyContent: "center",
-    alignItems: "center",
+    height: "100%",
+    justifyContent: "flex-end",
   },
   categoryImage: {
-    borderRadius: 12,
+    borderRadius: 16,
+    ...(Platform.OS === "web" ? { transition: "transform 0.4s ease" } : {}),
+  },
+  categoryImageHovered: {
+    ...(Platform.OS === "web" ? { transform: [{ scale: 1.04 }] } : {}),
   },
   gradientOverlay: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    borderRadius: 12,
+    borderRadius: 16,
     overflow: "hidden",
   },
-  gradientLayer1: {
+  nativeLayer: {
     position: "absolute",
-    top: 0,
     left: 0,
     right: 0,
-    height: "20%",
-    backgroundColor: "rgba(0, 0, 0, 0.1)",
   },
-  gradientLayer2: {
-    position: "absolute",
-    top: "20%",
-    left: 0,
-    right: 0,
-    height: "20%",
-    backgroundColor: "rgba(0, 0, 0, 0.2)",
-  },
-  gradientLayer3: {
-    position: "absolute",
-    top: "40%",
-    left: 0,
-    right: 0,
-    height: "20%",
-    backgroundColor: "rgba(0, 0, 0, 0.35)",
-  },
-  gradientLayer4: {
-    position: "absolute",
-    top: "60%",
-    left: 0,
-    right: 0,
-    height: "20%",
-    backgroundColor: "rgba(0, 0, 0, 0.55)",
-  },
-  gradientLayer5: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    height: "20%",
-    backgroundColor: "rgba(0, 0, 0, 0.7)",
-  },
-  categoryCardContent: {
-    alignItems: "center",
-    justifyContent: "center",
+  cardContent: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    paddingTop: 12,
     zIndex: 1,
-    width: "100%",
-    minHeight: "100%",
+  },
+  textBlock: {
+    flex: 1,
   },
   categoryName: {
-    fontWeight: "600",
+    fontWeight: "700",
     color: "#ffffff",
-    textAlign: "center",
-    marginBottom: 10,
+    letterSpacing: 1.2,
     fontFamily: "'Playfair Display', Georgia, serif",
-    textShadowColor: "rgba(0, 0, 0, 0.5)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    textShadowColor: "rgba(0,0,0,0.4)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
+    marginBottom: 6,
   },
-  categoryArrow: {
-    position: "absolute",
-    bottom: 20,
-    right: 20,
-    backgroundColor: "rgba(255, 255, 255, 0.2)",
-    borderRadius: 20,
-    padding: 8,
+  underline: {
+    width: 28,
+    height: 2,
+    backgroundColor: "rgba(255,255,255,0.6)",
+    borderRadius: 1,
+  },
+  arrowButton: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    backgroundColor: "rgba(255,255,255,0.18)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.35)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginLeft: 12,
+    ...(Platform.OS === "web" ? { transition: "background-color 0.2s ease" } : {}),
+  },
+  arrowButtonHovered: {
+    backgroundColor: "rgba(255,255,255,0.32)",
   },
 });
 
