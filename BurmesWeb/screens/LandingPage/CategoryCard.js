@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: "20%",
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    backgroundColor: "rgba(0, 0, 0, 0.1)",
   },
   gradientLayer2: {
     position: "absolute",
@@ -150,7 +150,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: "20%",
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: "rgba(0, 0, 0, 0.2)",
   },
   gradientLayer3: {
     position: "absolute",
@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: "20%",
-    backgroundColor: "rgba(0, 0, 0, 0.75)",
+    backgroundColor: "rgba(0, 0, 0, 0.35)",
   },
   gradientLayer4: {
     position: "absolute",
@@ -166,7 +166,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: "20%",
-    backgroundColor: "rgba(0, 0, 0, 0.85)",
+    backgroundColor: "rgba(0, 0, 0, 0.55)",
   },
   gradientLayer5: {
     position: "absolute",
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: "20%",
-    backgroundColor: "rgba(0, 0, 0, 0.95)",
+    backgroundColor: "rgba(0, 0, 0, 0.7)",
   },
   categoryCardContent: {
     alignItems: "center",

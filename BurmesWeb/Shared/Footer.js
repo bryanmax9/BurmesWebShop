@@ -114,8 +114,7 @@ const Footer = ({ onNavigate }) => {
               },
             ]}
           >
-            Joyería artesanal desde nuestro taller en Perú. Hecha con
-            precisión, envíos a todo el mundo.
+            Joyería artesanal desde nuestro taller en Perú.{"\n"}Hecha con precisión, envíos a todo el mundo.
           </Text>
         </View>
 
