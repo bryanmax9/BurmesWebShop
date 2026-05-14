@@ -7,12 +7,13 @@ import SingleProduct from "./Products/SingleProduct";
 import LandingPage from "./LandingPage";
 import Collections from "./Collections";
 import MadeForYou from "./MadeForYou";
+import LibroReclamaciones from "./LibroReclamaciones";
 import Header from "../Shared/Header";
 import useSEO from "../hooks/useSEO";
 
 const categoriesData = require("../assets/data/categories.json");
-const categoryIcons = { pendants: "diamond-outline", chains: "link-outline", rings: "radio-button-on-outline", bracelets: "ellipse-outline" };
-const categoryColors = { pendants: "#C9A961", chains: "#2E7D32", rings: "#E8B4B8", bracelets: "#4A90E2" };
+const categoryIcons = { pendants: "diamond-outline", chains: "link-outline", rings: "radio-button-on-outline", bracelets: "ellipse-outline", aretes: "sparkles-outline", relojes: "time-outline" };
+const categoryColors = { pendants: "#C9A961", chains: "#2E7D32", rings: "#E8B4B8", bracelets: "#4A90E2", aretes: "#C9A961", relojes: "#7B6B5A" };
 
 const getId = (x) => x?._id?.$oid || x?._id || x?.id;
 
@@ -108,6 +109,9 @@ export default function StoreLayout() {
     } else if (route === "made-for-you") {
       navigate("/made-for-you", { replace: false });
       scrollTop();
+    } else if (route === "libro-reclamaciones") {
+      navigate("/libro-reclamaciones", { replace: false });
+      scrollTop();
     } else if (route === "jewellery" || route === "engagement" || route === "watches") {
       const cat = categories.find((c) => c.name === route.replace("-", "") || (route === "jewellery" && c.name === "pendants"));
       if (cat) navigate(`/category/${getId(cat)}`, { replace: false });
@@ -141,6 +145,7 @@ export default function StoreLayout() {
   const showProducts = pathname.startsWith("/category/") && selectedCategory != null;
   const showCollections = pathname === "/collections";
   const showMadeForYou = pathname === "/made-for-you";
+  const showLibroReclamaciones = pathname === "/libro-reclamaciones";
   const currentProduct = productFromState ?? resolvedProduct;
 
   const seoTitle = useMemo(() => {
@@ -208,6 +213,8 @@ export default function StoreLayout() {
         />
       ) : showMadeForYou ? (
         <MadeForYou onNavigate={handleNavigate} />
+      ) : showLibroReclamaciones ? (
+        <LibroReclamaciones onNavigate={handleNavigate} />
       ) : (
         <LandingPage
           onCategorySelect={handleCategorySelect}

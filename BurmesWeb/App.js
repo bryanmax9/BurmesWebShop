@@ -42,6 +42,7 @@ function AppRoutes() {
       <Route path="/cart" element={<CartPage />} />
       <Route path="/collections" element={<StoreLayout />} />
       <Route path="/made-for-you" element={<StoreLayout />} />
+      <Route path="/libro-reclamaciones" element={<StoreLayout />} />
       <Route path="/category/:categoryId" element={<StoreLayout />} />
       <Route path="/product/:productId" element={<StoreLayout />} />
       <Route path="/" element={<StoreLayout />} />

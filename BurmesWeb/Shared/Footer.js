@@ -61,7 +61,7 @@ const Footer = ({ onNavigate }) => {
     ],
     customer: [
       { label: "Mi cuenta", route: "account" },
-      { label: "Seguimiento de pedido", route: "tracking" },
+      { label: "Libro de Reclamaciones", route: "libro-reclamaciones" },
       { label: "Guía de tallas", route: "size-guide" },
       { label: "Preguntas frecuentes", route: "faq" },
     ],
@@ -109,7 +109,7 @@ const Footer = ({ onNavigate }) => {
               styles.brandDescription,
               {
                 fontSize: isSmallScreen ? 13 : 14,
-                marginTop: isSmallScreen ? 12 : 16,
+                marginTop: isSmallScreen ? 24 : 32,
                 lineHeight: isSmallScreen ? 20 : 22,
               },
             ]}
@@ -299,7 +299,7 @@ const Footer = ({ onNavigate }) => {
               },
             ]}
           >
-            Dirección:{"\n"}Av La Encalada 1415, tda 203-B. Santiago de Surco 15023
+            Dirección:{"\n"}Av La Encalada 1415, tda 203-B.{"\n"}Santiago de Surco 15023
           </Text>
 
           {/* Social Media Icons */}

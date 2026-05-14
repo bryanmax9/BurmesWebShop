@@ -15,6 +15,8 @@ const categoryImages = {
   chains: require("../../assets/chains.png"),
   rings: require("../../assets/rings.png"),
   bracelets: require("../../assets/bracelet.png"),
+  aretes: require("../../assets/areteCategory.png"),
+  relojes: require("../../assets/relojesCategory.png"),
 };
 
 // Display names in Spanish
@@ -23,6 +25,8 @@ const categoryNamesEs = {
   chains: "Cadenas",
   rings: "Anillos",
   bracelets: "Pulseras",
+  aretes: "Aretes",
+  relojes: "Relojes",
 };
 
 const CategoryCard = ({ category, onPress, isSmallScreen }) => {

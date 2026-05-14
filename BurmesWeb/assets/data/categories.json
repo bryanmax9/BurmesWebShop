@@ -18,5 +18,15 @@
     "_id": { "$oid": "5f15d5b2cb4a6642bddc0fe7" },
     "name": "bracelets",
     "__v": 0
+  },
+  {
+    "_id": { "$oid": "6f25d5b2cb4a6642bddc1aa1" },
+    "name": "aretes",
+    "__v": 0
+  },
+  {
+    "_id": { "$oid": "6f25d5b2cb4a6642bddc1aa2" },
+    "name": "relojes",
+    "__v": 0
   }
 ]

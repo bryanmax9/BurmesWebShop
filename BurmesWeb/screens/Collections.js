@@ -11,6 +11,8 @@ const categoryIcons = {
   chains: "link-outline",
   rings: "radio-button-on-outline",
   bracelets: "ellipse-outline",
+  aretes: "sparkles-outline",
+  relojes: "time-outline",
 };
 
 const categoryColors = {
@@ -18,6 +20,8 @@ const categoryColors = {
   chains: "#2E7D32",
   rings: "#E8B4B8",
   bracelets: "#4A90E2",
+  aretes: "#C9A961",
+  relojes: "#7B6B5A",
 };
 
 const Collections = ({ onCategorySelect, onNavigate }) => {
