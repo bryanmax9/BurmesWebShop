@@ -15,6 +15,10 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import useSEO from "../hooks/useSEO";
+import { db } from "../config/firebase";
+import {
+  collection, getDocs, orderBy, query, doc, updateDoc,
+} from "firebase/firestore";
 
 const formatDate = (iso) => {
   if (!iso) return "—";
@@ -104,6 +108,93 @@ function ItemDetailModal({ item, visible, onClose }) {
         </Pressable>
       </Pressable>
     </Modal>
+  );
+}
+
+// ─── Reclamación status helpers ───────────────────────────────────────────────
+const reclamoStatusLabel = (s) => {
+  if (s === "respondido")  return "Respondido";
+  if (s === "en_proceso")  return "En proceso";
+  return "Pendiente";
+};
+
+const reclamoStatusStyle = (s) => {
+  if (s === "respondido") return styles.reclamoRespondido;
+  if (s === "en_proceso") return styles.reclamoEnProceso;
+  return styles.reclamoPendiente;
+};
+
+function ReclamacionCard({ reclamo, onStatusChange, updatingId }) {
+  const isUpdating = updatingId === reclamo.id;
+  const createdAt = reclamo.createdAt?.toDate
+    ? reclamo.createdAt.toDate().toLocaleString("es-PE", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })
+    : "—";
+
+  return (
+    <View style={styles.reclamoCard}>
+      <View style={styles.reclamoCardTop}>
+        <View>
+          <Text style={styles.reclamoCodigo} selectable>{reclamo.codigoReclamo || reclamo.id}</Text>
+          <Text style={styles.reclamoDate}>{createdAt}</Text>
+        </View>
+        <View style={[styles.reclamoBadge, reclamoStatusStyle(reclamo.status)]}>
+          <Text style={styles.reclamoBadgeText}>{reclamoStatusLabel(reclamo.status)}</Text>
+        </View>
+      </View>
+
+      <View style={styles.reclamoSection}>
+        <Text style={styles.reclamoSectionTitle}>CONSUMIDOR</Text>
+        <Text style={styles.reclamoName}>{reclamo.nombre || "—"}</Text>
+        <Text style={styles.reclamoMeta}>DNI: {reclamo.dni || "—"} · {reclamo.celular || "—"}</Text>
+        <Text style={styles.reclamoMeta}>{reclamo.email || "—"}</Text>
+        {(reclamo.departamento || reclamo.provincia) && (
+          <Text style={styles.reclamoMeta}>
+            {[reclamo.distrito, reclamo.provincia, reclamo.departamento].filter(Boolean).join(", ")}
+          </Text>
+        )}
+      </View>
+
+      <View style={styles.reclamoSection}>
+        <Text style={styles.reclamoSectionTitle}>BIEN CONTRATADO</Text>
+        <Text style={styles.reclamoMeta}>
+          {reclamo.tipoContratado || "—"}
+          {reclamo.nroPedido ? ` · Pedido: ${reclamo.nroPedido}` : ""}
+          {reclamo.montoReclamado ? ` · S/ ${reclamo.montoReclamado}` : ""}
+        </Text>
+        {reclamo.descripcionContratado ? (
+          <Text style={styles.reclamoDetalle} numberOfLines={2}>{reclamo.descripcionContratado}</Text>
+        ) : null}
+      </View>
+
+      <View style={styles.reclamoSection}>
+        <Text style={styles.reclamoSectionTitle}>
+          {reclamo.tipoReclamacion === "Queja" ? "QUEJA" : "RECLAMO"}
+        </Text>
+        <Text style={styles.reclamoDetalle}>{reclamo.detalle || "—"}</Text>
+      </View>
+
+      <View style={styles.statusActions}>
+        {["pendiente", "en_proceso", "respondido"].map((s) => (
+          <TouchableOpacity
+            key={s}
+            style={[
+              styles.reclamoStatusBtn,
+              reclamo.status === s && styles.reclamoStatusBtnActive,
+            ]}
+            onPress={() => onStatusChange(reclamo, s)}
+            disabled={isUpdating || reclamo.status === s}
+          >
+            {isUpdating && reclamo.status !== s ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <Text style={[styles.reclamoStatusBtnText, reclamo.status === s && { color: "#fff" }]}>
+                {reclamoStatusLabel(s)}
+              </Text>
+            )}
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
   );
 }
 
@@ -275,8 +366,14 @@ export default function AdminDashboard() {
   const [searchClientName, setSearchClientName] = useState("");
   const [searchRequestNumber, setSearchRequestNumber] = useState("");
   const [selectedUser, setSelectedUser] = useState(null);
-  const [viewMode, setViewMode] = useState("requests"); // "requests" or "clients"
+  const [viewMode, setViewMode] = useState("requests"); // "requests" | "clients" | "reclamaciones"
   const [updatingId, setUpdatingId] = useState(null);
+
+  const [reclamaciones,      setReclamaciones]      = useState([]);
+  const [loadingReclamos,    setLoadingReclamos]    = useState(false);
+  const [reclamosError,      setReclamosError]      = useState(null);
+  const [updatingReclamoId,  setUpdatingReclamoId]  = useState(null);
+  const [reclamoSearch,      setReclamoSearch]      = useState("");
 
   useSEO({
     title: "Control de Administración",
@@ -327,6 +424,24 @@ export default function AdminDashboard() {
     return () => { cancelled = true; };
   }, [user, isAdmin, getRequestsForAdmin, getUsersForAdmin]);
 
+  useEffect(() => {
+    if (!user || !isAdmin || viewMode !== "reclamaciones" || !db) return;
+    let cancelled = false;
+    setLoadingReclamos(true);
+    setReclamosError(null);
+    getDocs(query(collection(db, "reclamaciones"), orderBy("createdAt", "desc")))
+      .then((snap) => {
+        if (!cancelled) {
+          setReclamaciones(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+        }
+      })
+      .catch((err) => {
+        if (!cancelled) setReclamosError(err?.message || "No se pudieron cargar las reclamaciones.");
+      })
+      .finally(() => { if (!cancelled) setLoadingReclamos(false); });
+    return () => { cancelled = true; };
+  }, [user, isAdmin, viewMode]);
+
   const handleStatusChange = async (req, status) => {
     const uid = req.userId;
     if (!uid || !updateRequestStatus) return;
@@ -338,6 +453,19 @@ export default function AdminDashboard() {
       );
     } finally {
       setUpdatingId(null);
+    }
+  };
+
+  const handleReclamacionStatusChange = async (reclamo, newStatus) => {
+    if (!db) return;
+    setUpdatingReclamoId(reclamo.id);
+    try {
+      await updateDoc(doc(db, "reclamaciones", reclamo.id), { status: newStatus });
+      setReclamaciones((prev) =>
+        prev.map((r) => (r.id === reclamo.id ? { ...r, status: newStatus } : r))
+      );
+    } finally {
+      setUpdatingReclamoId(null);
     }
   };
 
@@ -413,6 +541,14 @@ export default function AdminDashboard() {
           </Text>
         </TouchableOpacity>
         <TouchableOpacity
+          style={[styles.tab, viewMode === "reclamaciones" && styles.tabActive]}
+          onPress={() => { setViewMode("reclamaciones"); setSelectedUser(null); }}
+        >
+          <Text style={[styles.tabText, viewMode === "reclamaciones" && styles.tabTextActive]}>
+            Reclamaciones{reclamaciones.length > 0 ? ` (${reclamaciones.length})` : ""}
+          </Text>
+        </TouchableOpacity>
+        <TouchableOpacity
           style={styles.tab}
           onPress={() => navigate("/admin/listings")}
         >
@@ -427,16 +563,22 @@ export default function AdminDashboard() {
       >
         <View style={styles.hero}>
           <Text style={styles.heroTitle}>
-            {viewMode === "requests" ? "Todas las solicitudes" : "Clientes"}
+            {viewMode === "requests"
+              ? "Todas las solicitudes"
+              : viewMode === "reclamaciones"
+              ? "Libro de Reclamaciones"
+              : "Clientes"}
           </Text>
           <Text style={styles.heroSubtitle}>
-            {viewMode === "requests"
+            {viewMode === "reclamaciones"
+              ? "Gestiona los reclamos y quejas recibidos. Actualiza el estado según avances en la atención."
+              : viewMode === "requests"
               ? "Busca por nombre de cliente o número de solicitud. Marca las solicitudes como completadas cuando termines."
               : "Consulta la información de los clientes y sus solicitudes. Haz clic en un cliente para ver detalles."}
           </Text>
         </View>
 
-        <View style={styles.searchWrap}>
+        {viewMode !== "reclamaciones" && <View style={styles.searchWrap}>
           <TextInput
             style={styles.searchInput}
             placeholder={viewMode === "requests" ? "Buscar por nombre o correo del cliente" : "Buscar clientes"}
@@ -453,9 +595,9 @@ export default function AdminDashboard() {
               onChangeText={setSearchRequestNumber}
             />
           )}
-        </View>
+        </View>}
 
-        {(usersError || requestsError) && (
+        {(usersError || requestsError) && viewMode !== "reclamaciones" && (
           <View style={styles.errorBox}>
             {usersError && (
               <View style={styles.errorItem}>
@@ -479,7 +621,54 @@ export default function AdminDashboard() {
           </View>
         )}
 
-        {loading && users.length === 0 && requests.length === 0 ? (
+        {viewMode === "reclamaciones" ? (
+          <View style={styles.section}>
+            <TextInput
+              style={[styles.searchInput, { marginBottom: 20 }]}
+              placeholder="Buscar por nombre, código o correo"
+              placeholderTextColor="#8a8a8a"
+              value={reclamoSearch}
+              onChangeText={setReclamoSearch}
+            />
+            {loadingReclamos ? (
+              <View style={styles.loaderWrap}>
+                <ActivityIndicator size="large" color="#1a1a1a" />
+                <Text style={styles.loaderText}>Cargando reclamaciones…</Text>
+              </View>
+            ) : reclamosError ? (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>{reclamosError}</Text>
+                <Text style={styles.errorHint}>
+                  Verifica que las reglas de Firestore permitan leer /reclamaciones a usuarios admin.
+                </Text>
+              </View>
+            ) : reclamaciones.length === 0 ? (
+              <View style={styles.emptyCard}>
+                <Text style={styles.emptyText}>No hay reclamaciones aún</Text>
+                <Text style={styles.emptySubtext}>Cuando un cliente envíe un reclamo aparecerá aquí.</Text>
+              </View>
+            ) : (
+              reclamaciones
+                .filter((r) => {
+                  const q = reclamoSearch.trim().toLowerCase();
+                  if (!q) return true;
+                  return (
+                    (r.nombre || "").toLowerCase().includes(q) ||
+                    (r.codigoReclamo || "").toLowerCase().includes(q) ||
+                    (r.email || "").toLowerCase().includes(q)
+                  );
+                })
+                .map((r) => (
+                  <ReclamacionCard
+                    key={r.id}
+                    reclamo={r}
+                    onStatusChange={handleReclamacionStatusChange}
+                    updatingId={updatingReclamoId}
+                  />
+                ))
+            )}
+          </View>
+        ) : loading && users.length === 0 && requests.length === 0 ? (
           <View style={styles.loaderWrap}>
             <ActivityIndicator size="large" color="#1a1a1a" />
             <Text style={styles.loaderText}>Cargando…</Text>
@@ -979,4 +1168,62 @@ const styles = StyleSheet.create({
   },
   statusBtnOutlineActive: { borderColor: "#1c1c1c", backgroundColor: "#f5f4f0" },
   statusBtnOutlineText: { fontSize: 13, color: "#333", fontWeight: "600" },
+
+  // Reclamaciones
+  reclamoCard: {
+    backgroundColor: "#fff",
+    padding: 20,
+    marginBottom: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e8e6e2",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.04,
+    shadowRadius: 3,
+    elevation: 2,
+  },
+  reclamoCardTop: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
+    marginBottom: 16,
+    paddingBottom: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f0ece6",
+  },
+  reclamoCodigo: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    fontFamily: Platform.OS === "web" ? "monospace" : undefined,
+    marginBottom: 2,
+  },
+  reclamoDate: { fontSize: 12, color: "#888" },
+  reclamoBadge: {
+    paddingVertical: 4, paddingHorizontal: 10, borderRadius: 6,
+  },
+  reclamoBadgeText: { fontSize: 11, fontWeight: "700", textTransform: "uppercase", letterSpacing: 0.5 },
+  reclamoPendiente:  { backgroundColor: "#fef9e7", borderWidth: 1, borderColor: "#f6c90e" },
+  reclamoEnProceso:  { backgroundColor: "#ebf8ff", borderWidth: 1, borderColor: "#63b3ed" },
+  reclamoRespondido: { backgroundColor: "#e6f4ea", borderWidth: 1, borderColor: "#68d391" },
+  reclamoSection: { marginBottom: 12 },
+  reclamoSectionTitle: {
+    fontSize: 10, fontWeight: "700", letterSpacing: 1.5,
+    color: "#aaa", textTransform: "uppercase", marginBottom: 4,
+  },
+  reclamoName: { fontSize: 15, fontWeight: "600", color: "#1a1a1a", marginBottom: 2 },
+  reclamoMeta: { fontSize: 13, color: "#555", marginBottom: 1 },
+  reclamoDetalle: { fontSize: 13, color: "#333", lineHeight: 20 },
+  reclamoStatusBtn: {
+    flex: 1,
+    paddingVertical: 9,
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: "#d0cec8",
+    alignItems: "center",
+    backgroundColor: "#f8f7f5",
+  },
+  reclamoStatusBtnActive: { backgroundColor: "#1a1a1a", borderColor: "#1a1a1a" },
+  reclamoStatusBtnText: { fontSize: 12, fontWeight: "600", color: "#444" },
 });
