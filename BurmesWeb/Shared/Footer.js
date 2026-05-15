@@ -7,6 +7,7 @@ import {
   Dimensions,
   Platform,
   Linking,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
@@ -347,75 +348,51 @@ const Footer = ({ onNavigate }) => {
           },
         ]}
       >
-        <Text
-          style={[
-            styles.copyrightText,
-            {
-              fontSize: isSmallScreen ? 11 : 12,
-              marginBottom: isMobile ? 16 : 0,
-            },
-          ]}
-        >
-          © {new Date().getFullYear()} Burmes & Co. Todos los derechos reservados.
-        </Text>
-        <View
-          style={[
-            styles.legalLinks,
-            {
-              flexDirection: isMobile ? "column" : "row",
-            },
-          ]}
-        >
-          <TouchableOpacity
-            onPress={() => handleNavigation("privacy")}
-            style={styles.legalLink}
+        {/* Left: copyright + legal links */}
+        <View style={{ flex: 1 }}>
+          <Text
+            style={[
+              styles.copyrightText,
+              {
+                fontSize: isSmallScreen ? 11 : 12,
+                marginBottom: isMobile ? 10 : 6,
+              },
+            ]}
           >
-            <Text
-              style={[
-                styles.legalLinkText,
-                {
-                  fontSize: isSmallScreen ? 11 : 12,
-                  marginRight: isMobile ? 0 : 24,
-                  marginBottom: isMobile ? 8 : 0,
-                },
-              ]}
-            >
-              Política de privacidad
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleNavigation("terms")}
-            style={styles.legalLink}
-          >
-            <Text
-              style={[
-                styles.legalLinkText,
-                {
-                  fontSize: isSmallScreen ? 11 : 12,
-                  marginRight: isMobile ? 0 : 24,
-                  marginBottom: isMobile ? 8 : 0,
-                },
-              ]}
-            >
-              Términos de servicio
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            onPress={() => handleNavigation("cookies")}
-            style={styles.legalLink}
-          >
-            <Text
-              style={[
-                styles.legalLinkText,
-                {
-                  fontSize: isSmallScreen ? 11 : 12,
-                },
-              ]}
-            >
-              Política de cookies
-            </Text>
-          </TouchableOpacity>
+            © {new Date().getFullYear()} Burmes & Co. Todos los derechos reservados.
+          </Text>
+          <View style={[styles.legalLinks, { flexDirection: "row", flexWrap: "wrap" }]}>
+            <TouchableOpacity onPress={() => handleNavigation("privacy")} style={styles.legalLink}>
+              <Text style={[styles.legalLinkText, { fontSize: isSmallScreen ? 11 : 12, marginRight: 16, marginBottom: 4 }]}>
+                Política de privacidad
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleNavigation("terms")} style={styles.legalLink}>
+              <Text style={[styles.legalLinkText, { fontSize: isSmallScreen ? 11 : 12, marginRight: 16, marginBottom: 4 }]}>
+                Términos de servicio
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => handleNavigation("cookies")} style={styles.legalLink}>
+              <Text style={[styles.legalLinkText, { fontSize: isSmallScreen ? 11 : 12, marginBottom: 4 }]}>
+                Política de cookies
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
+
+        {/* Right: Libro de Reclamaciones badge */}
+        <TouchableOpacity
+          onPress={() => handleNavigation("libro-reclamaciones")}
+          activeOpacity={0.85}
+          style={[styles.libroBadge, { marginTop: isMobile ? 20 : 0 }]}
+        >
+          <Image
+            source={require("../assets/libroReclamaciones.png")}
+            style={styles.libroImage}
+            resizeMode="contain"
+          />
+          <Text style={styles.libroText}>Libro de{"\n"}Reclamaciones</Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -502,6 +479,29 @@ const styles = StyleSheet.create({
     color: "#cccccc",
     fontFamily: "sans-serif",
     textDecorationLine: "underline",
+  },
+  libroBadge: {
+    backgroundColor: "#ffffff",
+    borderRadius: 6,
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    alignItems: "center",
+    flexDirection: "row",
+    gap: 10,
+    ...(Platform.OS === "web"
+      ? { boxShadow: "0 2px 8px rgba(0,0,0,0.3)" }
+      : { shadowColor: "#000", shadowOpacity: 0.3, shadowRadius: 8, elevation: 4 }),
+  },
+  libroImage: {
+    width: 44,
+    height: 44,
+  },
+  libroText: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#1a1a1a",
+    fontFamily: "sans-serif",
+    lineHeight: 16,
   },
 });
 

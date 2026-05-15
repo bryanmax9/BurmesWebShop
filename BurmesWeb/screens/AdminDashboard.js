@@ -347,6 +347,127 @@ function UserDetailCard({ user, requestCount, onClose }) {
   );
 }
 
+// ─── Reclamaciones export helpers ────────────────────────────────────────────
+function exportReclamacionesCSV(reclamaciones) {
+  const headers = [
+    "Código","Fecha","Estado","Nombre","DNI","Email","Teléfono",
+    "Departamento","Provincia","Distrito","Tipo Bien","N° Pedido",
+    "Monto","Tipo Reclamo","Detalle",
+  ];
+  const escape = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
+  const rows = reclamaciones.map((r) => [
+    r.codigoReclamo || r.id,
+    r.createdAt?.toDate?.()?.toLocaleDateString("es-PE") || "",
+    r.status || "pendiente",
+    r.nombre, r.dni, r.email, r.celular,
+    r.departamento, r.provincia, r.distrito || "",
+    r.tipoContratado, r.nroPedido || "", r.montoReclamado || "",
+    r.tipoReclamacion, r.detalle,
+  ].map(escape).join(","));
+  const csv = [headers.map(escape).join(","), ...rows].join("\n");
+  const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `reclamaciones_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function printReclamacionesReport(reclamaciones) {
+  const fmtDate = (r) =>
+    r.createdAt?.toDate?.()?.toLocaleString("es-PE", {
+      day: "2-digit", month: "long", year: "numeric",
+      hour: "2-digit", minute: "2-digit",
+    }) || "—";
+
+  const pages = reclamaciones.map((r) => `
+    <div class="page">
+      <div class="header">
+        <div class="header-left">
+          <div class="logo-bar"></div>
+          <div>
+            <div class="header-title">LIBRO DE RECLAMACIONES VIRTUAL</div>
+            <div class="header-sub">Ley N° 29571 — DS 011-2011-PCM</div>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="codigo">${r.codigoReclamo || r.id}</div>
+          <div class="fecha">${fmtDate(r)}</div>
+        </div>
+      </div>
+
+      <div class="company-bar">
+        <span class="company-name">BURMES &amp; CO S.A.C.</span>
+        <span class="company-ruc">RUC 20613752367</span>
+        <span class="status status-${r.status || "pendiente"}">${
+          r.status === "respondido" ? "RESPONDIDO" :
+          r.status === "en_proceso" ? "EN PROCESO" : "PENDIENTE"
+        }</span>
+      </div>
+
+      <div class="section-title">I. IDENTIFICACIÓN DEL CONSUMIDOR RECLAMANTE</div>
+      <table class="data-table">
+        <tr><td class="label">Nombre completo</td><td>${r.nombre || "—"}</td><td class="label">DNI / C.E.</td><td>${r.dni || "—"}</td></tr>
+        <tr><td class="label">Correo electrónico</td><td>${r.email || "—"}</td><td class="label">Teléfono</td><td>${r.celular || "—"}</td></tr>
+        <tr><td class="label">Domicilio</td><td colspan="3">${[r.domicilio, r.distrito, r.provincia, r.departamento].filter(Boolean).join(", ") || "—"}</td></tr>
+      </table>
+
+      <div class="section-title">II. IDENTIFICACIÓN DEL BIEN CONTRATADO</div>
+      <table class="data-table">
+        <tr><td class="label">Tipo</td><td>${r.tipoContratado || "—"}</td><td class="label">N° Pedido</td><td>${r.nroPedido || "—"}</td></tr>
+        <tr><td class="label">Monto reclamado</td><td>S/ ${r.montoReclamado || "—"}</td><td class="label">&nbsp;</td><td>&nbsp;</td></tr>
+        <tr><td class="label">Descripción</td><td colspan="3">${r.descripcionContratado || "—"}</td></tr>
+      </table>
+
+      <div class="section-title section-title-red">III. DETALLE DE LA ${(r.tipoReclamacion || "RECLAMACIÓN").toUpperCase()}</div>
+      <div class="detalle-box">${r.detalle || "—"}</div>
+
+      <div class="footer-note">
+        El proveedor deberá dar respuesta en un plazo no mayor de <strong>30 días calendario</strong>.
+        La formulación del reclamo no impide acudir al INDECOPI.
+      </div>
+    </div>
+  `).join("");
+
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">
+    <title>Libro de Reclamaciones — BURMES &amp; CO S.A.C.</title>
+    <style>
+      * { box-sizing: border-box; margin: 0; padding: 0; }
+      body { font-family: Arial, sans-serif; font-size: 11px; color: #111; }
+      .page { width: 210mm; min-height: 297mm; padding: 16mm; page-break-after: always; }
+      .header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 3px solid #0056AC; padding-bottom: 10px; margin-bottom: 10px; }
+      .header-left { display: flex; align-items: center; gap: 10px; }
+      .logo-bar { width: 6px; height: 50px; background: #D91023; border-radius: 3px; }
+      .header-title { font-size: 13px; font-weight: bold; color: #0056AC; letter-spacing: 1px; }
+      .header-sub { font-size: 9px; color: #666; margin-top: 3px; }
+      .header-right { text-align: right; }
+      .codigo { font-size: 16px; font-weight: bold; font-family: monospace; color: #0056AC; }
+      .fecha { font-size: 9px; color: #666; margin-top: 3px; }
+      .company-bar { background: #0d1e3a; color: #fff; padding: 7px 12px; display: flex; gap: 16px; align-items: center; margin-bottom: 14px; border-radius: 3px; }
+      .company-name { font-weight: bold; font-size: 12px; }
+      .company-ruc { font-size: 10px; opacity: 0.7; }
+      .status { margin-left: auto; font-size: 9px; font-weight: bold; padding: 3px 8px; border-radius: 2px; letter-spacing: 1px; }
+      .status-pendiente { background: #F6C90E; color: #111; }
+      .status-en_proceso { background: #63b3ed; color: #fff; }
+      .status-respondido { background: #48bb78; color: #fff; }
+      .section-title { background: #1e3a5f; color: #fff; font-size: 9px; font-weight: bold; letter-spacing: 1.5px; text-transform: uppercase; padding: 6px 10px; margin: 12px 0 6px; }
+      .section-title-red { background: #7b1a1a; }
+      .data-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+      .data-table td { padding: 6px 8px; border: 1px solid #dde3ed; }
+      .label { background: #dce6f4; font-weight: bold; color: #1e3a5f; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; width: 20%; }
+      .detalle-box { border: 1px solid #fca5a5; border-left: 4px solid #D91023; padding: 12px; background: #fff5f5; font-size: 11px; line-height: 1.6; min-height: 60px; }
+      .footer-note { margin-top: 20px; padding: 10px; background: #f0f5ff; border-left: 3px solid #0056AC; font-size: 10px; color: #444; line-height: 1.6; }
+      @media print { .page { page-break-after: always; } }
+    </style>
+  </head><body>${pages}</body></html>`;
+
+  const w = window.open("", "_blank");
+  w.document.write(html);
+  w.document.close();
+  w.onload = () => w.print();
+}
+
 export default function AdminDashboard() {
   const navigate = useNavigate();
   const {
@@ -623,13 +744,32 @@ export default function AdminDashboard() {
 
         {viewMode === "reclamaciones" ? (
           <View style={styles.section}>
-            <TextInput
-              style={[styles.searchInput, { marginBottom: 20 }]}
-              placeholder="Buscar por nombre, código o correo"
-              placeholderTextColor="#8a8a8a"
-              value={reclamoSearch}
-              onChangeText={setReclamoSearch}
-            />
+            {/* Search + Download buttons */}
+            <View style={{ flexDirection: "row", gap: 10, marginBottom: 20, flexWrap: "wrap" }}>
+              <TextInput
+                style={[styles.searchInput, { flex: 1, minWidth: 200, marginBottom: 0 }]}
+                placeholder="Buscar por nombre, código o correo"
+                placeholderTextColor="#8a8a8a"
+                value={reclamoSearch}
+                onChangeText={setReclamoSearch}
+              />
+              {reclamaciones.length > 0 && Platform.OS === "web" && (
+                <>
+                  <TouchableOpacity
+                    style={styles.exportBtn}
+                    onPress={() => exportReclamacionesCSV(reclamaciones)}
+                  >
+                    <Text style={styles.exportBtnText}>⬇ CSV</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[styles.exportBtn, { backgroundColor: "#1e3a5f" }]}
+                    onPress={() => printReclamacionesReport(reclamaciones)}
+                  >
+                    <Text style={styles.exportBtnText}>🖨 Imprimir / PDF</Text>
+                  </TouchableOpacity>
+                </>
+              )}
+            </View>
             {loadingReclamos ? (
               <View style={styles.loaderWrap}>
                 <ActivityIndicator size="large" color="#1a1a1a" />
@@ -1226,4 +1366,14 @@ const styles = StyleSheet.create({
   },
   reclamoStatusBtnActive: { backgroundColor: "#1a1a1a", borderColor: "#1a1a1a" },
   reclamoStatusBtnText: { fontSize: 12, fontWeight: "600", color: "#444" },
+
+  exportBtn: {
+    backgroundColor: "#2d5a1b",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  exportBtnText: { color: "#fff", fontSize: 13, fontWeight: "600" },
 });

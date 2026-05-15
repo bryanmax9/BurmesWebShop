@@ -31,8 +31,9 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress }) => {
   const loadProducts = async () => {
     setLoading(true);
     try {
-      const categoryId = selectedCategory?._id?.$oid || selectedCategory?._id || null;
-      const allProducts = await (getProducts?.(categoryId) ?? Promise.resolve([]));
+      const categoryId   = selectedCategory?._id?.$oid || selectedCategory?._id || null;
+      const categoryName = selectedCategory?.name || null;
+      const allProducts  = await (getProducts?.(categoryId, categoryName) ?? Promise.resolve([]));
       setProducts(allProducts || []);
     } catch (err) {
       console.error("Failed to load products:", err);
@@ -113,10 +114,12 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress }) => {
                     {selectedCategory.name
                       ? (
                           {
-                            pendants: "Dijes",
-                            chains: "Cadenas",
-                            rings: "Anillos",
+                            pendants:  "Dijes",
+                            chains:    "Cadenas",
+                            rings:     "Anillos",
                             bracelets: "Pulseras",
+                            aretes:    "Aretes",
+                            relojes:   "Relojes",
                           }[selectedCategory.name.toLowerCase()] ||
                           selectedCategory.name.charAt(0).toUpperCase() +
                             selectedCategory.name.slice(1)

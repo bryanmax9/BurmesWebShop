@@ -115,6 +115,7 @@ const LibroReclamaciones = ({ onNavigate }) => {
   const [submitError,      setSubmitError]       = useState(null);
   const [codigoReclamo,    setCodigoReclamo]     = useState("");
   const [errors,           setErrors]            = useState({});
+  const [countdown,        setCountdown]         = useState(6);
 
   const [form, setForm] = useState({
     nombre: "", dni: "", celular: "", email: "",
@@ -132,6 +133,25 @@ const LibroReclamaciones = ({ onNavigate }) => {
 
   // Reset provincia when departamento changes
   useEffect(() => { setProvincia(""); }, [departamento]);
+
+  // Countdown redirect to INDECOPI after submission
+  useEffect(() => {
+    if (!submitted) return;
+    setCountdown(6);
+    const interval = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          clearInterval(interval);
+          if (Platform.OS === "web") {
+            window.location.href = "https://enlinea.indecopi.gob.pe/reclamavirtual/#/";
+          }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [submitted]);
 
   const isSmall  = windowDimensions.width < 768;
   const isMobile = windowDimensions.width < 600;
@@ -262,20 +282,45 @@ const LibroReclamaciones = ({ onNavigate }) => {
 
   // ─── Success screen ──────────────────────────────────────────────────────────
   if (submitted) {
+    const INDECOPI_URL = "https://enlinea.indecopi.gob.pe/reclamavirtual/#/";
     return (
       <ScrollView style={styles.container} contentContainerStyle={styles.scrollContent}>
-        <View style={[styles.successBox, { width: contentWidth, alignSelf: "center", marginTop: 140, marginBottom: 60 }]}>
+        <View style={[styles.successBox, { width: contentWidth, alignSelf: "center", marginTop: 120, marginBottom: 60 }]}>
           <Text style={styles.successIcon}>✓</Text>
           <Text style={styles.successTitle}>Reclamo registrado</Text>
+
           <View style={styles.codigoBox}>
             <Text style={styles.codigoLabel}>Código de reclamo</Text>
             <Text style={styles.codigoCodigo} selectable>{codigoReclamo}</Text>
           </View>
+
           <Text style={styles.successBody}>
-            Hemos recibido tu reclamo. Guarda el código de referencia y nos comunicaremos contigo en un plazo máximo de{" "}
-            <Text style={{ fontWeight: "700" }}>30 días calendario</Text> al correo electrónico proporcionado.
+            Hemos recibido tu reclamo. Guarda el código y nos comunicaremos contigo en un plazo máximo de{" "}
+            <Text style={{ fontWeight: "700" }}>30 días calendario</Text> al correo proporcionado.
           </Text>
-          <TouchableOpacity style={styles.submitBtn} onPress={resetForm}>
+
+          {/* INDECOPI redirect banner */}
+          <View style={styles.indecopiBox}>
+            <Text style={styles.indecopiLabel}>
+              También puedes registrar tu reclamo directamente en INDECOPI
+            </Text>
+            <Text style={styles.indecopiCountdown}>
+              Redirigiendo en <Text style={{ fontWeight: "700", color: "#C9A961" }}>{countdown}s</Text>…
+            </Text>
+            <TouchableOpacity
+              style={styles.indecopiBtn}
+              onPress={() => {
+                if (Platform.OS === "web") {
+                  window.location.href = INDECOPI_URL;
+                }
+              }}
+              activeOpacity={0.85}
+            >
+              <Text style={styles.indecopiBtnText}>Ir al portal de INDECOPI ahora →</Text>
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity style={[styles.submitBtn, { backgroundColor: "#555", marginTop: 12 }]} onPress={resetForm}>
             <Text style={styles.submitBtnText}>Enviar otro reclamo</Text>
           </TouchableOpacity>
         </View>
@@ -669,7 +714,44 @@ const styles = StyleSheet.create({
   successBody: {
     fontSize: 14, color: "#666", textAlign: "center",
     lineHeight: 22, fontFamily: "sans-serif",
-    marginBottom: 32, maxWidth: 460,
+    marginBottom: 24, maxWidth: 460,
+  },
+  indecopiBox: {
+    width: "100%",
+    backgroundColor: "#1a1a1a",
+    borderRadius: 6,
+    padding: 20,
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  indecopiLabel: {
+    color: "#cccccc",
+    fontSize: 13,
+    textAlign: "center",
+    fontFamily: "sans-serif",
+    lineHeight: 20,
+    marginBottom: 10,
+  },
+  indecopiCountdown: {
+    color: "#aaaaaa",
+    fontSize: 12,
+    fontFamily: "sans-serif",
+    marginBottom: 14,
+  },
+  indecopiBtn: {
+    backgroundColor: "#C9A961",
+    paddingVertical: 13,
+    paddingHorizontal: 24,
+    borderRadius: 3,
+    width: "100%",
+    alignItems: "center",
+  },
+  indecopiBtnText: {
+    color: "#1a1a1a",
+    fontSize: 13,
+    fontWeight: "700",
+    letterSpacing: 0.5,
+    fontFamily: "sans-serif",
   },
 });
 

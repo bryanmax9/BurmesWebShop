@@ -8,6 +8,7 @@ import LandingPage from "./LandingPage";
 import Collections from "./Collections";
 import MadeForYou from "./MadeForYou";
 import LibroReclamaciones from "./LibroReclamaciones";
+import TerminosCondiciones from "./TerminosCondiciones";
 import Header from "../Shared/Header";
 import useSEO from "../hooks/useSEO";
 
@@ -112,6 +113,9 @@ export default function StoreLayout() {
     } else if (route === "libro-reclamaciones") {
       navigate("/libro-reclamaciones", { replace: false });
       scrollTop();
+    } else if (route === "terms") {
+      navigate("/terminos-condiciones", { replace: false });
+      scrollTop();
     } else if (route === "jewellery" || route === "engagement" || route === "watches") {
       const cat = categories.find((c) => c.name === route.replace("-", "") || (route === "jewellery" && c.name === "pendants"));
       if (cat) navigate(`/category/${getId(cat)}`, { replace: false });
@@ -145,7 +149,8 @@ export default function StoreLayout() {
   const showProducts = pathname.startsWith("/category/") && selectedCategory != null;
   const showCollections = pathname === "/collections";
   const showMadeForYou = pathname === "/made-for-you";
-  const showLibroReclamaciones = pathname === "/libro-reclamaciones";
+  const showLibroReclamaciones  = pathname === "/libro-reclamaciones";
+  const showTerminos            = pathname === "/terminos-condiciones";
   const currentProduct = productFromState ?? resolvedProduct;
 
   const seoTitle = useMemo(() => {
@@ -213,6 +218,8 @@ export default function StoreLayout() {
         />
       ) : showMadeForYou ? (
         <MadeForYou onNavigate={handleNavigate} />
+      ) : showTerminos ? (
+        <TerminosCondiciones onNavigate={handleNavigate} />
       ) : showLibroReclamaciones ? (
         <LibroReclamaciones onNavigate={handleNavigate} />
       ) : (

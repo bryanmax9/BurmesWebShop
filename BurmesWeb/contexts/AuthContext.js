@@ -332,14 +332,16 @@ export function AuthProvider({ children }) {
     await updateDoc(ref, { status: status || "pending" });
   };
 
-  const getProducts = async (categoryId = null) => {
+  const getProducts = async (categoryId = null, categoryName = null) => {
     if (!db) return [];
     const baseCol = collection(db, PRODUCTS_COLLECTION);
     let q;
-    if (categoryId) {
-      // Filter only by category to avoid needing a composite index.
-      // We'll sort by name on the client.
-      q = query(baseCol, where("category", "==", categoryId));
+    if (categoryId || categoryName) {
+      // Match by OID string OR by category name — handles both save formats.
+      const filterValues = [...new Set([categoryId, categoryName].filter(Boolean))];
+      q = filterValues.length === 1
+        ? query(baseCol, where("category", "==", filterValues[0]))
+        : query(baseCol, where("category", "in", filterValues));
     } else {
       q = query(baseCol, orderBy("name", "asc"));
     }
