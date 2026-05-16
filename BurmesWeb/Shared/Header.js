@@ -32,6 +32,7 @@ const JOYAS_DISCOVER = [
   { key: "plata",      label: "COLECCIÓN PLATA" },
   { key: "hombre",     label: "PARA HOMBRES" },
   { key: "mujer",      label: "PARA MUJERES" },
+  { key: "unisex",     label: "UNISEX" },
   { key: "novios",     label: "PARA NOVIOS" },
   { key: "ninos",      label: "NIÑOS Y BEBÉS" },
 ];

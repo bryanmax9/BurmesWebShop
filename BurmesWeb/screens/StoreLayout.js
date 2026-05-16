@@ -56,6 +56,7 @@ export default function StoreLayout() {
     plata:  { label: "Colección Plata", filterFn: (p) => p.material === "plata" },
     hombre: { label: "Para Hombres",    filterFn: (p) => p.gender === "hombre" },
     mujer:  { label: "Para Mujeres",    filterFn: (p) => p.gender === "mujer" },
+    unisex: { label: "Unisex",          filterFn: (p) => p.gender === "unisex" },
     novios: { label: "Para Novios",     filterFn: (p) => p.isNovios === true },
     ninos:  { label: "Niños y Bebés",   filterFn: (p) => p.gender === "ninos_bebes" },
   };
