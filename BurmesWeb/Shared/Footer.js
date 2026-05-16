@@ -62,7 +62,6 @@ const Footer = ({ onNavigate }) => {
     ],
     customer: [
       { label: "Mi cuenta", route: "account" },
-      { label: "Libro de Reclamaciones", route: "libro-reclamaciones" },
       { label: "Guía de tallas", route: "size-guide" },
       { label: "Preguntas frecuentes", route: "faq" },
     ],
@@ -73,6 +72,16 @@ const Footer = ({ onNavigate }) => {
       name: "instagram",
       url: "https://www.instagram.com/burmesandco/",
       icon: "logo-instagram",
+    },
+    {
+      name: "youtube",
+      url: "https://youtube.com/@burmesandco?si=u4OM0IGOHBLUIYUM",
+      icon: "logo-youtube",
+    },
+    {
+      name: "tiktok",
+      url: "https://www.tiktok.com/@joyeria.burmes?_r=1&_t=ZS-96OrD5F27nE",
+      icon: "logo-tiktok",
     },
   ];
 

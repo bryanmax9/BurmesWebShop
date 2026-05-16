@@ -430,6 +430,16 @@ export function AuthProvider({ children }) {
     });
   };
 
+  const updateInventory = async (productId, { inventoryStatus, inventoryNote }) => {
+    if (!db || !firebaseUser) throw new Error("Not authenticated");
+    const ref = doc(db, PRODUCTS_COLLECTION, productId);
+    await updateDoc(ref, {
+      inventoryStatus: inventoryStatus || "available",
+      inventoryNote: inventoryNote ?? "",
+      inventoryUpdatedAt: new Date().toISOString(),
+    });
+  };
+
   const deleteProduct = async (productId) => {
     if (!db || !firebaseUser) throw new Error("Not authenticated");
     const productRef = doc(db, PRODUCTS_COLLECTION, productId);
@@ -518,6 +528,7 @@ export function AuthProvider({ children }) {
     getProducts,
     createProduct,
     updateProduct,
+    updateInventory,
     deleteProduct,
   };
 

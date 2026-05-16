@@ -47,6 +47,20 @@ const toImageSource = (img) => {
 
 const DEFAULT_BRAND = "Burmes & Co";
 
+const CATEGORY_LABELS = {
+  pendants: "Dijes",
+  chains: "Cadenas",
+  rings: "Anillos",
+  bracelets: "Pulseras",
+  aretes: "Aretes",
+  relojes: "Relojes",
+};
+
+const INV_STATUS_CYCLE = { available: "sold", sold: "reserved", reserved: "available" };
+const INV_STATUS_LABELS = { available: "Disponible", sold: "Vendido", reserved: "Reservado" };
+const INV_STATUS_COLORS = { available: "#2d7a4a", sold: "#c0392b", reserved: "#b8620a" };
+const INV_STATUS_BG = { available: "#e8f5ee", sold: "#fde8e6", reserved: "#fef3e6" };
+
 function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
   const [name, setName] = useState("");
   const [brand, setBrand] = useState(DEFAULT_BRAND);
@@ -549,12 +563,19 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
 
 export default function AdminListings() {
   const navigate = useNavigate();
-  const { user, isAdmin, signOut, getProducts, createProduct, updateProduct, deleteProduct } = useAuth();
+  const { user, isAdmin, signOut, getProducts, createProduct, updateProduct, updateInventory, deleteProduct } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formVisible, setFormVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Inventario tab state
+  const [activeTab, setActiveTab] = useState("productos");
+  const [invSearch, setInvSearch] = useState("");
+  const [invCategory, setInvCategory] = useState("all");
+  const [localNotes, setLocalNotes] = useState({});
+  const [savingInv, setSavingInv] = useState({});
 
   useSEO({
     title: "Gestión de Productos",
@@ -613,6 +634,58 @@ export default function AdminListings() {
     return name.includes(q) || brand.includes(q) || sku.includes(q);
   });
 
+  const getCategoryName = (p) => {
+    const cat = (categoriesData || []).find((c) => {
+      const oid = c?._id?.$oid;
+      return p.category === oid || p.category === c.name;
+    });
+    return cat ? (CATEGORY_LABELS[cat.name] || cat.name) : "—";
+  };
+
+  const filteredInventory = products.filter((p) => {
+    if (invCategory !== "all") {
+      const cat = (categoriesData || []).find((c) => c.name === invCategory);
+      const oid = cat?._id?.$oid;
+      if (p.category !== invCategory && p.category !== oid) return false;
+    }
+    const q = invSearch.trim().toLowerCase();
+    if (!q) return true;
+    return (p.name || "").toLowerCase().includes(q) || (p.sku || "").toLowerCase().includes(q);
+  });
+
+  const handleStatusToggle = async (product) => {
+    const current = product.inventoryStatus || "available";
+    const next = INV_STATUS_CYCLE[current] || "available";
+    setSavingInv((s) => ({ ...s, [product.id]: true }));
+    try {
+      const note = localNotes[product.id] ?? (product.inventoryNote || "");
+      await updateInventory(product.id, { inventoryStatus: next, inventoryNote: note });
+      setProducts((prev) =>
+        prev.map((p) => p.id === product.id ? { ...p, inventoryStatus: next } : p)
+      );
+    } catch (err) {
+      window.alert(err.message || "No se pudo actualizar el estado.");
+    } finally {
+      setSavingInv((s) => ({ ...s, [product.id]: false }));
+    }
+  };
+
+  const handleSaveNote = async (product) => {
+    const note = localNotes[product.id] ?? (product.inventoryNote || "");
+    const status = product.inventoryStatus || "available";
+    setSavingInv((s) => ({ ...s, [product.id]: true }));
+    try {
+      await updateInventory(product.id, { inventoryStatus: status, inventoryNote: note });
+      setProducts((prev) =>
+        prev.map((p) => p.id === product.id ? { ...p, inventoryNote: note } : p)
+      );
+    } catch (err) {
+      window.alert(err.message || "No se pudo guardar la nota.");
+    } finally {
+      setSavingInv((s) => ({ ...s, [product.id]: false }));
+    }
+  };
+
   if (!user || !isAdmin) return null;
 
   return (
@@ -630,114 +703,270 @@ export default function AdminListings() {
           </View>
         </View>
         <Text style={styles.email}>{user?.email}</Text>
-      </View>
 
-      <View style={styles.content}>
-        <View style={styles.hero}>
-          <Text style={styles.heroTitle}>Productos</Text>
-          <Text style={styles.heroSubtitle}>
-            Crea y gestiona los productos de la tienda. Las imágenes se guardan en Google Drive.
-          </Text>
-        </View>
-
-        <View style={styles.actionsBar}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder="Buscar productos..."
-            placeholderTextColor="#8a8a8a"
-            value={searchQuery}
-            onChangeText={setSearchQuery}
-          />
+        {/* Tab switcher */}
+        <View style={styles.tabBar}>
           <TouchableOpacity
-            style={styles.createBtn}
-            onPress={() => {
-              setEditingProduct(null);
-              setFormVisible(true);
-            }}
+            style={[styles.tabBtn, activeTab === "productos" && styles.tabBtnActive]}
+            onPress={() => setActiveTab("productos")}
           >
-            <Text style={styles.createBtnText}>+ Crear producto</Text>
+            <Text style={[styles.tabBtnText, activeTab === "productos" && styles.tabBtnTextActive]}>
+              Productos
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tabBtn, activeTab === "inventario" && styles.tabBtnActive]}
+            onPress={() => setActiveTab("inventario")}
+          >
+            <Text style={[styles.tabBtnText, activeTab === "inventario" && styles.tabBtnTextActive]}>
+              Inventario
+            </Text>
           </TouchableOpacity>
         </View>
-
-        {loading ? (
-          <View style={styles.loaderWrap}>
-            <ActivityIndicator size="large" color="#1a1a1a" />
-            <Text style={styles.loaderText}>Cargando productos…</Text>
-          </View>
-        ) : filteredProducts.length === 0 ? (
-          <View style={styles.emptyCard}>
-            <Text style={styles.emptyText}>
-              {products.length === 0 ? "Aún no hay productos" : "No se encontraron productos"}
-            </Text>
-            <Text style={styles.emptySubtext}>
-              {products.length === 0
-                ? "Crea tu primer producto para empezar a vender."
-                : "Prueba con otro término de búsqueda."}
-            </Text>
-          </View>
-        ) : (
-          <View style={styles.productsGrid}>
-            {filteredProducts.map((product) => {
-              const coverUrl =
-                product.image ||
-                (Array.isArray(product.images) && product.images[0]) ||
-                null;
-              const imgSrc = toImageSource(coverUrl);
-              return (
-                <TouchableOpacity
-                  key={product.id}
-                  style={styles.productCard}
-                  onPress={() => {
-                    setEditingProduct(product);
-                    setFormVisible(true);
-                  }}
-                >
-                  <View style={styles.productImageContainer}>
-                    {imgSrc ? (
-                      <Image source={imgSrc} style={styles.productImage} resizeMode="cover" />
-                    ) : (
-                      <View style={styles.productImagePlaceholder}>
-                        <Text style={styles.productImagePlaceholderText}>📷</Text>
-                      </View>
-                    )}
-                    {product.isFeatured && (
-                      <View style={styles.featuredBadge}>
-                        <Text style={styles.featuredBadgeText}>Más popular</Text>
-                      </View>
-                    )}
-                  </View>
-                  <View style={styles.productInfo}>
-                    <Text style={styles.productName} numberOfLines={2}>
-                      {product.name || "—"}
-                    </Text>
-                    {product.brand && (
-                      <Text style={styles.productBrand} numberOfLines={1}>
-                        {product.brand}
-                      </Text>
-                    )}
-                    {product.price != null && (
-                      <Text style={styles.productPrice}>
-                        ${Number(product.price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                      </Text>
-                    )}
-                    {product.sku && (
-                      <View style={styles.skuBadge}>
-                        <Text style={styles.skuBadgeText}>{product.sku}</Text>
-                      </View>
-                    )}
-                    <Text style={styles.productStock}>
-                      Stock: {product.countInStock ?? 0}
-                    </Text>
-                    <Text style={styles.productDate}>
-                      {formatDate(product.createdAt)}
-                    </Text>
-                  </View>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
       </View>
+
+      {/* ── PRODUCTOS TAB ── */}
+      {activeTab === "productos" && (
+        <View style={styles.content}>
+          <View style={styles.hero}>
+            <Text style={styles.heroTitle}>Productos</Text>
+            <Text style={styles.heroSubtitle}>
+              Crea y gestiona los productos de la tienda. Las imágenes se guardan en Google Drive.
+            </Text>
+          </View>
+
+          <View style={styles.actionsBar}>
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Buscar productos..."
+              placeholderTextColor="#8a8a8a"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+            />
+            <TouchableOpacity
+              style={styles.createBtn}
+              onPress={() => {
+                setEditingProduct(null);
+                setFormVisible(true);
+              }}
+            >
+              <Text style={styles.createBtnText}>+ Crear producto</Text>
+            </TouchableOpacity>
+          </View>
+
+          {loading ? (
+            <View style={styles.loaderWrap}>
+              <ActivityIndicator size="large" color="#1a1a1a" />
+              <Text style={styles.loaderText}>Cargando productos…</Text>
+            </View>
+          ) : filteredProducts.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyText}>
+                {products.length === 0 ? "Aún no hay productos" : "No se encontraron productos"}
+              </Text>
+              <Text style={styles.emptySubtext}>
+                {products.length === 0
+                  ? "Crea tu primer producto para empezar a vender."
+                  : "Prueba con otro término de búsqueda."}
+              </Text>
+            </View>
+          ) : (
+            <View style={styles.productsGrid}>
+              {filteredProducts.map((product) => {
+                const coverUrl =
+                  product.image ||
+                  (Array.isArray(product.images) && product.images[0]) ||
+                  null;
+                const imgSrc = toImageSource(coverUrl);
+                return (
+                  <TouchableOpacity
+                    key={product.id}
+                    style={styles.productCard}
+                    onPress={() => {
+                      setEditingProduct(product);
+                      setFormVisible(true);
+                    }}
+                  >
+                    <View style={styles.productImageContainer}>
+                      {imgSrc ? (
+                        <Image source={imgSrc} style={styles.productImage} resizeMode="cover" />
+                      ) : (
+                        <View style={styles.productImagePlaceholder}>
+                          <Text style={styles.productImagePlaceholderText}>📷</Text>
+                        </View>
+                      )}
+                      {product.isFeatured && (
+                        <View style={styles.featuredBadge}>
+                          <Text style={styles.featuredBadgeText}>Más popular</Text>
+                        </View>
+                      )}
+                    </View>
+                    <View style={styles.productInfo}>
+                      <Text style={styles.productName} numberOfLines={2}>
+                        {product.name || "—"}
+                      </Text>
+                      {product.brand && (
+                        <Text style={styles.productBrand} numberOfLines={1}>
+                          {product.brand}
+                        </Text>
+                      )}
+                      {product.price != null && (
+                        <Text style={styles.productPrice}>
+                          ${Number(product.price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </Text>
+                      )}
+                      {product.sku && (
+                        <View style={styles.skuBadge}>
+                          <Text style={styles.skuBadgeText}>{product.sku}</Text>
+                        </View>
+                      )}
+                      <Text style={styles.productStock}>
+                        Stock: {product.countInStock ?? 0}
+                      </Text>
+                      <Text style={styles.productDate}>
+                        {formatDate(product.createdAt)}
+                      </Text>
+                    </View>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          )}
+        </View>
+      )}
+
+      {/* ── INVENTARIO TAB ── */}
+      {activeTab === "inventario" && (
+        <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 40 }}>
+          <View style={styles.hero}>
+            <Text style={styles.heroTitle}>Inventario</Text>
+            <Text style={styles.heroSubtitle}>
+              Registra el estado de cada pieza. Busca por SKU o nombre y filtra por categoría.
+            </Text>
+          </View>
+
+          {/* Search + category filters */}
+          <TextInput
+            style={[styles.searchInput, { marginBottom: 12 }]}
+            placeholder="Buscar por SKU o nombre..."
+            placeholderTextColor="#8a8a8a"
+            value={invSearch}
+            onChangeText={setInvSearch}
+          />
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.catChipsRow}>
+            {[{ name: "all", label: "Todas" }, ...(categoriesData || []).map((c) => ({ name: c.name, label: CATEGORY_LABELS[c.name] || c.name }))].map((cat) => (
+              <TouchableOpacity
+                key={cat.name}
+                style={[styles.catChip, invCategory === cat.name && styles.catChipActive]}
+                onPress={() => setInvCategory(cat.name)}
+              >
+                <Text style={[styles.catChipText, invCategory === cat.name && styles.catChipTextActive]}>
+                  {cat.label}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+
+          {loading ? (
+            <View style={styles.loaderWrap}>
+              <ActivityIndicator size="large" color="#1a1a1a" />
+              <Text style={styles.loaderText}>Cargando inventario…</Text>
+            </View>
+          ) : filteredInventory.length === 0 ? (
+            <View style={styles.emptyCard}>
+              <Text style={styles.emptyText}>Sin resultados</Text>
+              <Text style={styles.emptySubtext}>Prueba con otro filtro o término.</Text>
+            </View>
+          ) : (
+            <View style={styles.invList}>
+              {filteredInventory.map((product) => {
+                const coverUrl = product.image || (Array.isArray(product.images) && product.images[0]) || null;
+                const imgSrc = toImageSource(coverUrl);
+                const status = product.inventoryStatus || "available";
+                const isSaving = !!savingInv[product.id];
+                const noteDraft = localNotes[product.id] ?? (product.inventoryNote || "");
+                const noteChanged = noteDraft !== (product.inventoryNote || "");
+                return (
+                  <View key={product.id} style={styles.invRow}>
+                    {/* Thumbnail */}
+                    <View style={styles.invThumb}>
+                      {imgSrc ? (
+                        <Image source={imgSrc} style={styles.invThumbImg} resizeMode="cover" />
+                      ) : (
+                        <View style={styles.invThumbPlaceholder}>
+                          <Text style={{ fontSize: 22 }}>📷</Text>
+                        </View>
+                      )}
+                    </View>
+
+                    {/* Info */}
+                    <View style={styles.invInfo}>
+                      <View style={styles.invInfoTop}>
+                        {product.sku ? (
+                          <View style={styles.skuBadge}>
+                            <Text style={styles.skuBadgeText}>{product.sku}</Text>
+                          </View>
+                        ) : (
+                          <Text style={styles.invNoSku}>Sin SKU</Text>
+                        )}
+                        <Text style={styles.invCatLabel}>{getCategoryName(product)}</Text>
+                      </View>
+                      <Text style={styles.invProductName} numberOfLines={1}>{product.name || "—"}</Text>
+                      {product.price != null && (
+                        <Text style={styles.invPrice}>
+                          ${Number(product.price).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                        </Text>
+                      )}
+
+                      {/* Status toggle */}
+                      <TouchableOpacity
+                        style={[styles.invStatusBtn, { backgroundColor: INV_STATUS_BG[status] }]}
+                        onPress={() => handleStatusToggle(product)}
+                        disabled={isSaving}
+                      >
+                        <View style={[styles.invStatusDot, { backgroundColor: INV_STATUS_COLORS[status] }]} />
+                        <Text style={[styles.invStatusText, { color: INV_STATUS_COLORS[status] }]}>
+                          {INV_STATUS_LABELS[status]}
+                        </Text>
+                        <Text style={styles.invStatusArrow}>↻</Text>
+                      </TouchableOpacity>
+
+                      {/* Note field */}
+                      <View style={styles.invNoteRow}>
+                        <TextInput
+                          style={styles.invNoteInput}
+                          placeholder="Agregar nota (ej. vendido a cliente X, en reparación…)"
+                          placeholderTextColor="#bbb"
+                          value={noteDraft}
+                          onChangeText={(v) => setLocalNotes((n) => ({ ...n, [product.id]: v }))}
+                          multiline
+                        />
+                        {noteChanged && (
+                          <TouchableOpacity
+                            style={styles.invSaveNoteBtn}
+                            onPress={() => handleSaveNote(product)}
+                            disabled={isSaving}
+                          >
+                            <Text style={styles.invSaveNoteBtnText}>
+                              {isSaving ? "…" : "Guardar"}
+                            </Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+
+                      {product.inventoryUpdatedAt && (
+                        <Text style={styles.invUpdatedAt}>
+                          Actualizado: {formatDate(product.inventoryUpdatedAt)}
+                        </Text>
+                      )}
+                    </View>
+                  </View>
+                );
+              })}
+            </View>
+          )}
+        </ScrollView>
+      )}
 
       <ProductFormModal
         product={editingProduct}
