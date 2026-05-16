@@ -767,7 +767,7 @@ const Header = ({
           >
             <Image
               source={require("../assets/paraella.png")}
-              style={StyleSheet.absoluteFillObject}
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
               resizeMode="cover"
             />
             <View style={styles.compromisPanelGradient} />
@@ -795,7 +795,7 @@ const Header = ({
           >
             <Image
               source={require("../assets/parael.png")}
-              style={StyleSheet.absoluteFillObject}
+              style={{ position: "absolute", top: 0, left: 0, width: "100%", height: "100%" }}
               resizeMode="cover"
             />
             <View style={styles.compromisPanelGradient} />
