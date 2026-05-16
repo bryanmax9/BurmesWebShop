@@ -106,14 +106,14 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress, filterNo
                       styles.categoryIconContainer,
                       {
                         backgroundColor:
-                          (selectedCategory.color || "#C9A961") + "20",
+                          ((selectedCategory?.color) || "#C9A961") + "20",
                       },
                     ]}
                   >
                     <Ionicons
-                      name={selectedCategory.icon || "diamond-outline"}
+                      name={selectedCategory?.icon || "diamond-outline"}
                       size={24}
-                      color={selectedCategory.color || "#C9A961"}
+                      color={selectedCategory?.color || "#C9A961"}
                     />
                   </View>
                   <Text style={styles.categoryHeaderTitle}>
@@ -121,7 +121,7 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress, filterNo
                       ? discoverFilter.label
                       : filterNovios
                       ? "Compromiso"
-                      : selectedCategory.name
+                      : selectedCategory?.name
                       ? (
                           {
                             pendants:  "Dijes",
@@ -135,7 +135,7 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress, filterNo
                           selectedCategory.name.charAt(0).toUpperCase() +
                             selectedCategory.name.slice(1)
                         )
-                      : selectedCategory.name}
+                      : ""}
                   </Text>
                 </View>
                 <Text style={styles.productCount}>
@@ -165,9 +165,13 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress, filterNo
           ) : (
             <View style={styles.emptyContainer}>
               <Ionicons name="cube-outline" size={64} color="#ccc" />
-              <Text style={styles.emptyText}>No se encontraron productos</Text>
+              <Text style={styles.emptyText}>
+                {discoverFilter ? `Sin productos en "${discoverFilter.label}"` : "No se encontraron productos"}
+              </Text>
               <Text style={styles.emptySubtext}>
-                Prueba seleccionando otra categoría
+                {discoverFilter
+                  ? "Pronto encontrarás joyas en esta colección."
+                  : "Prueba seleccionando otra categoría"}
               </Text>
             </View>
           )}
