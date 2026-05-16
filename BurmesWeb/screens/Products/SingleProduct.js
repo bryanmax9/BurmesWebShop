@@ -16,6 +16,35 @@ import { useAuth } from "../../contexts/AuthContext";
 
 const WHATSAPP_NUMBER = "51969762316"; // +51 969 762 316
 
+const categoriesData = require("../../assets/data/categories.json");
+
+const getCategoryName = (product) => {
+  if (!product?.category) return null;
+  const cat = (categoriesData || []).find((c) => {
+    const oid = c?._id?.$oid || c?._id;
+    return product.category === oid || product.category === c.name;
+  });
+  return cat?.name || null;
+};
+
+const TALLA_OPTIONS = ["XS", "S", "M", "L", "XL"];
+const ORO_OPTIONS = ["Oro 14k", "Oro 18k", "Oro Blanco 14k", "Oro Blanco 18k", "Plata 925"];
+const LARGO_PULSERA = [
+  { cm: 14, label: '14 cm / 5.5"' },
+  { cm: 16, label: '16 cm / 6.3"' },
+  { cm: 17, label: '17 cm / 6.7"' },
+  { cm: 18, label: '18 cm / 7.1"' },
+  { cm: 19, label: '19 cm / 7.5"' },
+  { cm: 20, label: '20 cm / 7.9"' },
+];
+const LARGO_CADENA = [
+  { cm: 40, label: '40 cm / 15.7"' },
+  { cm: 45, label: '45 cm / 17.7"' },
+  { cm: 50, label: '50 cm / 19.7"' },
+  { cm: 55, label: '55 cm / 21.7"' },
+  { cm: 60, label: '60 cm / 23.6"' },
+];
+
 const getId = (x) => x?._id?.$oid || x?._id || x?.id;
 const getCat = (x) => x?.category?.$oid || x?.category;
 
@@ -57,10 +86,22 @@ export default function SingleProduct({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [related, setRelated] = useState([]);
   const [selectedQty, setSelectedQty] = useState(1);
+  const [selectedSize, setSelectedSize] = useState(null);
+  const [selectedGold, setSelectedGold] = useState(null);
+  const [selectedLargo, setSelectedLargo] = useState(null);
+
+  const categoryName = getCategoryName(product);
+  const isBracelet = categoryName === "bracelets";
+  const isChain = categoryName === "chains";
+  const showCustomizers = isBracelet || isChain;
+  const largoOptions = isBracelet ? LARGO_PULSERA : LARGO_CADENA;
 
   useEffect(() => {
     setSelectedImageIndex(0);
     setSelectedQty(1);
+    setSelectedSize(null);
+    setSelectedGold(null);
+    setSelectedLargo(null);
 
     if (!product) return setRelated([]);
 
@@ -91,7 +132,14 @@ export default function SingleProduct({
     if (user && createOrder && product) {
       createOrder(getId(product), product.name).catch(() => {});
     }
-    openWhatsAppOrder(product?.name);
+    const name = product?.name || "este artículo";
+    let extras = "";
+    if (selectedSize) extras += `\n• Talla: *${selectedSize}*`;
+    if (selectedGold) extras += `\n• Material: *${selectedGold}*`;
+    if (selectedLargo) extras += `\n• Largo: *${selectedLargo.label}*`;
+    const text = `Hola! Me gustaría recibir asesoría sobre el siguiente artículo que vi en su página: *${name}*.${extras ? `\n\nOpciones seleccionadas:${extras}` : ""} ¿Podrían indicarme disponibilidad y opciones de personalización? Gracias.`;
+    const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(text)}`;
+    Linking.openURL(url).catch(() => {});
   };
 
   const handleAddToCart = () => {
@@ -268,6 +316,74 @@ export default function SingleProduct({
               {product.countInStock > 0 && product.countInStock <= 5 && (
                 <Text style={styles.stockLow}>Solo quedan {product.countInStock}</Text>
               )}
+            </View>
+          )}
+
+          {/* Delivery message - all products */}
+          <View style={styles.deliveryBox}>
+            <Ionicons name="cube-outline" size={17} color="#1a1a1a" style={{ marginTop: 1 }} />
+            <Text style={styles.deliveryText}>
+              {(product.countInStock ?? 0) > 0
+                ? "En stock — tu pedido se enviará el mismo día"
+                : "Fabricado bajo pedido — tiempo de entrega: 2-3 semanas"}
+            </Text>
+          </View>
+
+          {/* Size / Gold / Length selectors — only for pulseras & cadenas */}
+          {showCustomizers && (
+            <View style={styles.customizationBlock}>
+              <View style={styles.customField}>
+                <Text style={styles.customFieldLabel}>TALLA</Text>
+                <View style={styles.customPillRow}>
+                  {TALLA_OPTIONS.map((s) => (
+                    <TouchableOpacity
+                      key={s}
+                      style={[styles.customPill, selectedSize === s && styles.customPillActive]}
+                      onPress={() => setSelectedSize(s)}
+                    >
+                      <Text style={[styles.customPillText, selectedSize === s && styles.customPillTextActive]}>
+                        {s}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.customField}>
+                <Text style={styles.customFieldLabel}>MATERIAL / ORO</Text>
+                <View style={styles.customPillRow}>
+                  {ORO_OPTIONS.map((g) => (
+                    <TouchableOpacity
+                      key={g}
+                      style={[styles.customPill, selectedGold === g && styles.customPillActive]}
+                      onPress={() => setSelectedGold(g)}
+                    >
+                      <Text style={[styles.customPillText, selectedGold === g && styles.customPillTextActive]}>
+                        {g}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+
+              <View style={styles.customField}>
+                <Text style={styles.customFieldLabel}>LARGO</Text>
+                <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+                  <View style={[styles.customPillRow, { flexWrap: "nowrap" }]}>
+                    {largoOptions.map((l) => (
+                      <TouchableOpacity
+                        key={l.cm}
+                        style={[styles.customPill, selectedLargo?.cm === l.cm && styles.customPillActive]}
+                        onPress={() => setSelectedLargo(l)}
+                      >
+                        <Text style={[styles.customPillText, selectedLargo?.cm === l.cm && styles.customPillTextActive]}>
+                          {l.label}
+                        </Text>
+                      </TouchableOpacity>
+                    ))}
+                  </View>
+                </ScrollView>
+              </View>
             </View>
           )}
 
@@ -618,4 +734,63 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   simpleBtnText: { fontWeight: "700" },
+
+  // Delivery message
+  deliveryBox: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    backgroundColor: "#f0f0ef",
+    borderRadius: 8,
+    paddingVertical: 11,
+    paddingHorizontal: 14,
+    marginBottom: 18,
+  },
+  deliveryText: {
+    flex: 1,
+    fontSize: 13,
+    color: "#1a1a1a",
+    fontWeight: "600",
+    lineHeight: 19,
+  },
+
+  // Pulseras / Cadenas customization selectors
+  customizationBlock: {
+    marginBottom: 20,
+    gap: 14,
+  },
+  customField: {
+    gap: 8,
+  },
+  customFieldLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#888",
+    letterSpacing: 1.5,
+  },
+  customPillRow: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: 8,
+  },
+  customPill: {
+    paddingVertical: 7,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: "#d0d0d0",
+    backgroundColor: "#fff",
+  },
+  customPillActive: {
+    backgroundColor: "#1a1a1a",
+    borderColor: "#1a1a1a",
+  },
+  customPillText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#444",
+  },
+  customPillTextActive: {
+    color: "#fff",
+  },
 });

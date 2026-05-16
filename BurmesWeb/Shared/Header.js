@@ -767,9 +767,10 @@ const Header = ({
           >
             <Image
               source={require("../assets/paraella.png")}
-              style={styles.compromisPanelImg}
+              style={StyleSheet.absoluteFillObject}
               resizeMode="cover"
             />
+            <View style={styles.compromisPanelGradient} />
             <View style={styles.compromisPanelLabel}>
               <TouchableOpacity onPress={() => { setCompromisMenuOpen(false); setCompromisHover(null); if (navigate) navigate("/coleccion/compromiso-ella"); }}>
                 <Text style={styles.compromisPanelLabelTitle}>PARA ELLA</Text>
@@ -794,9 +795,10 @@ const Header = ({
           >
             <Image
               source={require("../assets/parael.png")}
-              style={styles.compromisPanelImg}
+              style={StyleSheet.absoluteFillObject}
               resizeMode="cover"
             />
+            <View style={styles.compromisPanelGradient} />
             <View style={styles.compromisPanelLabel}>
               <TouchableOpacity onPress={() => { setCompromisMenuOpen(false); setCompromisHover(null); if (navigate) navigate("/coleccion/compromiso-el"); }}>
                 <Text style={styles.compromisPanelLabelTitle}>PARA ÉL</Text>
@@ -1224,7 +1226,8 @@ const styles = StyleSheet.create({
     right: 0,
     zIndex: 999,
     flexDirection: "row",
-    height: 320,
+    height: 340,
+    backgroundColor: "#1a1a1a",
     ...(Platform.OS === "web"
       ? { boxShadow: "0 6px 24px rgba(0,0,0,0.18)" }
       : { shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 12, elevation: 8 }),
@@ -1233,25 +1236,29 @@ const styles = StyleSheet.create({
     flex: 1,
     overflow: "hidden",
     position: "relative",
-    justifyContent: "flex-end",
+    backgroundColor: "#1e1e1e",
     ...(Platform.OS === "web" ? { cursor: "pointer" } : {}),
   },
   compromisPanelWrapHover: {
-    ...(Platform.OS === "web" ? { filter: "brightness(1.08)" } : {}),
+    ...(Platform.OS === "web" ? { opacity: 0.9 } : { opacity: 0.9 }),
   },
-  compromisPanelImg: {
+  compromisPanelGradient: {
     position: "absolute",
-    top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
-    bottom: 0,
-    width: "100%",
-    height: "100%",
+    height: 160,
+    ...(Platform.OS === "web"
+      ? { background: "linear-gradient(to top, rgba(0,0,0,0.75) 0%, rgba(0,0,0,0) 100%)" }
+      : { backgroundColor: "rgba(0,0,0,0.4)" }),
   },
   compromisPanelLabel: {
-    backgroundColor: "rgba(0,0,0,0.38)",
-    paddingVertical: 18,
-    paddingHorizontal: 24,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingVertical: 20,
+    paddingHorizontal: 28,
   },
   compromisPanelLabelTitle: {
     color: "#ffffff",
