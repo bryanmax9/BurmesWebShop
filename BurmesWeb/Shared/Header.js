@@ -48,17 +48,13 @@ const JOYAS_GEMAS = [
 ];
 
 const COMPROMISO_ELLA = [
-  { key: "compromiso-ella-anillos",  label: "ANILLOS DE COMPROMISO" },
-  { key: "compromiso-ella-alianzas", label: "ALIANZAS" },
-  { key: "compromiso-ella-conjuntos", label: "CONJUNTOS" },
-  { key: "compromiso-ella-eternidad", label: "ANILLOS DE ETERNIDAD" },
+  { key: "compromiso-ella-promesa",    label: "ANILLOS DE PROMESA" },
+  { key: "compromiso-ella-anillos",    label: "ANILLO DE COMPROMISO" },
 ];
 
 const COMPROMISO_EL = [
-  { key: "compromiso-el-argollas",  label: "ARGOLLAS MATRIMONIALES" },
-  { key: "compromiso-el-alianzas",  label: "ALIANZAS" },
-  { key: "compromiso-el-clasicos",  label: "DISEÑOS CLÁSICOS" },
-  { key: "compromiso-el-modernos",  label: "DISEÑOS MODERNOS" },
+  { key: "compromiso-el-clasicas", label: "ARGOLLAS MATRIMONIALES CLÁSICAS" },
+  { key: "compromiso-el-modernas", label: "ARGOLLAS MATRIMONIALES MODERNAS" },
 ];
 
 // Default navigation items - can be overridden via props
@@ -754,7 +750,7 @@ const Header = ({
       {compromisMenuOpen && !isSmallScreen && (
         <Animated.View
           style={[
-            styles.joyasMenu,
+            styles.compromisMenu,
             {
               opacity: compromisMenuAnim,
               transform: [{ translateY: compromisMenuAnim.interpolate({ inputRange: [0, 1], outputRange: [-16, 0] }) }],
@@ -763,72 +759,57 @@ const Header = ({
           onMouseEnter={openCompromisMenu}
           onMouseLeave={scheduleCloseCompromisMenu}
         >
-          <View style={styles.joyasMenuInner}>
-            {/* Col 1: Para Ella */}
-            <View style={styles.joyasMenuLinks}>
-              <TouchableOpacity
-                style={styles.compromisGenderHeader}
-                onMouseEnter={() => setCompromisHover("ella")}
-                onPress={() => { setCompromisMenuOpen(false); setCompromisHover(null); if (navigate) navigate("/coleccion/compromiso-ella"); }}
-              >
-                <Text style={[styles.compromisGenderTitle, compromisHover === "ella" && styles.compromisGenderTitleActive]}>
-                  PARA ELLA
-                </Text>
-                <Text style={styles.compromisGenderSub}>○ Para la novia</Text>
+          {/* Para Ella panel */}
+          <View
+            style={[styles.compromisPanelWrap, compromisHover === "ella" && styles.compromisPanelWrapHover]}
+            onMouseEnter={() => setCompromisHover("ella")}
+            onMouseLeave={() => setCompromisHover(null)}
+          >
+            <Image
+              source={require("../assets/paraella.png")}
+              style={styles.compromisPanelImg}
+              resizeMode="cover"
+            />
+            <View style={styles.compromisPanelLabel}>
+              <TouchableOpacity onPress={() => { setCompromisMenuOpen(false); setCompromisHover(null); if (navigate) navigate("/coleccion/compromiso-ella"); }}>
+                <Text style={styles.compromisPanelLabelTitle}>PARA ELLA</Text>
               </TouchableOpacity>
+              <View style={styles.compromisPanelDivider} />
               {COMPROMISO_ELLA.map((item) => (
                 <TouchableOpacity
                   key={item.key}
                   onPress={() => { setCompromisMenuOpen(false); setCompromisHover(null); if (navigate) navigate(`/coleccion/${item.key}`); }}
                 >
-                  <Text style={styles.joyasMenuLink}>{item.label}</Text>
+                  <Text style={styles.compromisPanelLink}>{item.label}</Text>
                 </TouchableOpacity>
               ))}
             </View>
+          </View>
 
-            {/* Divider */}
-            <View style={styles.compromisDivider} />
-
-            {/* Col 2: Para Él */}
-            <View style={styles.joyasMenuLinks}>
-              <TouchableOpacity
-                style={styles.compromisGenderHeader}
-                onMouseEnter={() => setCompromisHover("el")}
-                onPress={() => { setCompromisMenuOpen(false); setCompromisHover(null); if (navigate) navigate("/coleccion/compromiso-el"); }}
-              >
-                <Text style={[styles.compromisGenderTitle, compromisHover === "el" && styles.compromisGenderTitleActive]}>
-                  PARA ÉL
-                </Text>
-                <Text style={styles.compromisGenderSub}>○ Para el novio</Text>
+          {/* Para Él panel */}
+          <View
+            style={[styles.compromisPanelWrap, compromisHover === "el" && styles.compromisPanelWrapHover]}
+            onMouseEnter={() => setCompromisHover("el")}
+            onMouseLeave={() => setCompromisHover(null)}
+          >
+            <Image
+              source={require("../assets/parael.png")}
+              style={styles.compromisPanelImg}
+              resizeMode="cover"
+            />
+            <View style={styles.compromisPanelLabel}>
+              <TouchableOpacity onPress={() => { setCompromisMenuOpen(false); setCompromisHover(null); if (navigate) navigate("/coleccion/compromiso-el"); }}>
+                <Text style={styles.compromisPanelLabelTitle}>PARA ÉL</Text>
               </TouchableOpacity>
+              <View style={styles.compromisPanelDivider} />
               {COMPROMISO_EL.map((item) => (
                 <TouchableOpacity
                   key={item.key}
                   onPress={() => { setCompromisMenuOpen(false); setCompromisHover(null); if (navigate) navigate(`/coleccion/${item.key}`); }}
                 >
-                  <Text style={styles.joyasMenuLink}>{item.label}</Text>
+                  <Text style={styles.compromisPanelLink}>{item.label}</Text>
                 </TouchableOpacity>
               ))}
-            </View>
-
-            {/* Right: two banner images */}
-            <View style={styles.joyasMenuImages}>
-              <TouchableOpacity
-                style={[styles.compromisBanner, { marginRight: 8 }]}
-                onPress={() => { setCompromisMenuOpen(false); setCompromisHover(null); if (navigate) navigate("/coleccion/compromiso-ella"); }}
-              >
-                <View style={styles.compromisBannerOverlay}>
-                  <Text style={styles.compromisBannerLabel}>PARA ELLA</Text>
-                </View>
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.compromisBanner}
-                onPress={() => { setCompromisMenuOpen(false); setCompromisHover(null); if (navigate) navigate("/coleccion/compromiso-el"); }}
-              >
-                <View style={styles.compromisBannerOverlay}>
-                  <Text style={styles.compromisBannerLabel}>PARA ÉL</Text>
-                </View>
-              </TouchableOpacity>
             </View>
           </View>
         </Animated.View>
@@ -1235,55 +1216,63 @@ const styles = StyleSheet.create({
     height: "100%",
   },
 
-  // Compromiso megamenu
-  compromisGenderHeader: {
-    marginBottom: 20,
-    ...(Platform.OS === "web" ? { cursor: "pointer" } : {}),
+  // Compromiso megamenu — full-width dual image panels
+  compromisMenu: {
+    position: "absolute",
+    top: 60,
+    left: 0,
+    right: 0,
+    zIndex: 999,
+    flexDirection: "row",
+    height: 320,
+    ...(Platform.OS === "web"
+      ? { boxShadow: "0 6px 24px rgba(0,0,0,0.18)" }
+      : { shadowColor: "#000", shadowOpacity: 0.18, shadowRadius: 12, elevation: 8 }),
   },
-  compromisGenderTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#1a1a1a",
-    letterSpacing: 2,
-    marginBottom: 4,
-    fontFamily: "sans-serif",
-  },
-  compromisGenderTitleActive: {
-    color: "#9a7c3a",
-  },
-  compromisGenderSub: {
-    fontSize: 12,
-    color: "#999",
-    letterSpacing: 0.5,
-    marginBottom: 6,
-    fontFamily: "sans-serif",
-  },
-  compromisDivider: {
-    width: 1,
-    backgroundColor: "#e0ddd8",
-    alignSelf: "stretch",
-    marginHorizontal: 8,
-  },
-  compromisBanner: {
-    width: 200,
-    height: 240,
-    borderRadius: 4,
+  compromisPanelWrap: {
+    flex: 1,
     overflow: "hidden",
-    backgroundColor: "#2a2a2a",
+    position: "relative",
     justifyContent: "flex-end",
     ...(Platform.OS === "web" ? { cursor: "pointer" } : {}),
   },
-  compromisBannerOverlay: {
-    backgroundColor: "rgba(0,0,0,0.45)",
-    paddingVertical: 16,
-    paddingHorizontal: 14,
+  compromisPanelWrapHover: {
+    ...(Platform.OS === "web" ? { filter: "brightness(1.08)" } : {}),
   },
-  compromisBannerLabel: {
+  compromisPanelImg: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    width: "100%",
+    height: "100%",
+  },
+  compromisPanelLabel: {
+    backgroundColor: "rgba(0,0,0,0.38)",
+    paddingVertical: 18,
+    paddingHorizontal: 24,
+  },
+  compromisPanelLabelTitle: {
     color: "#ffffff",
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: "700",
-    letterSpacing: 2,
+    letterSpacing: 3,
     fontFamily: "sans-serif",
+    marginBottom: 4,
+  },
+  compromisPanelDivider: {
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.3)",
+    marginVertical: 10,
+  },
+  compromisPanelLink: {
+    color: "rgba(255,255,255,0.88)",
+    fontSize: 12,
+    letterSpacing: 1.5,
+    fontFamily: "sans-serif",
+    marginBottom: 8,
+    ...(Platform.OS === "web" ? { cursor: "pointer" } : {}),
   },
 });
 
