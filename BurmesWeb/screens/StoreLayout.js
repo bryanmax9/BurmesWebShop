@@ -138,6 +138,10 @@ export default function StoreLayout() {
         const ringsCat = categories.find((c) => c.name === "rings");
         if (ringsCat) navigate(`/category/${getId(ringsCat)}`, { replace: false, state: { filterNovios: true } });
         else navigate("/collections", { replace: false });
+      } else if (route === "gemas") {
+        const gemasCat = categories.find((c) => c.name === "gemas");
+        if (gemasCat) navigate(`/category/${getId(gemasCat)}`, { replace: false });
+        else navigate("/collections", { replace: false });
       } else {
         const cat = categories.find((c) => route === "jewellery" ? c.name === "pendants" : c.name === "relojes");
         if (cat) navigate(`/category/${getId(cat)}`, { replace: false });

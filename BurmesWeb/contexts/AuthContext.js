@@ -408,6 +408,7 @@ export function AuthProvider({ children }) {
       gemType: productData.gemType || null,
       isZodiac: productData.isZodiac === true,
       isLetterCollection: productData.isLetterCollection === true,
+      tallaAmericana: productData.tallaAmericana || null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
@@ -438,6 +439,7 @@ export function AuthProvider({ children }) {
       gemType: productData.gemType || null,
       isZodiac: productData.isZodiac === true,
       isLetterCollection: productData.isLetterCollection === true,
+      tallaAmericana: productData.tallaAmericana || null,
       updatedAt: new Date().toISOString(),
     });
   };

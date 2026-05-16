@@ -49,10 +49,11 @@ const JOYAS_GEMAS = [
 
 // Default navigation items - can be overridden via props
 const DEFAULT_NAV_ITEMS = [
-  { id: "home", label: "INICIO", route: "home" },
-  { id: "jewellery", label: "JOYAS", route: "jewellery" },
+  { id: "home",       label: "INICIO",     route: "home" },
+  { id: "jewellery",  label: "JOYAS",      route: "jewellery" },
   { id: "engagement", label: "COMPROMISO", route: "engagement" },
-  { id: "watches", label: "RELOJES", route: "watches" },
+  { id: "watches",    label: "RELOJES",    route: "watches" },
+  { id: "gemas",      label: "GEMAS",      route: "gemas" },
 ];
 
 const Header = ({
@@ -77,6 +78,10 @@ const Header = ({
   const [activeGender, setActiveGender] = useState(null);
   const joyasMenuAnim   = useState(new Animated.Value(0))[0];
   const joyasCloseTimer = useRef(null);
+
+  const [gemasMenuOpen, setGemasMenuOpen] = useState(false);
+  const gemasMenuAnim   = useState(new Animated.Value(0))[0];
+  const gemasCloseTimer = useRef(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [internalScrollY, setInternalScrollY] = useState(0);
@@ -196,11 +201,28 @@ const Header = ({
 
   const openJoyasMenu = () => {
     if (joyasCloseTimer.current) clearTimeout(joyasCloseTimer.current);
+    setGemasMenuOpen(false);
     setJoyasMenuOpen(true);
   };
-
   const scheduleCloseJoyasMenu = () => {
-    joyasCloseTimer.current = setTimeout(() => { setJoyasMenuOpen(false); setActiveGender(null); }, 120);
+    joyasCloseTimer.current = setTimeout(() => { setJoyasMenuOpen(false); setActiveGender(null); }, 150);
+  };
+
+  useEffect(() => {
+    Animated.timing(gemasMenuAnim, {
+      toValue: gemasMenuOpen ? 1 : 0,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [gemasMenuOpen]);
+
+  const openGemasMenu = () => {
+    if (gemasCloseTimer.current) clearTimeout(gemasCloseTimer.current);
+    setJoyasMenuOpen(false);
+    setGemasMenuOpen(true);
+  };
+  const scheduleCloseGemasMenu = () => {
+    gemasCloseTimer.current = setTimeout(() => setGemasMenuOpen(false), 150);
   };
 
   useEffect(() => {
@@ -309,10 +331,24 @@ const Header = ({
                   </TouchableOpacity>
                 );
               }
+              if (item.id === "gemas") {
+                return (
+                  <TouchableOpacity
+                    key={item.id}
+                    onMouseEnter={openGemasMenu}
+                    onMouseLeave={scheduleCloseGemasMenu}
+                    onPress={openGemasMenu}
+                  >
+                    <Text style={[styles.navItem, gemasMenuOpen && styles.navItemActive]}>
+                      {item.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }
               return (
                 <TouchableOpacity
                   key={item.id || index}
-                  onPress={() => { setJoyasMenuOpen(false); onNavigate && onNavigate(item.route); }}
+                  onPress={() => { setJoyasMenuOpen(false); setGemasMenuOpen(false); onNavigate && onNavigate(item.route); }}
                 >
                   <Text style={styles.navItem}>{item.label}</Text>
                 </TouchableOpacity>
@@ -543,10 +579,6 @@ const Header = ({
       {/* Joyas Megamenu */}
       {joyasMenuOpen && !isSmallScreen && (
         <>
-          <Pressable
-            style={StyleSheet.absoluteFillObject}
-            onPress={() => setJoyasMenuOpen(false)}
-          />
           <Animated.View
             style={[
               styles.joyasMenu,
@@ -619,19 +651,6 @@ const Header = ({
                 ))}
               </View>
 
-              {/* Col 4: GEMAS */}
-              <View style={styles.joyasMenuLinks}>
-                <Text style={styles.joyasMenuColHeader}>GEMAS</Text>
-                {JOYAS_GEMAS.map((item) => (
-                  <TouchableOpacity
-                    key={item.key}
-                    onPress={() => { setJoyasMenuOpen(false); setActiveGender(null); if (navigate) navigate(`/coleccion/${item.key}`); }}
-                  >
-                    <Text style={styles.joyasMenuLink}>{item.label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
-
               {/* Right: 2 featured product images */}
               <View style={styles.joyasMenuImages}>
                 {joyasFeatured.slice(0, 2).map((product, i) => {
@@ -647,6 +666,35 @@ const Header = ({
             </View>
           </Animated.View>
         </>
+      )}
+
+      {/* Gemas Megamenu */}
+      {gemasMenuOpen && !isSmallScreen && (
+        <Animated.View
+          style={[
+            styles.joyasMenu,
+            {
+              opacity: gemasMenuAnim,
+              transform: [{ translateY: gemasMenuAnim.interpolate({ inputRange: [0,1], outputRange: [-12,0] }) }],
+            },
+          ]}
+          onMouseEnter={openGemasMenu}
+          onMouseLeave={scheduleCloseGemasMenu}
+        >
+          <View style={[styles.joyasMenuInner, { gap: 40 }]}>
+            <View style={styles.joyasMenuLinks}>
+              <Text style={styles.joyasMenuColHeader}>TIPO DE GEMA</Text>
+              {JOYAS_GEMAS.map((item) => (
+                <TouchableOpacity
+                  key={item.key}
+                  onPress={() => { setGemasMenuOpen(false); if (navigate) navigate(`/coleccion/${item.key}`); }}
+                >
+                  <Text style={styles.joyasMenuLink}>{item.label}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          </View>
+        </Animated.View>
       )}
 
       {/* Search Bar Dropdown - Should appear right after header */}

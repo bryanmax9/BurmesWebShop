@@ -78,6 +78,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
   const [gemType, setGemType] = useState(null);
   const [isZodiac, setIsZodiac] = useState(false);
   const [isLetterCollection, setIsLetterCollection] = useState(false);
+  const [tallaAmericana, setTallaAmericana] = useState("");
 
   // Up to 3 images
   const [images, setImages] = useState([null, null, null]); // each: { previewUrl, imageUrl, driveFileId }
@@ -103,6 +104,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       setGemType(product.gemType || null);
       setIsZodiac(product.isZodiac === true);
       setIsLetterCollection(product.isLetterCollection === true);
+      setTallaAmericana(product.tallaAmericana || "");
 
       const urls = Array.isArray(product.images) && product.images.length
         ? product.images
@@ -134,6 +136,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       setGemType(null);
       setIsZodiac(false);
       setIsLetterCollection(false);
+      setTallaAmericana("");
       setImages([null, null, null]);
     }
     setCategoryPickerOpen(false);
@@ -275,6 +278,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
         gemType: selectedCatName === "gemas" ? (gemType || null) : null,
         isZodiac: isZodiac || false,
         isLetterCollection: isLetterCollection || false,
+        tallaAmericana: selectedCatName === "gemas" ? (tallaAmericana.trim() || null) : null,
       };
 
       if (product) {
@@ -498,6 +502,22 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                     </TouchableOpacity>
                   ))}
                 </View>
+              </View>
+            )}
+
+            {/* ── Talla Americana (solo para Gemas) ── */}
+            {(categoriesData || []).find((c) => (c?._id?.$oid || c?._id) === categoryId)?.name === "gemas" && (
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>TALLA AMERICANA</Text>
+                <Text style={styles.skuHint}>Indica la talla americana de la gema (ej. 6.5, 7, 8).</Text>
+                <TextInput
+                  style={styles.formInput}
+                  value={tallaAmericana}
+                  onChangeText={setTallaAmericana}
+                  placeholder="ej. 6.5"
+                  placeholderTextColor="#bbb"
+                  disabled={saving || uploading}
+                />
               </View>
             )}
 
