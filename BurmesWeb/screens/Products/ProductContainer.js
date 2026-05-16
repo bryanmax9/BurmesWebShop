@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import ProductList from "./ProductList";
 import { useAuth } from "../../contexts/AuthContext";
 
-const ProductContainer = ({ onScroll, selectedCategory, onProductPress }) => {
+const ProductContainer = ({ onScroll, selectedCategory, onProductPress, filterNovios }) => {
   const { getProducts } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,7 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress }) => {
 
   useEffect(() => {
     loadProducts();
-  }, [selectedCategory, getProducts]);
+  }, [selectedCategory, getProducts, filterNovios]);
 
   const loadProducts = async () => {
     setLoading(true);
@@ -34,7 +34,8 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress }) => {
       const categoryId   = selectedCategory?._id?.$oid || selectedCategory?._id || null;
       const categoryName = selectedCategory?.name || null;
       const allProducts  = await (getProducts?.(categoryId, categoryName) ?? Promise.resolve([]));
-      setProducts(allProducts || []);
+      const filtered = filterNovios ? (allProducts || []).filter((p) => p.isNovios === true) : (allProducts || []);
+      setProducts(filtered);
     } catch (err) {
       console.error("Failed to load products:", err);
       setProducts([]);
@@ -111,7 +112,9 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress }) => {
                     />
                   </View>
                   <Text style={styles.categoryHeaderTitle}>
-                    {selectedCategory.name
+                    {filterNovios
+                      ? "Compromiso"
+                      : selectedCategory.name
                       ? (
                           {
                             pendants:  "Dijes",
@@ -120,6 +123,7 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress }) => {
                             bracelets: "Pulseras",
                             aretes:    "Aretes",
                             relojes:   "Relojes",
+                            gemas:     "Gemas",
                           }[selectedCategory.name.toLowerCase()] ||
                           selectedCategory.name.charAt(0).toUpperCase() +
                             selectedCategory.name.slice(1)

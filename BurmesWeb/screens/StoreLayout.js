@@ -117,9 +117,15 @@ export default function StoreLayout() {
       navigate("/terminos-condiciones", { replace: false });
       scrollTop();
     } else if (route === "jewellery" || route === "engagement" || route === "watches") {
-      const cat = categories.find((c) => c.name === route.replace("-", "") || (route === "jewellery" && c.name === "pendants"));
-      if (cat) navigate(`/category/${getId(cat)}`, { replace: false });
-      else navigate("/collections", { replace: false });
+      if (route === "engagement") {
+        const ringsCat = categories.find((c) => c.name === "rings");
+        if (ringsCat) navigate(`/category/${getId(ringsCat)}`, { replace: false, state: { filterNovios: true } });
+        else navigate("/collections", { replace: false });
+      } else {
+        const cat = categories.find((c) => route === "jewellery" ? c.name === "pendants" : c.name === "relojes");
+        if (cat) navigate(`/category/${getId(cat)}`, { replace: false });
+        else navigate("/collections", { replace: false });
+      }
       scrollTop();
     }
   };
@@ -210,6 +216,7 @@ export default function StoreLayout() {
           onScroll={setScrollY}
           selectedCategory={selectedCategory}
           onProductPress={handleProductSelect}
+          filterNovios={location.state?.filterNovios === true}
         />
       ) : showCollections ? (
         <Collections

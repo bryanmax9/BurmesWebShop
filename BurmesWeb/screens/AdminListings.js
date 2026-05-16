@@ -448,10 +448,11 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
             {/* ── Novios (solo para Anillos) ── */}
             {(categoriesData || []).find((c) => (c?._id?.$oid || c?._id) === categoryId)?.name === "rings" && (
               <View style={styles.formField}>
-                <Text style={styles.formLabel}>¿Para novios?</Text>
-                <View style={styles.optionRow}>
+                <Text style={styles.formLabel}>COMPROMISO</Text>
+                <Text style={styles.skuHint}>Marca SÍ para que este anillo aparezca bajo el filtro "Compromiso" en la tienda.</Text>
+                <View style={[styles.optionRow, { marginTop: 8 }]}>
                   {[
-                    { value: true, label: "SÍ" },
+                    { value: true, label: "SÍ — ES COMPROMISO" },
                     { value: false, label: "NO" },
                   ].map((opt) => (
                     <TouchableOpacity
