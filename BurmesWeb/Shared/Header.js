@@ -517,6 +517,7 @@ const Header = ({
             <View style={styles.joyasMenuInner}>
               {/* Left: category links */}
               <View style={styles.joyasMenuLinks}>
+                <Text style={styles.joyasMenuColHeader}>CATEGORÍAS</Text>
                 {JOYAS_CATEGORIES.map((cat) => {
                   const entry = (categoriesData || []).find((c) => c.name === cat.name);
                   const oid = entry?._id?.$oid || entry?._id;
@@ -532,6 +533,22 @@ const Header = ({
                     </TouchableOpacity>
                   );
                 })}
+              </View>
+
+              {/* Middle: discover filters */}
+              <View style={styles.joyasMenuLinks}>
+                <Text style={styles.joyasMenuColHeader}>DESCUBRE</Text>
+                {JOYAS_DISCOVER.map((item) => (
+                  <TouchableOpacity
+                    key={item.key}
+                    onPress={() => {
+                      setJoyasMenuOpen(false);
+                      if (onNavigate) onNavigate("collections");
+                    }}
+                  >
+                    <Text style={styles.joyasMenuLink}>{item.label}</Text>
+                  </TouchableOpacity>
+                ))}
               </View>
 
               {/* Right: 2 featured product images */}
@@ -919,6 +936,14 @@ const styles = StyleSheet.create({
   },
   joyasMenuLinks: {
     minWidth: 200,
+  },
+  joyasMenuColHeader: {
+    fontSize: 11,
+    fontWeight: "700",
+    color: "#999",
+    letterSpacing: 2,
+    marginBottom: 18,
+    fontFamily: "sans-serif",
   },
   joyasMenuLink: {
     fontSize: 16,

@@ -44,7 +44,7 @@ const LandingPage = ({ onCategorySelect, onShopCollections, onMadeForYou, onNavi
     });
 
     // Map categories from local JSON file
-    const mappedCategories = categoriesData.map((cat) => ({
+    const mappedCategories = categoriesData.filter((cat) => cat.name !== "gemas").map((cat) => ({
       ...cat,
       _id: cat._id?.$oid || cat._id,
       icon: categoryIcons[cat.name?.toLowerCase()] || "diamond-outline",
