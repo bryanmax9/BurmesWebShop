@@ -406,6 +406,8 @@ export function AuthProvider({ children }) {
       gender: productData.gender || null,
       isNovios: productData.isNovios === true,
       gemType: productData.gemType || null,
+      isZodiac: productData.isZodiac === true,
+      isLetterCollection: productData.isLetterCollection === true,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
@@ -434,6 +436,8 @@ export function AuthProvider({ children }) {
       gender: productData.gender || null,
       isNovios: productData.isNovios === true,
       gemType: productData.gemType || null,
+      isZodiac: productData.isZodiac === true,
+      isLetterCollection: productData.isLetterCollection === true,
       updatedAt: new Date().toISOString(),
     });
   };

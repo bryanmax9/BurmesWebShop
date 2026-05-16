@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   StyleSheet,
   SafeAreaView,
@@ -19,22 +19,32 @@ import { useAuth } from "../contexts/AuthContext";
 const categoriesData = require("../assets/data/categories.json");
 
 const JOYAS_CATEGORIES = [
-  { name: "pendants", label: "DIJES" },
-  { name: "chains", label: "CADENAS" },
-  { name: "rings", label: "ANILLOS" },
+  { name: "pendants",  label: "DIJES" },
+  { name: "chains",    label: "CADENAS" },
+  { name: "rings",     label: "ANILLOS" },
   { name: "bracelets", label: "PULSERAS" },
-  { name: "aretes", label: "ARETES" },
-  { name: "gemas", label: "GEMAS" },
+  { name: "aretes",    label: "ARETES" },
+  { name: "relojes",   label: "RELOJES" },
+];
+
+const JOYAS_GENDER_GROUPS = [
+  { key: "hombre",      label: "HOMBRES" },
+  { key: "mujer",       label: "MUJERES" },
+  { key: "unisex",      label: "UNISEX" },
+  { key: "ninos_bebes", label: "NIÑOS Y BEBÉS" },
 ];
 
 const JOYAS_DISCOVER = [
-  { key: "oro",        label: "COLECCIÓN ORO" },
-  { key: "plata",      label: "COLECCIÓN PLATA" },
-  { key: "hombre",     label: "PARA HOMBRES" },
-  { key: "mujer",      label: "PARA MUJERES" },
-  { key: "unisex",     label: "UNISEX" },
-  { key: "novios",     label: "PARA NOVIOS" },
-  { key: "ninos",      label: "NIÑOS Y BEBÉS" },
+  { key: "oro",     label: "COLECCIÓN ORO" },
+  { key: "plata",   label: "COLECCIÓN PLATA" },
+  { key: "zodiac",  label: "SIGNOS ZODIACALES" },
+  { key: "letras",  label: "COLECCIÓN DE LETRAS" },
+];
+
+const JOYAS_GEMAS = [
+  { key: "gemas_diamantes",  label: "DIAMANTES" },
+  { key: "gemas_color",      label: "GEMAS DE COLOR" },
+  { key: "gemas_nacimiento", label: "GEMAS DE NACIMIENTO" },
 ];
 
 // Default navigation items - can be overridden via props
@@ -64,8 +74,9 @@ const Header = ({
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [joyasMenuOpen, setJoyasMenuOpen] = useState(false);
   const [joyasFeatured, setJoyasFeatured] = useState([]);
-  const joyasArrowAnim = useState(new Animated.Value(0))[0];
-  const joyasMenuAnim  = useState(new Animated.Value(0))[0];
+  const [activeGender, setActiveGender] = useState(null);
+  const joyasMenuAnim   = useState(new Animated.Value(0))[0];
+  const joyasCloseTimer = useRef(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [internalScrollY, setInternalScrollY] = useState(0);
@@ -176,19 +187,21 @@ const Header = ({
   }, []);
 
   useEffect(() => {
-    Animated.parallel([
-      Animated.timing(joyasArrowAnim, {
-        toValue: joyasMenuOpen ? 1 : 0,
-        duration: 220,
-        useNativeDriver: true,
-      }),
-      Animated.timing(joyasMenuAnim, {
-        toValue: joyasMenuOpen ? 1 : 0,
-        duration: 240,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    Animated.timing(joyasMenuAnim, {
+      toValue: joyasMenuOpen ? 1 : 0,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
   }, [joyasMenuOpen]);
+
+  const openJoyasMenu = () => {
+    if (joyasCloseTimer.current) clearTimeout(joyasCloseTimer.current);
+    setJoyasMenuOpen(true);
+  };
+
+  const scheduleCloseJoyasMenu = () => {
+    joyasCloseTimer.current = setTimeout(() => { setJoyasMenuOpen(false); setActiveGender(null); }, 120);
+  };
 
   useEffect(() => {
     if (!joyasMenuOpen || joyasFeatured.length > 0 || !getProducts) return;
@@ -283,29 +296,16 @@ const Header = ({
           <View style={styles.navMenu}>
             {navigationItems.map((item, index) => {
               if (item.id === "jewellery") {
-                const arrowRotate = joyasArrowAnim.interpolate({
-                  inputRange: [0, 1],
-                  outputRange: ["0deg", "180deg"],
-                });
                 return (
                   <TouchableOpacity
                     key={item.id}
-                    onPress={() => setJoyasMenuOpen((v) => !v)}
-                    style={{ flexDirection: "row", alignItems: "center" }}
+                    onMouseEnter={openJoyasMenu}
+                    onMouseLeave={scheduleCloseJoyasMenu}
+                    onPress={openJoyasMenu}
                   >
                     <Text style={[styles.navItem, joyasMenuOpen && styles.navItemActive]}>
                       {item.label}
                     </Text>
-                    <Animated.Text
-                      style={[
-                        styles.navItem,
-                        styles.navItemChevron,
-                        joyasMenuOpen && styles.navItemActive,
-                        { transform: [{ rotate: arrowRotate }] },
-                      ]}
-                    >
-                      ▾
-                    </Animated.Text>
                   </TouchableOpacity>
                 );
               }
@@ -560,38 +560,72 @@ const Header = ({
                 }],
               },
             ]}
+            onMouseEnter={openJoyasMenu}
+            onMouseLeave={scheduleCloseJoyasMenu}
           >
             <View style={styles.joyasMenuInner}>
-              {/* Left: category links */}
+              {/* Col 1: Gender groups */}
               <View style={styles.joyasMenuLinks}>
-                <Text style={styles.joyasMenuColHeader}>CATEGORÍAS</Text>
-                {JOYAS_CATEGORIES.map((cat) => {
-                  const entry = (categoriesData || []).find((c) => c.name === cat.name);
-                  const oid = entry?._id?.$oid || entry?._id;
-                  return (
-                    <TouchableOpacity
-                      key={cat.name}
-                      onPress={() => {
-                        setJoyasMenuOpen(false);
-                        if (oid && navigate) navigate(`/category/${oid}`);
-                      }}
-                    >
-                      <Text style={styles.joyasMenuLink}>{cat.label}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
+                <Text style={styles.joyasMenuColHeader}>BUSCAR POR</Text>
+                {JOYAS_GENDER_GROUPS.map((g) => (
+                  <TouchableOpacity
+                    key={g.key}
+                    onMouseEnter={() => setActiveGender(g.key)}
+                    onPress={() => { setJoyasMenuOpen(false); setActiveGender(null); if (navigate) navigate(`/coleccion/${g.key}`); }}
+                  >
+                    <Text style={[styles.joyasMenuLink, activeGender === g.key && styles.joyasMenuLinkActive]}>
+                      {g.label} {activeGender === g.key ? "›" : ""}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
 
-              {/* Middle: discover filters */}
+              {/* Col 2: Category sub-panel (shown when a gender is hovered, else empty) */}
+              <View style={[styles.joyasMenuLinks, { minWidth: 180, borderLeftWidth: activeGender ? 1 : 0, borderLeftColor: "#e0ddd8", paddingLeft: activeGender ? 24 : 0 }]}>
+                {activeGender ? (
+                  <>
+                    <Text style={styles.joyasMenuColHeader}>CATEGORÍA</Text>
+                    {JOYAS_CATEGORIES.map((cat) => {
+                      const entry = (categoriesData || []).find((c) => c.name === cat.name);
+                      const oid = entry?._id?.$oid || entry?._id;
+                      return (
+                        <TouchableOpacity
+                          key={cat.name}
+                          onPress={() => {
+                            const g = activeGender;
+                            setJoyasMenuOpen(false);
+                            setActiveGender(null);
+                            if (oid && navigate) navigate(`/category/${oid}`, { state: { genderFilter: g } });
+                          }}
+                        >
+                          <Text style={styles.joyasMenuLink}>{cat.label}</Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </>
+                ) : null}
+              </View>
+
+              {/* Col 3: DESCUBRE */}
               <View style={styles.joyasMenuLinks}>
                 <Text style={styles.joyasMenuColHeader}>DESCUBRE</Text>
                 {JOYAS_DISCOVER.map((item) => (
                   <TouchableOpacity
                     key={item.key}
-                    onPress={() => {
-                      setJoyasMenuOpen(false);
-                      if (navigate) navigate(`/coleccion/${item.key}`);
-                    }}
+                    onPress={() => { setJoyasMenuOpen(false); setActiveGender(null); if (navigate) navigate(`/coleccion/${item.key}`); }}
+                  >
+                    <Text style={styles.joyasMenuLink}>{item.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+
+              {/* Col 4: GEMAS */}
+              <View style={styles.joyasMenuLinks}>
+                <Text style={styles.joyasMenuColHeader}>GEMAS</Text>
+                {JOYAS_GEMAS.map((item) => (
+                  <TouchableOpacity
+                    key={item.key}
+                    onPress={() => { setJoyasMenuOpen(false); setActiveGender(null); if (navigate) navigate(`/coleccion/${item.key}`); }}
                   >
                     <Text style={styles.joyasMenuLink}>{item.label}</Text>
                   </TouchableOpacity>
@@ -605,11 +639,7 @@ const Header = ({
                   if (!imgUri) return null;
                   return (
                     <View key={i} style={styles.joyasMenuImgWrap}>
-                      <Image
-                        source={{ uri: imgUri }}
-                        style={styles.joyasMenuImg}
-                        resizeMode="cover"
-                      />
+                      <Image source={{ uri: imgUri }} style={styles.joyasMenuImg} resizeMode="cover" />
                     </View>
                   );
                 })}
@@ -963,7 +993,6 @@ const styles = StyleSheet.create({
 
   // Joyas megamenu
   navItemActive: { opacity: 0.75 },
-  navItemChevron: { marginLeft: 4, marginHorizontal: 0 },
   joyasMenu: {
     position: "absolute",
     top: 60,
@@ -993,6 +1022,7 @@ const styles = StyleSheet.create({
     marginBottom: 18,
     fontFamily: "sans-serif",
   },
+  joyasMenuLinkActive: { fontWeight: "700", color: "#1a1a1a" },
   joyasMenuLink: {
     fontSize: 16,
     fontWeight: "500",

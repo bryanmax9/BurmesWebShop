@@ -13,7 +13,7 @@ import { Ionicons } from "@expo/vector-icons";
 import ProductList from "./ProductList";
 import { useAuth } from "../../contexts/AuthContext";
 
-const ProductContainer = ({ onScroll, selectedCategory, onProductPress, filterNovios, discoverFilter }) => {
+const ProductContainer = ({ onScroll, selectedCategory, onProductPress, filterNovios, genderFilter, discoverFilter }) => {
   const { getProducts } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -37,9 +37,10 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress, filterNo
       } else {
         const categoryId   = selectedCategory?._id?.$oid || selectedCategory?._id || null;
         const categoryName = selectedCategory?.name || null;
-        const allProducts  = await (getProducts?.(categoryId, categoryName) ?? Promise.resolve([]));
-        const filtered = filterNovios ? (allProducts || []).filter((p) => p.isNovios === true) : (allProducts || []);
-        setProducts(filtered);
+        let allProducts = await (getProducts?.(categoryId, categoryName) ?? Promise.resolve([]));
+        if (filterNovios)  allProducts = allProducts.filter((p) => p.isNovios === true);
+        if (genderFilter)  allProducts = allProducts.filter((p) => p.gender === genderFilter);
+        setProducts(allProducts);
       }
     } catch (err) {
       console.error("Failed to load products:", err);

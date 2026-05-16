@@ -76,6 +76,8 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
   const [gender, setGender] = useState(null);
   const [isNovios, setIsNovios] = useState(false);
   const [gemType, setGemType] = useState(null);
+  const [isZodiac, setIsZodiac] = useState(false);
+  const [isLetterCollection, setIsLetterCollection] = useState(false);
 
   // Up to 3 images
   const [images, setImages] = useState([null, null, null]); // each: { previewUrl, imageUrl, driveFileId }
@@ -99,6 +101,8 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       setGender(product.gender || null);
       setIsNovios(product.isNovios === true);
       setGemType(product.gemType || null);
+      setIsZodiac(product.isZodiac === true);
+      setIsLetterCollection(product.isLetterCollection === true);
 
       const urls = Array.isArray(product.images) && product.images.length
         ? product.images
@@ -128,6 +132,8 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       setGender(null);
       setIsNovios(false);
       setGemType(null);
+      setIsZodiac(false);
+      setIsLetterCollection(false);
       setImages([null, null, null]);
     }
     setCategoryPickerOpen(false);
@@ -265,8 +271,10 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
         sku: skuValue,
         material: material || null,
         gender: gender || null,
-        isNovios: selectedCatName === "rings" ? isNovios : false,
+        isNovios: isNovios || false,
         gemType: selectedCatName === "gemas" ? (gemType || null) : null,
+        isZodiac: isZodiac || false,
+        isLetterCollection: isLetterCollection || false,
       };
 
       if (product) {
@@ -492,6 +500,46 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                 </View>
               </View>
             )}
+
+            {/* ── Signos Zodiacales ── */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>SIGNOS ZODIACALES</Text>
+              <Text style={styles.skuHint}>Marca SÍ si esta joya está relacionada con signos zodiacales.</Text>
+              <View style={[styles.optionRow, { marginTop: 8 }]}>
+                {[{ value: true, label: "SÍ" }, { value: false, label: "NO" }].map((opt) => (
+                  <TouchableOpacity
+                    key={String(opt.value)}
+                    style={[styles.optionPill, isZodiac === opt.value && styles.optionPillActive]}
+                    onPress={() => setIsZodiac(opt.value)}
+                    disabled={saving || uploading}
+                  >
+                    <Text style={[styles.optionPillText, isZodiac === opt.value && styles.optionPillTextActive]}>
+                      {opt.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* ── Colección de Letras ── */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>COLECCIÓN DE LETRAS</Text>
+              <Text style={styles.skuHint}>Marca SÍ si esta joya pertenece a la colección de letras.</Text>
+              <View style={[styles.optionRow, { marginTop: 8 }]}>
+                {[{ value: true, label: "SÍ" }, { value: false, label: "NO" }].map((opt) => (
+                  <TouchableOpacity
+                    key={String(opt.value)}
+                    style={[styles.optionPill, isLetterCollection === opt.value && styles.optionPillActive]}
+                    onPress={() => setIsLetterCollection(opt.value)}
+                    disabled={saving || uploading}
+                  >
+                    <Text style={[styles.optionPillText, isLetterCollection === opt.value && styles.optionPillTextActive]}>
+                      {opt.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
 
             <View style={styles.formField}>
               <Text style={styles.formLabel}>Descripción</Text>
@@ -838,6 +886,14 @@ export default function AdminListings() {
               Inventario
             </Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.tabBtn, activeTab === "analiticas" && styles.tabBtnActive]}
+            onPress={() => setActiveTab("analiticas")}
+          >
+            <Text style={[styles.tabBtnText, activeTab === "analiticas" && styles.tabBtnTextActive]}>
+              Analíticas
+            </Text>
+          </TouchableOpacity>
         </View>
       </View>
 
@@ -1083,6 +1139,189 @@ export default function AdminListings() {
           )}
         </ScrollView>
       )}
+
+      {/* ── ANALÍTICAS TAB ── */}
+      {activeTab === "analiticas" && (() => {
+        const total      = products.length;
+        const sold       = products.filter(p => (p.inventoryStatus || "available") === "sold").length;
+        const available  = products.filter(p => (p.inventoryStatus || "available") === "available").length;
+        const reserved   = products.filter(p => (p.inventoryStatus || "available") === "reserved").length;
+        const soldValue  = products.filter(p => (p.inventoryStatus || "available") === "sold").reduce((s, p) => s + (Number(p.price) || 0), 0);
+
+        const byCategory = (categoriesData || []).map(c => {
+          const oid   = c?._id?.$oid || c?._id;
+          const items = products.filter(p => p.category === oid || p.category === c.name);
+          const s     = items.filter(p => (p.inventoryStatus || "available") === "sold").length;
+          const a     = items.filter(p => (p.inventoryStatus || "available") === "available").length;
+          const r     = items.filter(p => (p.inventoryStatus || "available") === "reserved").length;
+          return { label: CATEGORY_LABELS[c.name] || c.name.toUpperCase(), total: items.length, sold: s, available: a, reserved: r };
+        }).filter(r => r.total > 0);
+
+        const byMaterial = ["oro","plata"].map(m => {
+          const items = products.filter(p => p.material === m);
+          const s = items.filter(p => (p.inventoryStatus||"available") === "sold").length;
+          return { label: m === "oro" ? "ORO" : "PLATA", total: items.length, sold: s, pct: items.length ? Math.round(s/items.length*100) : 0 };
+        }).filter(r => r.total > 0);
+
+        const byGender = [
+          { key: "mujer",       label: "PARA MUJERES" },
+          { key: "hombre",      label: "PARA HOMBRES" },
+          { key: "unisex",      label: "UNISEX" },
+          { key: "ninos_bebes", label: "NIÑOS Y BEBÉS" },
+        ].map(g => {
+          const items = products.filter(p => p.gender === g.key);
+          const s = items.filter(p => (p.inventoryStatus||"available") === "sold").length;
+          return { label: g.label, total: items.length, sold: s, pct: items.length ? Math.round(s/items.length*100) : 0 };
+        }).filter(r => r.total > 0);
+
+        const noviosItems = products.filter(p => p.isNovios === true);
+        const noviosSold  = noviosItems.filter(p => (p.inventoryStatus||"available") === "sold").length;
+
+        const byGemType = [
+          { key: "diamantes",        label: "DIAMANTES" },
+          { key: "gemas_color",      label: "GEMAS DE COLOR" },
+          { key: "gemas_nacimiento", label: "GEMAS DE NACIMIENTO" },
+        ].map(g => {
+          const items = products.filter(p => p.gemType === g.key);
+          const s = items.filter(p => (p.inventoryStatus||"available") === "sold").length;
+          return { label: g.label, total: items.length, sold: s };
+        }).filter(r => r.total > 0);
+
+        const StatCard = ({ label, value, sub, color }) => (
+          <View style={[styles.statCard, { borderTopColor: color }]}>
+            <Text style={styles.statCardValue}>{value}</Text>
+            <Text style={styles.statCardLabel}>{label}</Text>
+            {sub ? <Text style={styles.statCardSub}>{sub}</Text> : null}
+          </View>
+        );
+
+        const TableHeader = ({ cols }) => (
+          <View style={styles.tableRow}>
+            {cols.map((c, i) => (
+              <Text key={i} style={[styles.tableHeaderCell, i === 0 && { flex: 2 }]}>{c}</Text>
+            ))}
+          </View>
+        );
+
+        const TableRow = ({ cells, zebra }) => (
+          <View style={[styles.tableRow, zebra && styles.tableRowZebra]}>
+            {cells.map((c, i) => (
+              <Text key={i} style={[styles.tableCell, i === 0 && { flex: 2 }]}>{c}</Text>
+            ))}
+          </View>
+        );
+
+        const SectionTitle = ({ title }) => (
+          <View style={styles.analyticsSectionTitle}>
+            <Text style={styles.analyticsSectionTitleText}>{title}</Text>
+          </View>
+        );
+
+        return (
+          <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 48 }}>
+            <View style={styles.hero}>
+              <Text style={styles.heroTitle}>Analíticas</Text>
+              <Text style={styles.heroSubtitle}>
+                Resumen de ventas e inventario basado en el estado indicado por el administrador.
+              </Text>
+            </View>
+
+            {loading ? (
+              <View style={styles.loaderWrap}>
+                <ActivityIndicator size="large" color="#1a1a1a" />
+              </View>
+            ) : (
+              <>
+                {/* KPI Cards */}
+                <View style={styles.statCardsRow}>
+                  <StatCard label="Total piezas"   value={total}     color="#1c1c1c" />
+                  <StatCard label="Vendidas"        value={sold}      color="#c0392b" sub={`S/ ${soldValue.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}`} />
+                  <StatCard label="Disponibles"     value={available} color="#2d7a4a" />
+                  <StatCard label="Reservadas"      value={reserved}  color="#b8620a" />
+                  <StatCard label="% Vendido"       value={total ? `${Math.round(sold/total*100)}%` : "—"} color="#5a3e8a" />
+                </View>
+
+                {/* Por Categoría */}
+                {byCategory.length > 0 && (
+                  <View style={styles.analyticsCard}>
+                    <SectionTitle title="Por Categoría" />
+                    <TableHeader cols={["Categoría","Total","Vendido","Disponible","Reservado"]} />
+                    {byCategory.map((r,i) => (
+                      <TableRow key={r.label} zebra={i%2===1}
+                        cells={[r.label, r.total, r.sold, r.available, r.reserved]} />
+                    ))}
+                  </View>
+                )}
+
+                {/* Por Material */}
+                {byMaterial.length > 0 && (
+                  <View style={styles.analyticsCard}>
+                    <SectionTitle title="Por Material" />
+                    <TableHeader cols={["Material","Total","Vendido","% Vendido"]} />
+                    {byMaterial.map((r,i) => (
+                      <TableRow key={r.label} zebra={i%2===1}
+                        cells={[r.label, r.total, r.sold, `${r.pct}%`]} />
+                    ))}
+                  </View>
+                )}
+
+                {/* Por Audiencia */}
+                {byGender.length > 0 && (
+                  <View style={styles.analyticsCard}>
+                    <SectionTitle title="Por Audiencia" />
+                    <TableHeader cols={["Para","Total","Vendido","% Vendido"]} />
+                    {byGender.map((r,i) => (
+                      <TableRow key={r.label} zebra={i%2===1}
+                        cells={[r.label, r.total, r.sold, `${r.pct}%`]} />
+                    ))}
+                  </View>
+                )}
+
+                {/* Colecciones Especiales */}
+                {(noviosItems.length > 0 || byGemType.length > 0) && (
+                  <View style={styles.analyticsCard}>
+                    <SectionTitle title="Colecciones Especiales" />
+                    <TableHeader cols={["Colección","Total","Vendido"]} />
+                    {noviosItems.length > 0 && (
+                      <TableRow zebra={false} cells={["PARA NOVIOS", noviosItems.length, noviosSold]} />
+                    )}
+                    {byGemType.map((r,i) => (
+                      <TableRow key={r.label} zebra={(i+1)%2===1}
+                        cells={[r.label, r.total, r.sold]} />
+                    ))}
+                  </View>
+                )}
+
+                {/* Últimas vendidas */}
+                {sold > 0 && (
+                  <View style={styles.analyticsCard}>
+                    <SectionTitle title="Piezas Vendidas" />
+                    <TableHeader cols={["SKU","Nombre","Precio","Nota"]} />
+                    {products
+                      .filter(p => (p.inventoryStatus||"available") === "sold")
+                      .map((p, i) => (
+                        <TableRow key={p.id} zebra={i%2===1}
+                          cells={[
+                            p.sku || "—",
+                            p.name || "—",
+                            p.price != null ? `S/ ${Number(p.price).toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2})}` : "—",
+                            p.inventoryNote || "—",
+                          ]} />
+                      ))}
+                  </View>
+                )}
+
+                {total === 0 && (
+                  <View style={styles.emptyCard}>
+                    <Text style={styles.emptyText}>Sin datos aún</Text>
+                    <Text style={styles.emptySubtext}>Crea productos y actualiza su estado en Inventario.</Text>
+                  </View>
+                )}
+              </>
+            )}
+          </ScrollView>
+        );
+      })()}
 
       <ProductFormModal
         product={editingProduct}
@@ -1491,6 +1730,42 @@ const styles = StyleSheet.create({
   categoryRowText: { fontSize: 15, color: "#222", fontWeight: "700" },
   categoryRowTextSelected: { color: "#000" },
   categoryRowCheck: { fontSize: 16, color: "#111", fontWeight: "900" },
+  // ── Analíticas ──
+  statCardsRow: { flexDirection: "row", flexWrap: "wrap", gap: 12, marginBottom: 20 },
+  statCard: {
+    flex: 1,
+    minWidth: 120,
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    borderTopWidth: 3,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "#e8e6e2",
+    ...(Platform.OS === "web" ? { boxShadow: "0 1px 4px rgba(0,0,0,0.05)" } : {}),
+  },
+  statCardValue: { fontSize: 28, fontWeight: "800", color: "#1a1a1a", marginBottom: 4 },
+  statCardLabel: { fontSize: 12, fontWeight: "600", color: "#666", textTransform: "uppercase", letterSpacing: 0.5 },
+  statCardSub:   { fontSize: 11, color: "#999", marginTop: 4 },
+  analyticsCard: {
+    backgroundColor: "#fff",
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "#e8e6e2",
+    marginBottom: 16,
+    overflow: "hidden",
+    ...(Platform.OS === "web" ? { boxShadow: "0 1px 4px rgba(0,0,0,0.05)" } : {}),
+  },
+  analyticsSectionTitle: {
+    backgroundColor: "#1c1c1c",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
+  analyticsSectionTitleText: { fontSize: 12, fontWeight: "700", color: "#fff", letterSpacing: 1.2 },
+  tableRow: { flexDirection: "row", paddingVertical: 10, paddingHorizontal: 16, alignItems: "center" },
+  tableRowZebra: { backgroundColor: "#f8f7f5" },
+  tableHeaderCell: { flex: 1, fontSize: 11, fontWeight: "700", color: "#888", textTransform: "uppercase", letterSpacing: 0.5 },
+  tableCell:       { flex: 1, fontSize: 13, color: "#222", fontWeight: "500" },
+
   optionRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   optionPill: {
     paddingVertical: 8,

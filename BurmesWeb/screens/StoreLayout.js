@@ -52,13 +52,18 @@ export default function StoreLayout() {
   }, [categoryId, categories]);
 
   const DISCOVER_FILTERS = {
-    oro:    { label: "Colección Oro",   filterFn: (p) => p.material === "oro" },
-    plata:  { label: "Colección Plata", filterFn: (p) => p.material === "plata" },
-    hombre: { label: "Para Hombres",    filterFn: (p) => p.gender === "hombre" },
-    mujer:  { label: "Para Mujeres",    filterFn: (p) => p.gender === "mujer" },
-    unisex: { label: "Unisex",          filterFn: (p) => p.gender === "unisex" },
-    novios: { label: "Para Novios",     filterFn: (p) => p.isNovios === true },
-    ninos:  { label: "Niños y Bebés",   filterFn: (p) => p.gender === "ninos_bebes" },
+    oro:              { label: "Colección Oro",        filterFn: (p) => p.material === "oro" },
+    plata:            { label: "Colección Plata",      filterFn: (p) => p.material === "plata" },
+    hombre:           { label: "Para Hombres",         filterFn: (p) => p.gender === "hombre" },
+    mujer:            { label: "Para Mujeres",         filterFn: (p) => p.gender === "mujer" },
+    unisex:           { label: "Unisex",               filterFn: (p) => p.gender === "unisex" },
+    novios:           { label: "Para Novios",          filterFn: (p) => p.isNovios === true },
+    ninos:            { label: "Niños y Bebés",        filterFn: (p) => p.gender === "ninos_bebes" },
+    gemas_diamantes:  { label: "Diamantes",            filterFn: (p) => p.gemType === "diamantes" },
+    gemas_color:      { label: "Gemas de Color",       filterFn: (p) => p.gemType === "gemas_color" },
+    gemas_nacimiento: { label: "Gemas de Nacimiento",  filterFn: (p) => p.gemType === "gemas_nacimiento" },
+    zodiac:           { label: "Signos Zodiacales",    filterFn: (p) => p.isZodiac === true },
+    letras:           { label: "Colección de Letras",  filterFn: (p) => p.isLetterCollection === true },
   };
 
   const showDiscover = pathname.startsWith("/coleccion/") && !!filterKey && !!DISCOVER_FILTERS[filterKey];
@@ -236,6 +241,7 @@ export default function StoreLayout() {
           selectedCategory={selectedCategory}
           onProductPress={handleProductSelect}
           filterNovios={location.state?.filterNovios === true}
+          genderFilter={location.state?.genderFilter || null}
         />
       ) : showCollections ? (
         <Collections
