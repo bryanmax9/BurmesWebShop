@@ -184,22 +184,30 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
 
   const SKU_REGEX = /^[A-Z]{3}-\d{5}$/;
 
+  const showError = (msg) => {
+    if (Platform.OS === "web" && typeof window !== "undefined" && window.alert) {
+      window.alert(msg);
+    } else {
+      Alert.alert("Error", msg);
+    }
+  };
+
   const handleSave = async () => {
     if (!name.trim()) {
-      Alert.alert("Error", "El nombre del producto es obligatorio.");
+      showError("El nombre del producto es obligatorio.");
       return;
     }
     if (!categoryId) {
-      Alert.alert("Error", "Selecciona una categoría.");
+      showError("Selecciona una categoría.");
       return;
     }
     const skuValue = sku.trim().toUpperCase();
     if (!skuValue) {
-      Alert.alert("Error", "El SKU es obligatorio.");
+      showError("El SKU es obligatorio.");
       return;
     }
     if (!SKU_REGEX.test(skuValue)) {
-      Alert.alert("Error", "El SKU debe tener el formato AAA-12345 (3 letras mayúsculas, guión, 5 dígitos).");
+      showError("El SKU debe tener el formato AAA-12345 (3 letras mayúsculas, guión, 5 dígitos).");
       return;
     }
 
@@ -208,7 +216,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       const imageUrls = images.map((x) => x?.imageUrl).filter(Boolean);
       const driveFileIds = images.map((x) => x?.driveFileId).filter(Boolean);
       if (imageUrls.length === 0) {
-        Alert.alert("Error", "Sube al menos 1 imagen.");
+        showError("Sube al menos 1 imagen.");
         setSaving(false);
         return;
       }
@@ -227,7 +235,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
         driveFileIds: driveFileIds.slice(0, 3),
         sku: skuValue,
       };
-      
+
       if (product) {
         await onSave(product.id, productData);
       } else {
@@ -235,7 +243,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       }
       onClose();
     } catch (err) {
-      Alert.alert("Error", err.message || "No se pudo guardar el producto.");
+      showError(err.message || "No se pudo guardar el producto.");
     } finally {
       setSaving(false);
     }
@@ -332,10 +340,9 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
               <TextInput
                 style={[styles.formInput, styles.skuInput]}
                 value={sku}
-                onChangeText={(v) => setSku(v.toUpperCase())}
+                onChangeText={(v) => setSku(v.toUpperCase().replace(/[^A-Z0-9-]/g, ""))}
                 placeholder="AAA-12345"
                 placeholderTextColor="#bbb"
-                autoCapitalize="characters"
                 maxLength={9}
               />
               <Text style={styles.skuHint}>Formato: 3 letras + guión + 5 dígitos (ej. ARE-78445)</Text>
