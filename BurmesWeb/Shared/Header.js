@@ -10,6 +10,7 @@ import {
   Dimensions,
   Platform,
   Image,
+  Animated,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SearchedProducts from "../screens/Products/SearchedProducts";
@@ -62,6 +63,8 @@ const Header = ({
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [joyasMenuOpen, setJoyasMenuOpen] = useState(false);
   const [joyasFeatured, setJoyasFeatured] = useState([]);
+  const joyasArrowAnim = useState(new Animated.Value(0))[0];
+  const joyasMenuAnim  = useState(new Animated.Value(0))[0];
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [internalScrollY, setInternalScrollY] = useState(0);
@@ -172,6 +175,21 @@ const Header = ({
   }, []);
 
   useEffect(() => {
+    Animated.parallel([
+      Animated.timing(joyasArrowAnim, {
+        toValue: joyasMenuOpen ? 1 : 0,
+        duration: 220,
+        useNativeDriver: true,
+      }),
+      Animated.timing(joyasMenuAnim, {
+        toValue: joyasMenuOpen ? 1 : 0,
+        duration: 240,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [joyasMenuOpen]);
+
+  useEffect(() => {
     if (!joyasMenuOpen || joyasFeatured.length > 0 || !getProducts) return;
     getProducts()
       .then((list) => {
@@ -264,14 +282,29 @@ const Header = ({
           <View style={styles.navMenu}>
             {navigationItems.map((item, index) => {
               if (item.id === "jewellery") {
+                const arrowRotate = joyasArrowAnim.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: ["0deg", "180deg"],
+                });
                 return (
                   <TouchableOpacity
                     key={item.id}
                     onPress={() => setJoyasMenuOpen((v) => !v)}
+                    style={{ flexDirection: "row", alignItems: "center" }}
                   >
                     <Text style={[styles.navItem, joyasMenuOpen && styles.navItemActive]}>
-                      {item.label} ▾
+                      {item.label}
                     </Text>
+                    <Animated.Text
+                      style={[
+                        styles.navItem,
+                        styles.navItemChevron,
+                        joyasMenuOpen && styles.navItemActive,
+                        { transform: [{ rotate: arrowRotate }] },
+                      ]}
+                    >
+                      ▾
+                    </Animated.Text>
                   </TouchableOpacity>
                 );
               }
@@ -513,7 +546,20 @@ const Header = ({
             style={StyleSheet.absoluteFillObject}
             onPress={() => setJoyasMenuOpen(false)}
           />
-          <View style={styles.joyasMenu}>
+          <Animated.View
+            style={[
+              styles.joyasMenu,
+              {
+                opacity: joyasMenuAnim,
+                transform: [{
+                  translateY: joyasMenuAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: [-16, 0],
+                  }),
+                }],
+              },
+            ]}
+          >
             <View style={styles.joyasMenuInner}>
               {/* Left: category links */}
               <View style={styles.joyasMenuLinks}>
@@ -543,7 +589,7 @@ const Header = ({
                     key={item.key}
                     onPress={() => {
                       setJoyasMenuOpen(false);
-                      if (onNavigate) onNavigate("collections");
+                      if (navigate) navigate(`/coleccion/${item.key}`);
                     }}
                   >
                     <Text style={styles.joyasMenuLink}>{item.label}</Text>
@@ -568,7 +614,7 @@ const Header = ({
                 })}
               </View>
             </View>
-          </View>
+          </Animated.View>
         </>
       )}
 
@@ -916,6 +962,7 @@ const styles = StyleSheet.create({
 
   // Joyas megamenu
   navItemActive: { opacity: 0.75 },
+  navItemChevron: { marginLeft: 4, marginHorizontal: 0 },
   joyasMenu: {
     position: "absolute",
     top: 60,

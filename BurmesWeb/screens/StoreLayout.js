@@ -26,7 +26,7 @@ Text.defaultProps.style = {
 export default function StoreLayout() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { categoryId, productId } = useParams();
+  const { categoryId, productId, filterKey } = useParams();
   const { user, isAdmin, signOut, getCart, profileNeedsCompletion, getProducts } = useAuth();
   const cartCount = !isAdmin && user ? (getCart() || []).length : 0;
   const showCart = !!user && !profileNeedsCompletion && !isAdmin;
@@ -50,6 +50,17 @@ export default function StoreLayout() {
     if (!categoryId || !categories.length) return null;
     return categories.find((c) => getId(c) === categoryId) || null;
   }, [categoryId, categories]);
+
+  const DISCOVER_FILTERS = {
+    oro:    { label: "Colección Oro",   filterFn: (p) => p.material === "oro" },
+    plata:  { label: "Colección Plata", filterFn: (p) => p.material === "plata" },
+    hombre: { label: "Para Hombres",    filterFn: (p) => p.gender === "hombre" },
+    mujer:  { label: "Para Mujeres",    filterFn: (p) => p.gender === "mujer" },
+    novios: { label: "Para Novios",     filterFn: (p) => p.isNovios === true },
+    ninos:  { label: "Niños y Bebés",   filterFn: (p) => p.gender === "ninos_bebes" },
+  };
+
+  const showDiscover = pathname.startsWith("/coleccion/") && !!filterKey && !!DISCOVER_FILTERS[filterKey];
 
   useEffect(() => {
     if (user && !isAdmin && profileNeedsCompletion) {
@@ -211,6 +222,13 @@ export default function StoreLayout() {
             <Text onPress={() => navigate("/")} style={{ marginTop: 8, textDecorationLine: "underline" }}>Volver al inicio</Text>
           </View>
         )
+      ) : showDiscover ? (
+        <ProductContainer
+          onScroll={setScrollY}
+          selectedCategory={null}
+          onProductPress={handleProductSelect}
+          discoverFilter={{ key: filterKey, ...DISCOVER_FILTERS[filterKey] }}
+        />
       ) : showProducts ? (
         <ProductContainer
           onScroll={setScrollY}

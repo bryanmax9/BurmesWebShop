@@ -445,30 +445,28 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
               </View>
             </View>
 
-            {/* ── Novios (solo para Anillos) ── */}
-            {(categoriesData || []).find((c) => (c?._id?.$oid || c?._id) === categoryId)?.name === "rings" && (
-              <View style={styles.formField}>
-                <Text style={styles.formLabel}>COMPROMISO</Text>
-                <Text style={styles.skuHint}>Marca SÍ para que este anillo aparezca bajo el filtro "Compromiso" en la tienda.</Text>
-                <View style={[styles.optionRow, { marginTop: 8 }]}>
-                  {[
-                    { value: true, label: "SÍ — ES COMPROMISO" },
-                    { value: false, label: "NO" },
-                  ].map((opt) => (
-                    <TouchableOpacity
-                      key={String(opt.value)}
-                      style={[styles.optionPill, isNovios === opt.value && styles.optionPillActive]}
-                      onPress={() => setIsNovios(opt.value)}
-                      disabled={saving || uploading}
-                    >
-                      <Text style={[styles.optionPillText, isNovios === opt.value && styles.optionPillTextActive]}>
-                        {opt.label}
-                      </Text>
-                    </TouchableOpacity>
-                  ))}
-                </View>
+            {/* ── Compromiso / Para Novios (any category) ── */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>PARA NOVIOS / COMPROMISO</Text>
+              <Text style={styles.skuHint}>Marca SÍ para que esta joya aparezca bajo el filtro "Para Novios" en la tienda.</Text>
+              <View style={[styles.optionRow, { marginTop: 8 }]}>
+                {[
+                  { value: true, label: "SÍ — ES PARA NOVIOS" },
+                  { value: false, label: "NO" },
+                ].map((opt) => (
+                  <TouchableOpacity
+                    key={String(opt.value)}
+                    style={[styles.optionPill, isNovios === opt.value && styles.optionPillActive]}
+                    onPress={() => setIsNovios(opt.value)}
+                    disabled={saving || uploading}
+                  >
+                    <Text style={[styles.optionPillText, isNovios === opt.value && styles.optionPillTextActive]}>
+                      {opt.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
               </View>
-            )}
+            </View>
 
             {/* ── Tipo de gema (solo para Gemas) ── */}
             {(categoriesData || []).find((c) => (c?._id?.$oid || c?._id) === categoryId)?.name === "gemas" && (
