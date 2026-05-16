@@ -19,12 +19,13 @@ const categoryImages = {
 };
 
 const categoryNamesEs = {
-  pendants: "Dijes",
-  chains: "Cadenas",
-  rings: "Anillos",
-  bracelets: "Pulseras",
-  aretes: "Aretes",
-  relojes: "Relojes",
+  pendants: "DIJES",
+  chains: "CADENAS",
+  rings: "ANILLOS",
+  bracelets: "PULSERAS",
+  aretes: "ARETES",
+  relojes: "RELOJES",
+  gemas: "GEMAS",
 };
 
 const CategoryCard = ({ category, onPress, isSmallScreen }) => {

@@ -48,12 +48,13 @@ const toImageSource = (img) => {
 const DEFAULT_BRAND = "Burmes & Co";
 
 const CATEGORY_LABELS = {
-  pendants: "Dijes",
-  chains: "Cadenas",
-  rings: "Anillos",
-  bracelets: "Pulseras",
-  aretes: "Aretes",
-  relojes: "Relojes",
+  pendants: "DIJES",
+  chains: "CADENAS",
+  rings: "ANILLOS",
+  bracelets: "PULSERAS",
+  aretes: "ARETES",
+  relojes: "RELOJES",
+  gemas: "GEMAS",
 };
 
 const INV_STATUS_CYCLE = { available: "sold", sold: "reserved", reserved: "available" };
@@ -71,6 +72,10 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
   const [isFeatured, setIsFeatured] = useState(false);
   const [categoryId, setCategoryId] = useState("");
   const [categoryPickerOpen, setCategoryPickerOpen] = useState(false);
+  const [material, setMaterial] = useState(null);
+  const [gender, setGender] = useState(null);
+  const [isNovios, setIsNovios] = useState(false);
+  const [gemType, setGemType] = useState(null);
 
   // Up to 3 images
   const [images, setImages] = useState([null, null, null]); // each: { previewUrl, imageUrl, driveFileId }
@@ -90,6 +95,10 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       setCountInStock(product.countInStock != null ? String(product.countInStock) : "");
       setIsFeatured(product.isFeatured === true);
       setCategoryId(product.category || "");
+      setMaterial(product.material || null);
+      setGender(product.gender || null);
+      setIsNovios(product.isNovios === true);
+      setGemType(product.gemType || null);
 
       const urls = Array.isArray(product.images) && product.images.length
         ? product.images
@@ -115,6 +124,10 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       setCountInStock("");
       setIsFeatured(false);
       setCategoryId("");
+      setMaterial(null);
+      setGender(null);
+      setIsNovios(false);
+      setGemType(null);
       setImages([null, null, null]);
     }
     setCategoryPickerOpen(false);
@@ -225,6 +238,8 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       return;
     }
 
+    const selectedCatName = (categoriesData || []).find((c) => (c?._id?.$oid || c?._id) === categoryId)?.name;
+
     setSaving(true);
     try {
       const imageUrls = images.map((x) => x?.imageUrl).filter(Boolean);
@@ -248,6 +263,10 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
         driveFileId: driveFileIds[0] || null,
         driveFileIds: driveFileIds.slice(0, 3),
         sku: skuValue,
+        material: material || null,
+        gender: gender || null,
+        isNovios: selectedCatName === "rings" ? isNovios : false,
+        gemType: selectedCatName === "gemas" ? (gemType || null) : null,
       };
 
       if (product) {
@@ -371,12 +390,110 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                 <Text style={styles.selectInputText}>
                   {(() => {
                     const c = (categoriesData || []).find((x) => (x?._id?.$oid || x?._id) === categoryId);
-                    return c ? (c.name === "pendants" ? "Dijes" : c.name === "chains" ? "Cadenas" : c.name === "rings" ? "Anillos" : c.name === "bracelets" ? "Pulseras" : c.name) : "Selecciona una categoría…";
+                    return c ? (CATEGORY_LABELS[c.name] || c.name.toUpperCase()) : "Seleccionar categoría…";
                   })()}
                 </Text>
                 <Text style={styles.selectChevron}>▾</Text>
               </TouchableOpacity>
             </View>
+
+            {/* ── Material ── */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>Material</Text>
+              <View style={styles.optionRow}>
+                {[
+                  { value: "oro", label: "ORO" },
+                  { value: "plata", label: "PLATA" },
+                  { value: null, label: "SIN ESPECIFICAR" },
+                ].map((opt) => (
+                  <TouchableOpacity
+                    key={String(opt.value)}
+                    style={[styles.optionPill, material === opt.value && styles.optionPillActive]}
+                    onPress={() => setMaterial(opt.value)}
+                    disabled={saving || uploading}
+                  >
+                    <Text style={[styles.optionPillText, material === opt.value && styles.optionPillTextActive]}>
+                      {opt.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* ── Género / Audiencia ── */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>Para</Text>
+              <View style={styles.optionRow}>
+                {[
+                  { value: "mujer", label: "MUJER" },
+                  { value: "hombre", label: "HOMBRE" },
+                  { value: "unisex", label: "UNISEX" },
+                  { value: "ninos_bebes", label: "NIÑOS Y BEBÉS" },
+                  { value: null, label: "SIN ESPECIFICAR" },
+                ].map((opt) => (
+                  <TouchableOpacity
+                    key={String(opt.value)}
+                    style={[styles.optionPill, gender === opt.value && styles.optionPillActive]}
+                    onPress={() => setGender(opt.value)}
+                    disabled={saving || uploading}
+                  >
+                    <Text style={[styles.optionPillText, gender === opt.value && styles.optionPillTextActive]}>
+                      {opt.label}
+                    </Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
+            </View>
+
+            {/* ── Novios (solo para Anillos) ── */}
+            {(categoriesData || []).find((c) => (c?._id?.$oid || c?._id) === categoryId)?.name === "rings" && (
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>¿Para novios?</Text>
+                <View style={styles.optionRow}>
+                  {[
+                    { value: true, label: "SÍ" },
+                    { value: false, label: "NO" },
+                  ].map((opt) => (
+                    <TouchableOpacity
+                      key={String(opt.value)}
+                      style={[styles.optionPill, isNovios === opt.value && styles.optionPillActive]}
+                      onPress={() => setIsNovios(opt.value)}
+                      disabled={saving || uploading}
+                    >
+                      <Text style={[styles.optionPillText, isNovios === opt.value && styles.optionPillTextActive]}>
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+
+            {/* ── Tipo de gema (solo para Gemas) ── */}
+            {(categoriesData || []).find((c) => (c?._id?.$oid || c?._id) === categoryId)?.name === "gemas" && (
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>Tipo de gema *</Text>
+                <View style={styles.optionRow}>
+                  {[
+                    { value: "diamantes", label: "DIAMANTES" },
+                    { value: "gemas_color", label: "GEMAS DE COLOR" },
+                    { value: "gemas_nacimiento", label: "GEMAS DE NACIMIENTO" },
+                  ].map((opt) => (
+                    <TouchableOpacity
+                      key={opt.value}
+                      style={[styles.optionPill, gemType === opt.value && styles.optionPillActive]}
+                      onPress={() => setGemType(opt.value)}
+                      disabled={saving || uploading}
+                    >
+                      <Text style={[styles.optionPillText, gemType === opt.value && styles.optionPillTextActive]}>
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+
             <View style={styles.formField}>
               <Text style={styles.formLabel}>Descripción</Text>
               <TextInput
@@ -547,7 +664,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                     }}
                   >
                     <Text style={[styles.categoryRowText, isSelected && styles.categoryRowTextSelected]}>
-                      {c.name === "pendants" ? "Dijes" : c.name === "chains" ? "Cadenas" : c.name === "rings" ? "Anillos" : c.name === "bracelets" ? "Pulseras" : c.name}
+                      {CATEGORY_LABELS[c.name] || c.name.toUpperCase()}
                     </Text>
                     {isSelected && <Text style={styles.categoryRowCheck}>✓</Text>}
                   </TouchableOpacity>
@@ -727,7 +844,7 @@ export default function AdminListings() {
 
       {/* ── PRODUCTOS TAB ── */}
       {activeTab === "productos" && (
-        <View style={styles.content}>
+        <ScrollView style={styles.content} contentContainerStyle={{ paddingBottom: 40 }}>
           <View style={styles.hero}>
             <Text style={styles.heroTitle}>Productos</Text>
             <Text style={styles.heroSubtitle}>
@@ -832,7 +949,7 @@ export default function AdminListings() {
               })}
             </View>
           )}
-        </View>
+        </ScrollView>
       )}
 
       {/* ── INVENTARIO TAB ── */}
@@ -1372,7 +1489,197 @@ const styles = StyleSheet.create({
     borderRadius: 12,
   },
   categoryRowSelected: { backgroundColor: "#f3f3f3" },
-  categoryRowText: { fontSize: 15, color: "#222", fontWeight: "700", textTransform: "capitalize" },
+  categoryRowText: { fontSize: 15, color: "#222", fontWeight: "700" },
   categoryRowTextSelected: { color: "#000" },
   categoryRowCheck: { fontSize: 16, color: "#111", fontWeight: "900" },
+  optionRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
+  optionPill: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#ddd",
+    backgroundColor: "#fafafa",
+  },
+  optionPillActive: { backgroundColor: "#1c1c1c", borderColor: "#1c1c1c" },
+  optionPillText: { fontSize: 11, fontWeight: "700", color: "#555", letterSpacing: 0.6 },
+  optionPillTextActive: { color: "#fff" },
+
+  // ── Tab bar ──
+  tabBar: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 20,
+  },
+  tabBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+  },
+  tabBtnActive: {
+    backgroundColor: "#fff",
+    borderColor: "#fff",
+  },
+  tabBtnText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.6)",
+  },
+  tabBtnTextActive: {
+    color: "#1c1c1c",
+  },
+
+  // ── Inventario tab ──
+  catChipsRow: {
+    flexDirection: "row",
+    marginBottom: 20,
+  },
+  catChip: {
+    paddingVertical: 7,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "#e0ddd8",
+    marginRight: 8,
+  },
+  catChipActive: {
+    backgroundColor: "#1c1c1c",
+    borderColor: "#1c1c1c",
+  },
+  catChipText: {
+    fontSize: 13,
+    fontWeight: "500",
+    color: "#555",
+  },
+  catChipTextActive: {
+    color: "#fff",
+    fontWeight: "600",
+  },
+  invList: {
+    gap: 12,
+  },
+  invRow: {
+    flexDirection: "row",
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: "#e8e6e2",
+    overflow: "hidden",
+    ...(Platform.OS === "web"
+      ? { boxShadow: "0 1px 4px rgba(0,0,0,0.05)" }
+      : { shadowColor: "#000", shadowOpacity: 0.04, shadowRadius: 4, elevation: 2 }),
+  },
+  invThumb: {
+    width: 90,
+    height: "100%",
+    minHeight: 90,
+    backgroundColor: "#f0ede8",
+  },
+  invThumbImg: {
+    width: "100%",
+    height: "100%",
+  },
+  invThumbPlaceholder: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    minHeight: 90,
+  },
+  invInfo: {
+    flex: 1,
+    padding: 14,
+    gap: 6,
+  },
+  invInfoTop: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    flexWrap: "wrap",
+  },
+  invNoSku: {
+    fontSize: 11,
+    color: "#bbb",
+    fontStyle: "italic",
+  },
+  invCatLabel: {
+    fontSize: 11,
+    color: "#999",
+    fontWeight: "500",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+  },
+  invProductName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#1a1a1a",
+  },
+  invPrice: {
+    fontSize: 13,
+    fontWeight: "700",
+    color: "#444",
+  },
+  invStatusBtn: {
+    alignSelf: "flex-start",
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 20,
+    marginTop: 2,
+  },
+  invStatusDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+  },
+  invStatusText: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 0.3,
+  },
+  invStatusArrow: {
+    fontSize: 12,
+    color: "#999",
+    marginLeft: 2,
+  },
+  invNoteRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 8,
+    marginTop: 4,
+  },
+  invNoteInput: {
+    flex: 1,
+    borderWidth: 1,
+    borderColor: "#e8e6e2",
+    borderRadius: 8,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    fontSize: 13,
+    color: "#333",
+    backgroundColor: "#fafaf9",
+    minHeight: 36,
+  },
+  invSaveNoteBtn: {
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    backgroundColor: "#1c1c1c",
+    borderRadius: 8,
+    justifyContent: "center",
+  },
+  invSaveNoteBtnText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  invUpdatedAt: {
+    fontSize: 10,
+    color: "#bbb",
+    marginTop: 2,
+  },
 });

@@ -13,6 +13,7 @@ const categoryIcons = {
   bracelets: "ellipse-outline",
   aretes: "sparkles-outline",
   relojes: "time-outline",
+  gemas: "color-palette-outline",
 };
 
 const categoryColors = {
@@ -22,6 +23,7 @@ const categoryColors = {
   bracelets: "#4A90E2",
   aretes: "#C9A961",
   relojes: "#7B6B5A",
+  gemas: "#7B5EA7",
 };
 
 const Collections = ({ onCategorySelect, onNavigate }) => {

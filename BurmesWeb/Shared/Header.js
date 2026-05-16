@@ -9,10 +9,31 @@ import {
   Pressable,
   Dimensions,
   Platform,
+  Image,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import SearchedProducts from "../screens/Products/SearchedProducts";
 import { useAuth } from "../contexts/AuthContext";
+
+const categoriesData = require("../assets/data/categories.json");
+
+const JOYAS_CATEGORIES = [
+  { name: "pendants", label: "DIJES" },
+  { name: "chains", label: "CADENAS" },
+  { name: "rings", label: "ANILLOS" },
+  { name: "bracelets", label: "PULSERAS" },
+  { name: "aretes", label: "ARETES" },
+  { name: "gemas", label: "GEMAS" },
+];
+
+const JOYAS_DISCOVER = [
+  { key: "oro",        label: "COLECCIÓN ORO" },
+  { key: "plata",      label: "COLECCIÓN PLATA" },
+  { key: "hombre",     label: "PARA HOMBRES" },
+  { key: "mujer",      label: "PARA MUJERES" },
+  { key: "novios",     label: "PARA NOVIOS" },
+  { key: "ninos",      label: "NIÑOS Y BEBÉS" },
+];
 
 // Default navigation items - can be overridden via props
 const DEFAULT_NAV_ITEMS = [
@@ -39,6 +60,8 @@ const Header = ({
   );
   const [menuOpen, setMenuOpen] = useState(false);
   const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
+  const [joyasMenuOpen, setJoyasMenuOpen] = useState(false);
+  const [joyasFeatured, setJoyasFeatured] = useState([]);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [internalScrollY, setInternalScrollY] = useState(0);
@@ -148,6 +171,17 @@ const Header = ({
     }
   }, []);
 
+  useEffect(() => {
+    if (!joyasMenuOpen || joyasFeatured.length > 0 || !getProducts) return;
+    getProducts()
+      .then((list) => {
+        const featured = (list || []).filter((p) => p.isFeatured && (p.image || (Array.isArray(p.images) && p.images[0])));
+        const toShow = featured.length >= 2 ? featured.slice(0, 2) : (list || []).filter((p) => p.image || (Array.isArray(p.images) && p.images[0])).slice(0, 2);
+        setJoyasFeatured(toShow);
+      })
+      .catch(() => {});
+  }, [joyasMenuOpen]);
+
   // Calculate opacity: 0.7 at top, 0.95 after 200px scroll
   const getOpacity = () => {
     const maxScroll = 200;
@@ -228,14 +262,28 @@ const Header = ({
         {/* Navigation Menu - Center (hidden on small screens) */}
         {!isSmallScreen && navigationItems.length > 0 && (
           <View style={styles.navMenu}>
-            {navigationItems.map((item, index) => (
-              <TouchableOpacity
-                key={item.id || index}
-                onPress={() => onNavigate && onNavigate(item.route)}
-              >
-                <Text style={styles.navItem}>{item.label}</Text>
-              </TouchableOpacity>
-            ))}
+            {navigationItems.map((item, index) => {
+              if (item.id === "jewellery") {
+                return (
+                  <TouchableOpacity
+                    key={item.id}
+                    onPress={() => setJoyasMenuOpen((v) => !v)}
+                  >
+                    <Text style={[styles.navItem, joyasMenuOpen && styles.navItemActive]}>
+                      {item.label} ▾
+                    </Text>
+                  </TouchableOpacity>
+                );
+              }
+              return (
+                <TouchableOpacity
+                  key={item.id || index}
+                  onPress={() => { setJoyasMenuOpen(false); onNavigate && onNavigate(item.route); }}
+                >
+                  <Text style={styles.navItem}>{item.label}</Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
 
@@ -457,6 +505,55 @@ const Header = ({
           )}
         </View>
       </View>
+
+      {/* Joyas Megamenu */}
+      {joyasMenuOpen && !isSmallScreen && (
+        <>
+          <Pressable
+            style={StyleSheet.absoluteFillObject}
+            onPress={() => setJoyasMenuOpen(false)}
+          />
+          <View style={styles.joyasMenu}>
+            <View style={styles.joyasMenuInner}>
+              {/* Left: category links */}
+              <View style={styles.joyasMenuLinks}>
+                {JOYAS_CATEGORIES.map((cat) => {
+                  const entry = (categoriesData || []).find((c) => c.name === cat.name);
+                  const oid = entry?._id?.$oid || entry?._id;
+                  return (
+                    <TouchableOpacity
+                      key={cat.name}
+                      onPress={() => {
+                        setJoyasMenuOpen(false);
+                        if (oid && navigate) navigate(`/category/${oid}`);
+                      }}
+                    >
+                      <Text style={styles.joyasMenuLink}>{cat.label}</Text>
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+
+              {/* Right: 2 featured product images */}
+              <View style={styles.joyasMenuImages}>
+                {joyasFeatured.slice(0, 2).map((product, i) => {
+                  const imgUri = product.image || (Array.isArray(product.images) && product.images[0]) || null;
+                  if (!imgUri) return null;
+                  return (
+                    <View key={i} style={styles.joyasMenuImgWrap}>
+                      <Image
+                        source={{ uri: imgUri }}
+                        style={styles.joyasMenuImg}
+                        resizeMode="cover"
+                      />
+                    </View>
+                  );
+                })}
+              </View>
+            </View>
+          </View>
+        </>
+      )}
 
       {/* Search Bar Dropdown - Should appear right after header */}
       {searchOpen && (
@@ -798,6 +895,56 @@ const styles = StyleSheet.create({
     elevation: 5,
     borderWidth: 1,
     borderColor: "#e0e0e0",
+  },
+
+  // Joyas megamenu
+  navItemActive: { opacity: 0.75 },
+  joyasMenu: {
+    position: "absolute",
+    top: 60,
+    left: 0,
+    right: 0,
+    zIndex: 999,
+    backgroundColor: "#f5f4f2",
+    ...(Platform.OS === "web"
+      ? { boxShadow: "0 6px 24px rgba(0,0,0,0.12)" }
+      : { shadowColor: "#000", shadowOpacity: 0.15, shadowRadius: 12, elevation: 8 }),
+  },
+  joyasMenuInner: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingVertical: 48,
+    paddingHorizontal: 80,
+    gap: 80,
+  },
+  joyasMenuLinks: {
+    minWidth: 200,
+  },
+  joyasMenuLink: {
+    fontSize: 16,
+    fontWeight: "500",
+    color: "#1a1a1a",
+    letterSpacing: 0.4,
+    marginBottom: 22,
+    fontFamily: "sans-serif",
+    ...(Platform.OS === "web" ? { cursor: "pointer" } : {}),
+  },
+  joyasMenuImages: {
+    flex: 1,
+    flexDirection: "row",
+    gap: 16,
+    justifyContent: "flex-end",
+  },
+  joyasMenuImgWrap: {
+    width: 220,
+    height: 240,
+    borderRadius: 4,
+    overflow: "hidden",
+    backgroundColor: "#e8e6e2",
+  },
+  joyasMenuImg: {
+    width: "100%",
+    height: "100%",
   },
 });
 

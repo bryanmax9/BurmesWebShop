@@ -402,6 +402,10 @@ export function AuthProvider({ children }) {
       driveFileId: productData.driveFileId || null,
       driveFileIds: productData.driveFileIds && Array.isArray(productData.driveFileIds) ? productData.driveFileIds : [],
       sku: productData.sku || null,
+      material: productData.material || null,
+      gender: productData.gender || null,
+      isNovios: productData.isNovios === true,
+      gemType: productData.gemType || null,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     });
@@ -426,6 +430,10 @@ export function AuthProvider({ children }) {
       driveFileId: productData.driveFileId || null,
       driveFileIds: productData.driveFileIds && Array.isArray(productData.driveFileIds) ? productData.driveFileIds : [],
       sku: productData.sku || null,
+      material: productData.material || null,
+      gender: productData.gender || null,
+      isNovios: productData.isNovios === true,
+      gemType: productData.gemType || null,
       updatedAt: new Date().toISOString(),
     });
   };

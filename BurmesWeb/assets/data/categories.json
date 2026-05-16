@@ -28,5 +28,10 @@
     "_id": { "$oid": "6f25d5b2cb4a6642bddc1aa2" },
     "name": "relojes",
     "__v": 0
+  },
+  {
+    "_id": { "$oid": "7g35e5b2cb4a6642bddc3cc4" },
+    "name": "gemas",
+    "__v": 0
   }
 ]
