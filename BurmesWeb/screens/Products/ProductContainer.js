@@ -39,7 +39,7 @@ const ProductContainer = ({ onScroll, selectedCategory, onProductPress, filterNo
         const categoryName = selectedCategory?.name || null;
         let allProducts = await (getProducts?.(categoryId, categoryName) ?? Promise.resolve([]));
         if (filterNovios)  allProducts = allProducts.filter((p) => p.isNovios === true);
-        if (genderFilter)  allProducts = allProducts.filter((p) => p.gender === genderFilter);
+        if (genderFilter)  allProducts = allProducts.filter((p) => Array.isArray(p.gender) ? p.gender.includes(genderFilter) : p.gender === genderFilter);
         setProducts(allProducts);
       }
     } catch (err) {

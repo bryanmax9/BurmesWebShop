@@ -73,7 +73,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
   const [categoryId, setCategoryId] = useState("");
   const [categoryPickerOpen, setCategoryPickerOpen] = useState(false);
   const [material, setMaterial] = useState(null);
-  const [gender, setGender] = useState(null);
+  const [gender, setGender] = useState([]);
   const [isNovios, setIsNovios] = useState(false);
   const [noviosCategory, setNoviosCategory] = useState(null);
   const [gemType, setGemType] = useState(null);
@@ -105,7 +105,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       setIsFeatured(product.isFeatured === true);
       setCategoryId(product.category || "");
       setMaterial(product.material || null);
-      setGender(product.gender || null);
+      setGender(Array.isArray(product.gender) ? product.gender : (product.gender ? [product.gender] : []));
       setIsNovios(product.isNovios === true);
       setNoviosCategory(product.noviosCategory || null);
       setGemType(product.gemType || null);
@@ -149,7 +149,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       setIsFeatured(false);
       setCategoryId("");
       setMaterial(null);
-      setGender(null);
+      setGender([]);
       setIsNovios(false);
       setNoviosCategory(null);
       setGemType(null);
@@ -344,7 +344,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
         videoFileIds: videoFileIds.slice(0, 3),
         sku: skuValue,
         material: material || null,
-        gender: gender || null,
+        gender: gender.length > 0 ? gender : null,
         isNovios: isNovios || false,
         noviosCategory: isNovios ? (noviosCategory || null) : null,
         gemType: selectedCatName === "gemas" ? (gemType || null) : null,
@@ -506,29 +506,39 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
               </View>
             </View>
 
-            {/* ── Género / Audiencia ── */}
+            {/* ── Género / Audiencia (multi-select) ── */}
             <View style={styles.formField}>
-              <Text style={styles.formLabel}>Para</Text>
-              <View style={styles.optionRow}>
+              <Text style={styles.formLabel}>Para (selección múltiple)</Text>
+              <Text style={styles.skuHint}>Selecciona todos los grupos a los que aplica esta joya.</Text>
+              <View style={[styles.optionRow, { marginTop: 8 }]}>
                 {[
-                  { value: "mujer", label: "MUJER" },
-                  { value: "hombre", label: "HOMBRE" },
-                  { value: "unisex", label: "UNISEX" },
+                  { value: "mujer",       label: "MUJER" },
+                  { value: "hombre",      label: "HOMBRE" },
+                  { value: "unisex",      label: "UNISEX" },
                   { value: "ninos_bebes", label: "NIÑOS Y BEBÉS" },
-                  { value: null, label: "SIN ESPECIFICAR" },
-                ].map((opt) => (
-                  <TouchableOpacity
-                    key={String(opt.value)}
-                    style={[styles.optionPill, gender === opt.value && styles.optionPillActive]}
-                    onPress={() => setGender(opt.value)}
-                    disabled={saving || uploading}
-                  >
-                    <Text style={[styles.optionPillText, gender === opt.value && styles.optionPillTextActive]}>
-                      {opt.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
+                ].map((opt) => {
+                  const selected = gender.includes(opt.value);
+                  return (
+                    <TouchableOpacity
+                      key={opt.value}
+                      style={[styles.optionPill, selected && styles.optionPillActive]}
+                      onPress={() => setGender((prev) =>
+                        selected ? prev.filter((g) => g !== opt.value) : [...prev, opt.value]
+                      )}
+                      disabled={saving || uploading}
+                    >
+                      <Text style={[styles.optionPillText, selected && styles.optionPillTextActive]}>
+                        {selected ? "✓ " : ""}{opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  );
+                })}
               </View>
+              {gender.length > 0 && (
+                <TouchableOpacity style={{ marginTop: 8 }} onPress={() => setGender([])} disabled={saving || uploading}>
+                  <Text style={{ fontSize: 11, color: "#aaa", textDecorationLine: "underline" }}>Quitar selección</Text>
+                </TouchableOpacity>
+              )}
             </View>
 
             {/* ── Compromiso / Para Novios (any category) ── */}
@@ -1437,7 +1447,7 @@ export default function AdminListings() {
           { key: "unisex",      label: "UNISEX" },
           { key: "ninos_bebes", label: "NIÑOS Y BEBÉS" },
         ].map(g => {
-          const items = products.filter(p => p.gender === g.key);
+          const items = products.filter(p => Array.isArray(p.gender) ? p.gender.includes(g.key) : p.gender === g.key);
           const s = items.filter(p => (p.inventoryStatus||"available") === "sold").length;
           return { label: g.label, total: items.length, sold: s, pct: items.length ? Math.round(s/items.length*100) : 0 };
         }).filter(r => r.total > 0);
