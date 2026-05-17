@@ -82,17 +82,17 @@ export default function SingleProduct({
   const { width } = useWindowDimensions();
   const isSmall = width < 768;
   const isMobile = width < 600;
-  // Horizontal padding and image size calculated from real viewport width
-  const hPad  = isMobile ? 16 : isSmall ? 28 : 56;
-  const imgSz = isSmall
-    ? width - hPad * 2
-    : Math.min(Math.floor((width - hPad * 2) * 0.46), 500);
+  const hPad = isMobile ? 16 : isSmall ? 28 : 56;
+  // Cap total product area at 1100px, then split 50/50 with a 48px gap between cols
+  const areaW  = Math.min(width, 1100) - hPad * 2;
+  const colGap = isSmall ? 0 : 48;
+  const colW   = isSmall ? areaW : Math.floor((areaW - colGap) / 2);
 
   const [mediaIndex, setMediaIndex] = useState(0);
   const [related, setRelated] = useState([]);
   const [selectedQty, setSelectedQty] = useState(1);
   const [lensPos, setLensPos] = useState(null); // { x: 0-1, y: 0-1 }
-  // imgSz computed from viewport width (above) — used for magnifier math
+  // colW computed from viewport width (above) — used for magnifier math
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedGold, setSelectedGold] = useState(null);
   const [selectedLargo, setSelectedLargo] = useState(null);
@@ -211,8 +211,8 @@ export default function SingleProduct({
   // Hover magnifier helpers (web only)
   const onImgMouseMove = Platform.OS === "web" ? (e) => {
     const ne = e.nativeEvent;
-    const x = Math.max(0, Math.min(1, (ne.offsetX || 0) / imgSz));
-    const y = Math.max(0, Math.min(1, (ne.offsetY || 0) / imgSz));
+    const x = Math.max(0, Math.min(1, (ne.offsetX || 0) / colW));
+    const y = Math.max(0, Math.min(1, (ne.offsetY || 0) / colW));
     setLensPos({ x, y });
   } : undefined;
   const onImgMouseLeave = Platform.OS === "web" ? () => setLensPos(null) : undefined;
@@ -220,8 +220,8 @@ export default function SingleProduct({
   const getMagTransform = () => {
     if (!lensPos) return undefined;
     const s = 2.2;
-    const tx = (0.5 - lensPos.x) * imgSz * (s - 1);
-    const ty = (0.5 - lensPos.y) * imgSz * (s - 1);
+    const tx = (0.5 - lensPos.x) * colW * (s - 1);
+    const ty = (0.5 - lensPos.y) * colW * (s - 1);
     return [{ translateX: tx }, { translateY: ty }, { scale: s }];
   };
 
@@ -263,22 +263,22 @@ export default function SingleProduct({
         </TouchableOpacity>
       )}
 
-      {/* ── Product row ── */}
-      <View style={[
-        styles.productRow,
-        {
-          paddingHorizontal: hPad,
+      {/* ── Product row — max-width centered, 50/50 columns ── */}
+      <View style={[styles.productRow, { paddingHorizontal: hPad }]}>
+        <View style={{
+          width: "100%",
+          maxWidth: 1100,
+          alignSelf: "center",
           flexDirection: isSmall ? "column" : "row",
           alignItems: "flex-start",
-          gap: isSmall ? 0 : 48,
-        }
-      ]}>
+          gap: colGap,
+        }}>
         {/* ── LEFT: gallery ── */}
-        <View style={{ width: imgSz }}>
+        <View style={{ width: colW }}>
 
           {/* ── Main media display (images + videos inline) ── */}
           <View
-            style={[styles.imageBox, { width: imgSz, height: imgSz }]}
+            style={[styles.imageBox, { width: colW, height: colW }]}
             onMouseMove={onImgMouseMove}
             onMouseLeave={onImgMouseLeave}
           >
@@ -286,7 +286,7 @@ export default function SingleProduct({
               Platform.OS === "web" ? (
                 <iframe
                   src={currentMedia.url}
-                  style={{ width: imgSz, height: imgSz, border: "none", display: "block" }}
+                  style={{ width: colW, height: colW, border: "none", display: "block" }}
                   allow="autoplay; fullscreen"
                   allowFullScreen
                   title="Video del producto"
@@ -367,7 +367,7 @@ export default function SingleProduct({
         </View>
 
         {/* ── RIGHT: product info ── */}
-        <View style={[styles.infoCol, { flex: 1, minWidth: 0, marginTop: isSmall ? 28 : 0 }]}>
+        <View style={[styles.infoCol, { width: colW, marginTop: isSmall ? 28 : 0 }]}>
           <Text style={[styles.title, { fontSize: isMobile ? 24 : 32 }]}>{product.name}</Text>
 
           <Text style={styles.price}>{formatPrice(product.price)}</Text>
@@ -550,6 +550,7 @@ export default function SingleProduct({
               )}
             </View>
           )}
+        </View>
         </View>
       </View>
 
