@@ -82,17 +82,16 @@ export default function SingleProduct({
   const { width } = useWindowDimensions();
   const isSmall = width < 768;
   const isMobile = width < 600;
-  const hPad = isMobile ? 16 : isSmall ? 28 : 56;
-  // Cap total product area at 1100px, then split 50/50 with a 48px gap between cols
-  const areaW  = Math.min(width, 1100) - hPad * 2;
-  const colGap = isSmall ? 0 : 48;
-  const colW   = isSmall ? areaW : Math.floor((areaW - colGap) / 2);
+  const hPad   = isMobile ? 20 : isSmall ? 40 : 72;
+  // Fixed image height — large enough to fill ~60-70% of viewport height
+  // regardless of column width, so the product commands the screen
+  const imageH = isSmall ? width - hPad * 2 : 580;
 
   const [mediaIndex, setMediaIndex] = useState(0);
   const [related, setRelated] = useState([]);
   const [selectedQty, setSelectedQty] = useState(1);
-  const [lensPos, setLensPos] = useState(null); // { x: 0-1, y: 0-1 }
-  // colW computed from viewport width (above) — used for magnifier math
+  const [lensPos, setLensPos] = useState(null);
+  const [boxW, setBoxW] = useState(500); // actual rendered width of imageBox
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedGold, setSelectedGold] = useState(null);
   const [selectedLargo, setSelectedLargo] = useState(null);
@@ -211,8 +210,8 @@ export default function SingleProduct({
   // Hover magnifier helpers (web only)
   const onImgMouseMove = Platform.OS === "web" ? (e) => {
     const ne = e.nativeEvent;
-    const x = Math.max(0, Math.min(1, (ne.offsetX || 0) / colW));
-    const y = Math.max(0, Math.min(1, (ne.offsetY || 0) / colW));
+    const x = Math.max(0, Math.min(1, (ne.offsetX || 0) / boxW));
+    const y = Math.max(0, Math.min(1, (ne.offsetY || 0) / imageH));
     setLensPos({ x, y });
   } : undefined;
   const onImgMouseLeave = Platform.OS === "web" ? () => setLensPos(null) : undefined;
@@ -220,8 +219,8 @@ export default function SingleProduct({
   const getMagTransform = () => {
     if (!lensPos) return undefined;
     const s = 2.2;
-    const tx = (0.5 - lensPos.x) * colW * (s - 1);
-    const ty = (0.5 - lensPos.y) * colW * (s - 1);
+    const tx = (0.5 - lensPos.x) * boxW * (s - 1);
+    const ty = (0.5 - lensPos.y) * imageH * (s - 1);
     return [{ translateX: tx }, { translateY: ty }, { scale: s }];
   };
 
@@ -263,22 +262,20 @@ export default function SingleProduct({
         </TouchableOpacity>
       )}
 
-      {/* ── Product row — max-width centered, 50/50 columns ── */}
-      <View style={[styles.productRow, { paddingHorizontal: hPad }]}>
-        <View style={{
-          width: "100%",
-          maxWidth: 1100,
-          alignSelf: "center",
-          flexDirection: isSmall ? "column" : "row",
-          alignItems: "flex-start",
-          gap: colGap,
-        }}>
-        {/* ── LEFT: gallery ── */}
-        <View style={{ width: colW }}>
+      {/* ── Product row ── */}
+      <View style={[styles.productRow, {
+        paddingHorizontal: hPad,
+        flexDirection: isSmall ? "column" : "row",
+        alignItems: "flex-start",
+        gap: isSmall ? 0 : 56,
+      }]}>
+        {/* ── LEFT: gallery — flex:1 so it takes exactly half ── */}
+        <View style={{ flex: isSmall ? undefined : 1, width: isSmall ? "100%" : undefined }}>
 
-          {/* ── Main media display (images + videos inline) ── */}
+          {/* ── Main media ── */}
           <View
-            style={[styles.imageBox, { width: colW, height: colW }]}
+            style={[styles.imageBox, { height: imageH }]}
+            onLayout={(e) => setBoxW(e.nativeEvent.layout.width)}
             onMouseMove={onImgMouseMove}
             onMouseLeave={onImgMouseLeave}
           >
@@ -286,7 +283,7 @@ export default function SingleProduct({
               Platform.OS === "web" ? (
                 <iframe
                   src={currentMedia.url}
-                  style={{ width: colW, height: colW, border: "none", display: "block" }}
+                  style={{ width: "100%", height: imageH, border: "none", display: "block" }}
                   allow="autoplay; fullscreen"
                   allowFullScreen
                   title="Video del producto"
@@ -367,7 +364,11 @@ export default function SingleProduct({
         </View>
 
         {/* ── RIGHT: product info ── */}
-        <View style={[styles.infoCol, { width: colW, marginTop: isSmall ? 28 : 0 }]}>
+        <View style={[styles.infoCol, {
+          flex: isSmall ? undefined : 1,
+          width: isSmall ? "100%" : undefined,
+          marginTop: isSmall ? 32 : 0,
+        }]}>
           <Text style={[styles.title, { fontSize: isMobile ? 24 : 32 }]}>{product.name}</Text>
 
           <Text style={styles.price}>{formatPrice(product.price)}</Text>
@@ -550,7 +551,6 @@ export default function SingleProduct({
               )}
             </View>
           )}
-        </View>
         </View>
       </View>
 
