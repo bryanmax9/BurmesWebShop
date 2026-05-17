@@ -1,13 +1,16 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   View,
   StyleSheet,
   Text,
   Image,
+  Modal,
+  Pressable,
   ScrollView,
   TouchableOpacity,
   useWindowDimensions,
   Linking,
+  Platform,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import Footer from "../../Shared/Footer";
@@ -86,6 +89,8 @@ export default function SingleProduct({
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
   const [related, setRelated] = useState([]);
   const [selectedQty, setSelectedQty] = useState(1);
+  const [zoomOpen, setZoomOpen] = useState(false);
+  const [imgHovered, setImgHovered] = useState(false);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedGold, setSelectedGold] = useState(null);
   const [selectedLargo, setSelectedLargo] = useState(null);
@@ -217,16 +222,56 @@ export default function SingleProduct({
   }
 
   return (
+    <>
+    {/* ── Zoom Lightbox Modal ── */}
+    <Modal visible={zoomOpen} transparent animationType="fade" onRequestClose={() => setZoomOpen(false)}>
+      <Pressable style={styles.zoomOverlay} onPress={() => setZoomOpen(false)}>
+        <TouchableOpacity style={styles.zoomCloseBtn} onPress={() => setZoomOpen(false)} activeOpacity={0.8}>
+          <Ionicons name="close" size={26} color="#fff" />
+        </TouchableOpacity>
+        <Pressable onPress={(e) => e.stopPropagation?.()}>
+          <ScrollView
+            horizontal
+            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
+            style={{ width: "100%", maxWidth: 900 }}
+          >
+            {mainSource && (
+              <Image
+                source={mainSource}
+                style={styles.zoomImage}
+                resizeMode="contain"
+              />
+            )}
+          </ScrollView>
+        </Pressable>
+        <View style={styles.zoomThumbs}>
+          {images.map((img, i) => {
+            const src = toSource(img);
+            if (!src) return null;
+            return (
+              <TouchableOpacity
+                key={i}
+                onPress={() => setSelectedImageIndex(i)}
+                style={[styles.zoomThumb, i === selectedImageIndex && styles.zoomThumbActive]}
+              >
+                <Image source={src} style={styles.zoomThumbImg} resizeMode="cover" />
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+      </Pressable>
+    </Modal>
+
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: 24 }}
+      contentContainerStyle={{ paddingBottom: 48 }}
     >
       {!!onBack && (
         <TouchableOpacity
           style={[styles.backBtn, { top: isSmall ? 60 : 120, left: padding }]}
           onPress={onBack}
         >
-          <Ionicons name="arrow-back" size={22} color="#1a1a1a" />
+          <Ionicons name="arrow-back" size={20} color="#1a1a1a" />
         </TouchableOpacity>
       )}
 
@@ -235,32 +280,40 @@ export default function SingleProduct({
           styles.row,
           {
             paddingHorizontal: padding,
-            paddingTop: isSmall ? 90 : 150,
+            paddingTop: isSmall ? 90 : 140,
             flexDirection: isMobile ? "column" : "row",
+            gap: isMobile ? 0 : 48,
           },
         ]}
       >
-        <View
-          style={{
-            width: isMobile ? "100%" : "50%",
-            marginRight: isMobile ? 0 : 28,
-          }}
-        >
-          <View style={styles.imageBox}>
+        {/* ── Left: image gallery ── */}
+        <View style={{ width: isMobile ? "100%" : "50%" }}>
+
+          {/* Main image with zoom */}
+          <TouchableOpacity
+            activeOpacity={0.96}
+            onPress={() => mainSource && setZoomOpen(true)}
+            onMouseEnter={() => setImgHovered(true)}
+            onMouseLeave={() => setImgHovered(false)}
+            style={styles.imageBox}
+          >
             {mainSource ? (
-              <Image
-                source={mainSource}
-                style={styles.image}
-                resizeMode="contain"
-              />
+              <Image source={mainSource} style={styles.image} resizeMode="contain" />
             ) : (
               <View style={styles.center}>
                 <Ionicons name="image-outline" size={48} color="#bbb" />
-                <Text style={styles.muted}>Image unavailable</Text>
+                <Text style={styles.muted}>Imagen no disponible</Text>
               </View>
             )}
-          </View>
+            {mainSource && (
+              <View style={[styles.zoomHint, imgHovered && styles.zoomHintVisible]}>
+                <Ionicons name="search-outline" size={17} color="#fff" />
+                <Text style={styles.zoomHintText}>Ampliar</Text>
+              </View>
+            )}
+          </TouchableOpacity>
 
+          {/* Thumbnails */}
           {images.length > 1 && (
             <View style={styles.thumbs}>
               {images.map((img, i) => {
@@ -268,16 +321,12 @@ export default function SingleProduct({
                 return (
                   <TouchableOpacity
                     key={`${i}`}
-                    style={[
-                      styles.thumb,
-                      i === selectedImageIndex && styles.thumbActive,
-                      !src && { opacity: 0.5 },
-                    ]}
+                    style={[styles.thumb, i === selectedImageIndex && styles.thumbActive, !src && { opacity: 0.4 }]}
                     onPress={() => src && setSelectedImageIndex(i)}
                     disabled={!src}
                   >
                     {src ? (
-                      <Image source={src} style={styles.thumbImg} />
+                      <Image source={src} style={styles.thumbImg} resizeMode="cover" />
                     ) : (
                       <View style={styles.thumbFallback}>
                         <Ionicons name="image-outline" size={18} color="#bbb" />
@@ -289,17 +338,22 @@ export default function SingleProduct({
             </View>
           )}
 
-          {/* Videos - shown below images */}
-          {Array.isArray(product?.videos) && product.videos.length > 0 && (
+          {/* Videos */}
+          {Array.isArray(product?.videos) && product.videos.filter(Boolean).length > 0 && (
             <View style={styles.videosSection}>
+              <View style={styles.videosSectionHeader}>
+                <Ionicons name="videocam-outline" size={16} color="#666" />
+                <Text style={styles.videosSectionLabel}>VIDEOS</Text>
+              </View>
               {product.videos.filter(Boolean).map((videoUrl, i) => (
-                <View key={i} style={styles.videoWrap}>
+                <View key={i} style={[styles.videoWrap, { height: isMobile ? 200 : 300 }]}>
                   {Platform.OS === "web" ? (
                     <iframe
                       src={videoUrl}
-                      style={{ width: "100%", height: "100%", border: "none" }}
-                      allow="autoplay"
+                      style={{ width: "100%", height: "100%", border: "none", display: "block" }}
+                      allow="autoplay; fullscreen"
                       allowFullScreen
+                      title={`Video ${i + 1}`}
                     />
                   ) : (
                     <View style={styles.videoFallback}>
@@ -313,18 +367,12 @@ export default function SingleProduct({
           )}
         </View>
 
-        <View
-          style={{
-            width: isMobile ? "100%" : "50%",
-            marginTop: isMobile ? 18 : 0,
-          }}
-        >
+        {/* ── Right: product info ── */}
+        <View style={{ width: isMobile ? "100%" : "50%", marginTop: isMobile ? 24 : 0 }}>
           {!!product.brand && (
-            <Text style={styles.brand}>
-              {String(product.brand).toUpperCase()}
-            </Text>
+            <Text style={styles.brand}>{String(product.brand).toUpperCase()}</Text>
           )}
-          <Text style={[styles.title, { fontSize: isSmall ? 28 : 36 }]}>
+          <Text style={[styles.title, { fontSize: isSmall ? 26 : 34 }]}>
             {product.name}
           </Text>
 
@@ -332,12 +380,12 @@ export default function SingleProduct({
 
           {typeof product.countInStock === "number" && (
             <View style={styles.stockRow}>
-              <Text style={styles.stockLabel}>En stock</Text>
-              <Text style={[styles.stockValue, product.countInStock === 0 && styles.stockValueZero]}>
-                {product.countInStock}
+              <View style={[styles.stockDot, { backgroundColor: product.countInStock > 0 ? "#2d7a4a" : "#c0392b" }]} />
+              <Text style={[styles.stockLabel, { color: product.countInStock > 0 ? "#2d7a4a" : "#c0392b" }]}>
+                {product.countInStock > 0 ? `En stock (${product.countInStock})` : "Agotado"}
               </Text>
               {product.countInStock > 0 && product.countInStock <= 5 && (
-                <Text style={styles.stockLow}>Solo quedan {product.countInStock}</Text>
+                <Text style={styles.stockLow}>· Solo quedan {product.countInStock}</Text>
               )}
             </View>
           )}
@@ -543,6 +591,7 @@ export default function SingleProduct({
 
       <Footer onNavigate={onNavigate} />
     </ScrollView>
+    </>
   );
 }
 
@@ -554,49 +603,100 @@ const styles = StyleSheet.create({
     position: "absolute",
     zIndex: 10,
     backgroundColor: "#fff",
-    borderRadius: 25,
-    width: 46,
-    height: 46,
+    borderRadius: 24,
+    width: 42,
+    height: 42,
     justifyContent: "center",
     alignItems: "center",
-    elevation: 5,
+    ...(Platform.OS === "web"
+      ? { boxShadow: "0 2px 10px rgba(0,0,0,0.12)" }
+      : { shadowColor: "#000", shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 }),
   },
 
   imageBox: {
     width: "100%",
     aspectRatio: 1,
-    backgroundColor: "#f8f8f8",
-    borderRadius: 8,
+    backgroundColor: "#f4f4f2",
+    borderRadius: 12,
     overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
+    position: "relative",
+    ...(Platform.OS === "web" ? { cursor: "zoom-in" } : {}),
   },
   image: { width: "100%", height: "100%" },
 
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.45)",
+  // Zoom hint overlay on image
+  zoomHint: {
+    position: "absolute",
+    bottom: 12,
+    right: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(0,0,0,0.55)",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    borderRadius: 20,
+    opacity: 0,
+  },
+  zoomHintVisible: { opacity: 1 },
+  zoomHintText: { color: "#fff", fontSize: 11, fontWeight: "600", letterSpacing: 0.5 },
+
+  // Lightbox modal
+  zoomOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.92)",
     justifyContent: "center",
     alignItems: "center",
   },
-  overlayText: {
-    color: "#fff",
-    fontSize: 16,
-    fontWeight: "700",
-    textTransform: "uppercase",
+  zoomCloseBtn: {
+    position: "absolute",
+    top: 20,
+    right: 20,
+    zIndex: 10,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 20,
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
   },
+  zoomImage: {
+    width: 700,
+    height: 700,
+  },
+  zoomThumbs: {
+    position: "absolute",
+    bottom: 24,
+    flexDirection: "row",
+    gap: 10,
+  },
+  zoomThumb: {
+    width: 56,
+    height: 56,
+    borderRadius: 6,
+    overflow: "hidden",
+    borderWidth: 2,
+    borderColor: "rgba(255,255,255,0.25)",
+  },
+  zoomThumbActive: { borderColor: "#fff" },
+  zoomThumbImg: { width: "100%", height: "100%" },
 
-  videosSection: { marginTop: 16, gap: 12 },
+  // Videos
+  videosSection: { marginTop: 20, gap: 10 },
+  videosSectionHeader: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 },
+  videosSectionLabel: { fontSize: 11, fontWeight: "700", color: "#888", letterSpacing: 1.5 },
   videoWrap: {
     width: "100%",
-    aspectRatio: 16 / 9,
-    backgroundColor: "#111",
-    borderRadius: 8,
+    borderRadius: 10,
     overflow: "hidden",
+    backgroundColor: "#111",
   },
-  videoFallback: { flex: 1, alignItems: "center", justifyContent: "center", gap: 6 },
+  videoFallback: { flex: 1, alignItems: "center", justifyContent: "center", gap: 6, minHeight: 200 },
   videoFallbackText: { color: "#aaa", fontSize: 13 },
-  thumbs: { flexDirection: "row", flexWrap: "wrap", marginTop: 12, gap: 10 },
+
+  thumbs: { flexDirection: "row", flexWrap: "wrap", marginTop: 12, gap: 8 },
   thumb: {
     width: 64,
     height: 64,
@@ -615,25 +715,26 @@ const styles = StyleSheet.create({
   },
 
   brand: {
-    color: "#757575",
-    letterSpacing: 1.5,
-    fontSize: 12,
+    color: "#aaa",
+    letterSpacing: 2.5,
+    fontSize: 11,
+    fontWeight: "600",
     marginBottom: 8,
+    textTransform: "uppercase",
   },
-  title: { fontWeight: "700", color: "#111", marginBottom: 10 },
-  price: { fontSize: 26, fontWeight: "800", marginBottom: 16 },
+  title: { fontWeight: "700", color: "#111", marginBottom: 10, lineHeight: 42 },
+  price: { fontSize: 28, fontWeight: "800", color: "#1a1a1a", marginBottom: 16, letterSpacing: -0.5 },
   stockRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 10,
-    marginTop: -6,
+    gap: 8,
     marginBottom: 16,
     flexWrap: "wrap",
   },
-  stockLabel: { fontSize: 12, color: "#777", fontWeight: "800", textTransform: "uppercase" },
-  stockValue: { fontSize: 13, color: "#111", fontWeight: "900" },
+  stockDot: { width: 8, height: 8, borderRadius: 4 },
+  stockLabel: { fontSize: 13, fontWeight: "700" },
   stockValueZero: { color: "#9b3c3c" },
-  stockLow: { fontSize: 12, color: "#9b3c3c", fontWeight: "800" },
+  stockLow: { fontSize: 12, color: "#9b3c3c", fontWeight: "600" },
   qtyRow: {
     flexDirection: "row",
     alignItems: "center",
