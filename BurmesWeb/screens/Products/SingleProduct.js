@@ -249,7 +249,7 @@ export default function SingleProduct({
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingTop: 96, paddingBottom: 80 }}
+      contentContainerStyle={{ paddingTop: 96 }}
     >
       {/* ── Back link ── */}
       {!!onBack && (
@@ -582,6 +582,7 @@ export default function SingleProduct({
         </View>
       )}
 
+      <View style={styles.footerSpacer} />
       <Footer onNavigate={onNavigate} />
     </ScrollView>
   );
@@ -605,7 +606,8 @@ const styles = StyleSheet.create({
   backBtnText: { fontSize: 13, color: "#888" },
 
   // ── Product row ──
-  productRow: { width: "100%" },
+  productRow: { width: "100%", paddingBottom: 80 },
+  footerSpacer: { height: 0, borderTopWidth: 1, borderTopColor: "#f0f0f0", marginTop: 8 },
   infoCol: {},
 
   // ── Main image box (sized explicitly via inline width/height) ──
@@ -855,7 +857,7 @@ const styles = StyleSheet.create({
   customPillTextActive: { color: "#fff" },
 
   // ── Related ──
-  relatedSection: { paddingTop: 16, paddingBottom: 40 },
+  relatedSection: { paddingTop: 48, paddingBottom: 80 },
   relatedTitle: { fontSize: 18, fontWeight: "700", color: "#111", marginBottom: 20, letterSpacing: 0.3 },
   relatedGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-start" },
   relatedCardWrapper: { marginBottom: 20 },
