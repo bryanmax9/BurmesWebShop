@@ -250,7 +250,7 @@ export default function SingleProduct({
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: 80 }}
+      contentContainerStyle={{ paddingTop: 96, paddingBottom: 80 }}
     >
       {/* ── Back link ── */}
       {!!onBack && (
