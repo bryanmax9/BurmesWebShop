@@ -1,11 +1,9 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   View,
   StyleSheet,
   Text,
   Image,
-  Modal,
-  Pressable,
   ScrollView,
   TouchableOpacity,
   useWindowDimensions,
@@ -86,11 +84,11 @@ export default function SingleProduct({
   const isMobile = width < 600;
   const padding = width < 600 ? 20 : width < 1024 ? 40 : 80;
 
-  const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+  const [mediaIndex, setMediaIndex] = useState(0);
   const [related, setRelated] = useState([]);
   const [selectedQty, setSelectedQty] = useState(1);
-  const [zoomOpen, setZoomOpen] = useState(false);
-  const [imgHovered, setImgHovered] = useState(false);
+  const [lensPos, setLensPos] = useState(null); // { x: 0-1, y: 0-1 }
+  const [containerW, setContainerW] = useState(400);
   const [selectedSize, setSelectedSize] = useState(null);
   const [selectedGold, setSelectedGold] = useState(null);
   const [selectedLargo, setSelectedLargo] = useState(null);
@@ -102,11 +100,12 @@ export default function SingleProduct({
   const largoOptions = isBracelet ? LARGO_PULSERA : LARGO_CADENA;
 
   useEffect(() => {
-    setSelectedImageIndex(0);
+    setMediaIndex(0);
     setSelectedQty(1);
     setSelectedSize(null);
     setSelectedGold(null);
     setSelectedLargo(null);
+    setLensPos(null);
 
     if (!product) return setRelated([]);
 
@@ -194,10 +193,34 @@ export default function SingleProduct({
     return product.image ? [product.image] : [];
   }, [product]);
 
-  const mainSource = useMemo(() => {
-    const selected = images[selectedImageIndex] || product?.image;
-    return toSource(selected) || toSource(product?.image);
-  }, [images, selectedImageIndex, product]);
+  // Combined media: images first, then videos
+  const allMedia = useMemo(() => {
+    const imgs = images.map((img) => ({ type: "image", src: toSource(img) })).filter((m) => m.src);
+    const vids = (Array.isArray(product?.videos) ? product.videos : [])
+      .filter(Boolean)
+      .map((url) => ({ type: "video", url }));
+    return [...imgs, ...vids];
+  }, [images, product?.videos]);
+
+  const currentMedia = allMedia[Math.min(mediaIndex, allMedia.length - 1)] || null;
+
+  // Hover magnifier helpers (web only)
+  const onImgLayout = (e) => setContainerW(e.nativeEvent.layout.width || 400);
+  const onImgMouseMove = Platform.OS === "web" ? (e) => {
+    const ne = e.nativeEvent;
+    const x = Math.max(0, Math.min(1, (ne.offsetX || 0) / containerW));
+    const y = Math.max(0, Math.min(1, (ne.offsetY || 0) / containerW));
+    setLensPos({ x, y });
+  } : undefined;
+  const onImgMouseLeave = Platform.OS === "web" ? () => setLensPos(null) : undefined;
+
+  const getMagTransform = () => {
+    if (!lensPos) return undefined;
+    const s = 2.2;
+    const tx = (0.5 - lensPos.x) * containerW * (s - 1);
+    const ty = (0.5 - lensPos.y) * containerW * (s - 1);
+    return [{ translateX: tx }, { translateY: ty }, { scale: s }];
+  };
 
   const formatPrice = (price) => {
     if (price == null) return "Precio a consultar";
@@ -222,46 +245,6 @@ export default function SingleProduct({
   }
 
   return (
-    <>
-    {/* ── Zoom Lightbox Modal ── */}
-    <Modal visible={zoomOpen} transparent animationType="fade" onRequestClose={() => setZoomOpen(false)}>
-      <Pressable style={styles.zoomOverlay} onPress={() => setZoomOpen(false)}>
-        <TouchableOpacity style={styles.zoomCloseBtn} onPress={() => setZoomOpen(false)} activeOpacity={0.8}>
-          <Ionicons name="close" size={26} color="#fff" />
-        </TouchableOpacity>
-        <Pressable onPress={(e) => e.stopPropagation?.()}>
-          <ScrollView
-            horizontal
-            contentContainerStyle={{ flexGrow: 1, justifyContent: "center" }}
-            style={{ width: "100%", maxWidth: 900 }}
-          >
-            {mainSource && (
-              <Image
-                source={mainSource}
-                style={styles.zoomImage}
-                resizeMode="contain"
-              />
-            )}
-          </ScrollView>
-        </Pressable>
-        <View style={styles.zoomThumbs}>
-          {images.map((img, i) => {
-            const src = toSource(img);
-            if (!src) return null;
-            return (
-              <TouchableOpacity
-                key={i}
-                onPress={() => setSelectedImageIndex(i)}
-                style={[styles.zoomThumb, i === selectedImageIndex && styles.zoomThumbActive]}
-              >
-                <Image source={src} style={styles.zoomThumbImg} resizeMode="cover" />
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-      </Pressable>
-    </Modal>
-
     <ScrollView
       style={styles.container}
       contentContainerStyle={{ paddingBottom: 48 }}
@@ -289,79 +272,87 @@ export default function SingleProduct({
         {/* ── Left: image gallery ── */}
         <View style={{ width: isMobile ? "100%" : "50%" }}>
 
-          {/* Main image with zoom */}
-          <TouchableOpacity
-            activeOpacity={0.96}
-            onPress={() => mainSource && setZoomOpen(true)}
-            onMouseEnter={() => setImgHovered(true)}
-            onMouseLeave={() => setImgHovered(false)}
+          {/* ── Main media display (images + videos inline) ── */}
+          <View
             style={styles.imageBox}
+            onLayout={onImgLayout}
+            onMouseMove={onImgMouseMove}
+            onMouseLeave={onImgMouseLeave}
           >
-            {mainSource ? (
-              <Image source={mainSource} style={styles.image} resizeMode="contain" />
+            {currentMedia?.type === "video" ? (
+              Platform.OS === "web" ? (
+                <iframe
+                  src={currentMedia.url}
+                  style={{ width: "100%", height: "100%", border: "none", display: "block" }}
+                  allow="autoplay; fullscreen"
+                  allowFullScreen
+                  title="Video del producto"
+                />
+              ) : (
+                <View style={styles.videoFallback}>
+                  <Ionicons name="videocam-outline" size={40} color="#aaa" />
+                  <Text style={styles.videoFallbackText}>Video</Text>
+                </View>
+              )
+            ) : currentMedia?.src ? (
+              <Image
+                source={currentMedia.src}
+                style={[styles.image, lensPos && { transform: getMagTransform() }]}
+                resizeMode="contain"
+              />
             ) : (
               <View style={styles.center}>
                 <Ionicons name="image-outline" size={48} color="#bbb" />
                 <Text style={styles.muted}>Imagen no disponible</Text>
               </View>
             )}
-            {mainSource && (
-              <View style={[styles.zoomHint, imgHovered && styles.zoomHintVisible]}>
-                <Ionicons name="search-outline" size={17} color="#fff" />
-                <Text style={styles.zoomHintText}>Ampliar</Text>
+
+            {/* Left arrow */}
+            {mediaIndex > 0 && (
+              <TouchableOpacity style={styles.arrowLeft} onPress={() => { setMediaIndex((i) => i - 1); setLensPos(null); }} activeOpacity={0.8}>
+                <Ionicons name="chevron-back" size={20} color="#1a1a1a" />
+              </TouchableOpacity>
+            )}
+
+            {/* Right arrow */}
+            {mediaIndex < allMedia.length - 1 && (
+              <TouchableOpacity style={styles.arrowRight} onPress={() => { setMediaIndex((i) => i + 1); setLensPos(null); }} activeOpacity={0.8}>
+                <Ionicons name="chevron-forward" size={20} color="#1a1a1a" />
+              </TouchableOpacity>
+            )}
+
+            {/* Media counter */}
+            {allMedia.length > 1 && (
+              <View style={styles.mediaCounter}>
+                <Text style={styles.mediaCounterText}>{mediaIndex + 1} / {allMedia.length}</Text>
               </View>
             )}
-          </TouchableOpacity>
 
-          {/* Thumbnails */}
-          {images.length > 1 && (
-            <View style={styles.thumbs}>
-              {images.map((img, i) => {
-                const src = toSource(img);
-                return (
-                  <TouchableOpacity
-                    key={`${i}`}
-                    style={[styles.thumb, i === selectedImageIndex && styles.thumbActive, !src && { opacity: 0.4 }]}
-                    onPress={() => src && setSelectedImageIndex(i)}
-                    disabled={!src}
-                  >
-                    {src ? (
-                      <Image source={src} style={styles.thumbImg} resizeMode="cover" />
-                    ) : (
-                      <View style={styles.thumbFallback}>
-                        <Ionicons name="image-outline" size={18} color="#bbb" />
-                      </View>
-                    )}
-                  </TouchableOpacity>
-                );
-              })}
-            </View>
-          )}
-
-          {/* Videos */}
-          {Array.isArray(product?.videos) && product.videos.filter(Boolean).length > 0 && (
-            <View style={styles.videosSection}>
-              <View style={styles.videosSectionHeader}>
-                <Ionicons name="videocam-outline" size={16} color="#666" />
-                <Text style={styles.videosSectionLabel}>VIDEOS</Text>
+            {/* Magnifier cursor hint (images only, desktop) */}
+            {currentMedia?.type === "image" && !lensPos && Platform.OS === "web" && (
+              <View style={styles.zoomHint}>
+                <Ionicons name="search-outline" size={14} color="#fff" />
               </View>
-              {product.videos.filter(Boolean).map((videoUrl, i) => (
-                <View key={i} style={[styles.videoWrap, { height: isMobile ? 200 : 300 }]}>
-                  {Platform.OS === "web" ? (
-                    <iframe
-                      src={videoUrl}
-                      style={{ width: "100%", height: "100%", border: "none", display: "block" }}
-                      allow="autoplay; fullscreen"
-                      allowFullScreen
-                      title={`Video ${i + 1}`}
-                    />
+            )}
+          </View>
+
+          {/* ── Thumbnail strip (all media) ── */}
+          {allMedia.length > 1 && (
+            <View style={styles.thumbs}>
+              {allMedia.map((media, i) => (
+                <TouchableOpacity
+                  key={i}
+                  style={[styles.thumb, i === mediaIndex && styles.thumbActive]}
+                  onPress={() => { setMediaIndex(i); setLensPos(null); }}
+                >
+                  {media.type === "image" ? (
+                    <Image source={media.src} style={styles.thumbImg} resizeMode="cover" />
                   ) : (
-                    <View style={styles.videoFallback}>
-                      <Ionicons name="videocam-outline" size={32} color="#aaa" />
-                      <Text style={styles.videoFallbackText}>Video {i + 1}</Text>
+                    <View style={styles.thumbVideo}>
+                      <Ionicons name="play-circle" size={26} color="#fff" />
                     </View>
                   )}
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           )}
@@ -591,7 +582,6 @@ export default function SingleProduct({
 
       <Footer onNavigate={onNavigate} />
     </ScrollView>
-    </>
   );
 }
 
@@ -626,84 +616,76 @@ const styles = StyleSheet.create({
   },
   image: { width: "100%", height: "100%" },
 
-  // Zoom hint overlay on image
+  // Arrow navigation
+  arrowLeft: {
+    position: "absolute",
+    left: 10,
+    top: "50%",
+    marginTop: -18,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    justifyContent: "center",
+    alignItems: "center",
+    ...(Platform.OS === "web" ? { boxShadow: "0 2px 8px rgba(0,0,0,0.15)", cursor: "pointer" } : { elevation: 3 }),
+  },
+  arrowRight: {
+    position: "absolute",
+    right: 10,
+    top: "50%",
+    marginTop: -18,
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.92)",
+    justifyContent: "center",
+    alignItems: "center",
+    ...(Platform.OS === "web" ? { boxShadow: "0 2px 8px rgba(0,0,0,0.15)", cursor: "pointer" } : { elevation: 3 }),
+  },
+  mediaCounter: {
+    position: "absolute",
+    bottom: 10,
+    right: 12,
+    backgroundColor: "rgba(0,0,0,0.45)",
+    paddingVertical: 3,
+    paddingHorizontal: 8,
+    borderRadius: 12,
+  },
+  mediaCounterText: { color: "#fff", fontSize: 11, fontWeight: "600" },
+
+  // Magnifier hint icon
   zoomHint: {
     position: "absolute",
-    bottom: 12,
-    right: 12,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    backgroundColor: "rgba(0,0,0,0.55)",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    borderRadius: 20,
-    opacity: 0,
-  },
-  zoomHintVisible: { opacity: 1 },
-  zoomHintText: { color: "#fff", fontSize: 11, fontWeight: "600", letterSpacing: 0.5 },
-
-  // Lightbox modal
-  zoomOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.92)",
+    bottom: 10,
+    left: 12,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     justifyContent: "center",
     alignItems: "center",
+    opacity: 0.7,
   },
-  zoomCloseBtn: {
-    position: "absolute",
-    top: 20,
-    right: 20,
-    zIndex: 10,
-    backgroundColor: "rgba(255,255,255,0.15)",
-    borderRadius: 20,
-    width: 40,
-    height: 40,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  zoomImage: {
-    width: 700,
-    height: 700,
-  },
-  zoomThumbs: {
-    position: "absolute",
-    bottom: 24,
-    flexDirection: "row",
-    gap: 10,
-  },
-  zoomThumb: {
-    width: 56,
-    height: 56,
-    borderRadius: 6,
-    overflow: "hidden",
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.25)",
-  },
-  zoomThumbActive: { borderColor: "#fff" },
-  zoomThumbImg: { width: "100%", height: "100%" },
 
-  // Videos
-  videosSection: { marginTop: 20, gap: 10 },
-  videosSectionHeader: { flexDirection: "row", alignItems: "center", gap: 6, marginBottom: 4 },
-  videosSectionLabel: { fontSize: 11, fontWeight: "700", color: "#888", letterSpacing: 1.5 },
-  videoWrap: {
-    width: "100%",
-    borderRadius: 10,
-    overflow: "hidden",
-    backgroundColor: "#111",
-  },
-  videoFallback: { flex: 1, alignItems: "center", justifyContent: "center", gap: 6, minHeight: 200 },
+  // Video fallback (non-web)
+  videoFallback: { flex: 1, alignItems: "center", justifyContent: "center", gap: 6 },
   videoFallbackText: { color: "#aaa", fontSize: 13 },
 
-  thumbs: { flexDirection: "row", flexWrap: "wrap", marginTop: 12, gap: 8 },
+  thumbs: { flexDirection: "row", flexWrap: "wrap", marginTop: 10, gap: 8 },
   thumb: {
-    width: 64,
-    height: 64,
+    width: 60,
+    height: 60,
     borderRadius: 8,
     overflow: "hidden",
     borderWidth: 2,
     borderColor: "transparent",
+  },
+  thumbVideo: {
+    flex: 1,
+    backgroundColor: "#222",
+    justifyContent: "center",
+    alignItems: "center",
   },
   thumbActive: { borderColor: "#111" },
   thumbImg: { width: "100%", height: "100%" },
