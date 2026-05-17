@@ -244,6 +244,8 @@ export default function SingleProduct({
     );
   }
 
+  const hPad = isMobile ? 20 : isSmall ? 32 : 60;
+
   return (
     <ScrollView
       style={styles.container}
@@ -251,17 +253,17 @@ export default function SingleProduct({
     >
       {!!onBack && (
         <TouchableOpacity
-          style={[styles.backBtn, { top: isSmall ? 72 : 92, left: padding }]}
+          style={[styles.backBtn, { marginHorizontal: hPad, marginBottom: 20 }]}
           onPress={onBack}
         >
-          <Ionicons name="chevron-back" size={20} color="#1a1a1a" />
-          {!isMobile && <Text style={styles.backBtnText}>Volver</Text>}
+          <Ionicons name="chevron-back" size={18} color="#1a1a1a" />
+          <Text style={styles.backBtnText}>Volver</Text>
         </TouchableOpacity>
       )}
 
-      <View style={[styles.pageInner, { paddingHorizontal: padding, flexDirection: isMobile ? "column" : "row" }]}>
+      <View style={[styles.pageInner, { paddingHorizontal: hPad, flexDirection: isMobile ? "column" : "row" }]}>
         {/* ── LEFT: gallery ── */}
-        <View style={[styles.galleryCol, { width: isMobile ? "100%" : "52%" }]}>
+        <View style={isMobile ? styles.galleryColMobile : styles.galleryColDesktop}>
 
           {/* ── Main media display (images + videos inline) ── */}
           <View
@@ -355,7 +357,7 @@ export default function SingleProduct({
         </View>
 
         {/* ── RIGHT: product info ── */}
-        <View style={[styles.infoCol, { width: isMobile ? "100%" : "48%", paddingLeft: isMobile ? 0 : 52, marginTop: isMobile ? 32 : 0 }]}>
+        <View style={isMobile ? styles.infoColMobile : styles.infoColDesktop}>
           <Text style={[styles.title, { fontSize: isMobile ? 24 : 32 }]}>{product.name}</Text>
 
           <Text style={styles.price}>{formatPrice(product.price)}</Text>
@@ -542,7 +544,7 @@ export default function SingleProduct({
       </View>
 
       {related.length > 0 && (
-        <View style={[styles.relatedSection, { paddingHorizontal: padding, marginTop: 64 }]}>
+        <View style={[styles.relatedSection, { paddingHorizontal: hPad, marginTop: 64 }]}>
           <Text style={styles.relatedTitle}>También te puede gustar</Text>
           <View style={styles.relatedGrid}>
             {related.map((item, idx) => (
@@ -582,36 +584,32 @@ const styles = StyleSheet.create({
     ...(Platform.OS === "web" ? { minHeight: "100vh" } : {}),
   },
   containerContent: {
-    paddingTop: 100,
-    paddingBottom: 96,
+    paddingTop: 96,
+    paddingBottom: 80,
   },
 
   // ── Layout ──
   pageInner: {
     width: "100%",
-    maxWidth: 1200,
-    alignSelf: "center",
     alignItems: "flex-start",
   },
-  galleryCol: {},
-  infoCol: { paddingTop: 4 },
+  // Desktop: flex ratio so columns fill evenly regardless of screen width
+  galleryColDesktop: { flex: 11, marginRight: 48 },
+  galleryColMobile: { width: "100%" },
+  infoColDesktop: { flex: 9, paddingTop: 4 },
+  infoColMobile: { width: "100%", marginTop: 32 },
 
   // ── Back button ──
   backBtn: {
-    position: "absolute",
-    zIndex: 10,
     flexDirection: "row",
     alignItems: "center",
     gap: 4,
-    backgroundColor: "rgba(255,255,255,0.95)",
-    borderRadius: 20,
-    paddingVertical: 7,
-    paddingHorizontal: 12,
-    ...(Platform.OS === "web"
-      ? { boxShadow: "0 1px 6px rgba(0,0,0,0.1)" }
-      : { elevation: 2 }),
+    alignSelf: "flex-start",
+    paddingVertical: 6,
+    paddingHorizontal: 2,
+    marginTop: 16,
   },
-  backBtnText: { fontSize: 13, fontWeight: "600", color: "#1a1a1a" },
+  backBtnText: { fontSize: 13, fontWeight: "500", color: "#555" },
 
   // ── Main image box ──
   imageBox: {
