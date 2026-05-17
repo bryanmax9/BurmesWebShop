@@ -75,9 +75,12 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
   const [material, setMaterial] = useState(null);
   const [gender, setGender] = useState(null);
   const [isNovios, setIsNovios] = useState(false);
+  const [noviosCategory, setNoviosCategory] = useState(null);
   const [gemType, setGemType] = useState(null);
   const [isZodiac, setIsZodiac] = useState(false);
+  const [zodiacSign, setZodiacSign] = useState(null);
   const [isLetterCollection, setIsLetterCollection] = useState(false);
+  const [letterValue, setLetterValue] = useState(null);
   const [tallaAmericana, setTallaAmericana] = useState("");
 
   // Up to 3 images
@@ -101,9 +104,12 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       setMaterial(product.material || null);
       setGender(product.gender || null);
       setIsNovios(product.isNovios === true);
+      setNoviosCategory(product.noviosCategory || null);
       setGemType(product.gemType || null);
       setIsZodiac(product.isZodiac === true);
+      setZodiacSign(product.zodiacSign || null);
       setIsLetterCollection(product.isLetterCollection === true);
+      setLetterValue(product.letterValue || null);
       setTallaAmericana(product.tallaAmericana || "");
 
       const urls = Array.isArray(product.images) && product.images.length
@@ -133,9 +139,12 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       setMaterial(null);
       setGender(null);
       setIsNovios(false);
+      setNoviosCategory(null);
       setGemType(null);
       setIsZodiac(false);
+      setZodiacSign(null);
       setIsLetterCollection(false);
+      setLetterValue(null);
       setTallaAmericana("");
       setImages([null, null, null]);
     }
@@ -275,9 +284,12 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
         material: material || null,
         gender: gender || null,
         isNovios: isNovios || false,
+        noviosCategory: isNovios ? (noviosCategory || null) : null,
         gemType: selectedCatName === "gemas" ? (gemType || null) : null,
         isZodiac: isZodiac || false,
+        zodiacSign: isZodiac ? (zodiacSign || null) : null,
         isLetterCollection: isLetterCollection || false,
+        letterValue: isLetterCollection ? (letterValue || null) : null,
         tallaAmericana: selectedCatName === "gemas" ? (tallaAmericana.trim() || null) : null,
       };
 
@@ -469,7 +481,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                   <TouchableOpacity
                     key={String(opt.value)}
                     style={[styles.optionPill, isNovios === opt.value && styles.optionPillActive]}
-                    onPress={() => setIsNovios(opt.value)}
+                    onPress={() => { setIsNovios(opt.value); if (!opt.value) setNoviosCategory(null); }}
                     disabled={saving || uploading}
                   >
                     <Text style={[styles.optionPillText, isNovios === opt.value && styles.optionPillTextActive]}>
@@ -479,6 +491,62 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                 ))}
               </View>
             </View>
+
+            {/* ── Sub-categoría de Novios ── */}
+            {isNovios && (
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>CATEGORÍA DE COMPROMISO</Text>
+                <Text style={styles.skuHint}>Selecciona la sub-categoría exacta para filtrar correctamente en la tienda.</Text>
+
+                <Text style={[styles.skuHint, { marginTop: 10, marginBottom: 4, fontWeight: "700", color: "#666" }]}>PARA ELLA</Text>
+                <View style={[styles.optionRow, { marginBottom: 10 }]}>
+                  {[
+                    { value: "compromiso-ella-promesa", label: "ANILLO DE PROMESA" },
+                    { value: "compromiso-ella-anillos", label: "ANILLO DE COMPROMISO" },
+                  ].map((opt) => (
+                    <TouchableOpacity
+                      key={opt.value}
+                      style={[styles.optionPill, noviosCategory === opt.value && styles.optionPillActive]}
+                      onPress={() => setNoviosCategory(opt.value)}
+                      disabled={saving || uploading}
+                    >
+                      <Text style={[styles.optionPillText, noviosCategory === opt.value && styles.optionPillTextActive]}>
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                <Text style={[styles.skuHint, { marginBottom: 4, fontWeight: "700", color: "#666" }]}>PARA ÉL</Text>
+                <View style={styles.optionRow}>
+                  {[
+                    { value: "compromiso-el-clasicas", label: "ARGOLLAS MATRIMONIALES CLÁSICAS" },
+                    { value: "compromiso-el-modernas", label: "ARGOLLAS MATRIMONIALES MODERNAS" },
+                  ].map((opt) => (
+                    <TouchableOpacity
+                      key={opt.value}
+                      style={[styles.optionPill, noviosCategory === opt.value && styles.optionPillActive]}
+                      onPress={() => setNoviosCategory(opt.value)}
+                      disabled={saving || uploading}
+                    >
+                      <Text style={[styles.optionPillText, noviosCategory === opt.value && styles.optionPillTextActive]}>
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+
+                {noviosCategory && (
+                  <TouchableOpacity
+                    style={{ marginTop: 10 }}
+                    onPress={() => setNoviosCategory(null)}
+                    disabled={saving || uploading}
+                  >
+                    <Text style={{ fontSize: 11, color: "#aaa", textDecorationLine: "underline" }}>Quitar selección</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
 
             {/* ── Tipo de gema (solo para Gemas) ── */}
             {(categoriesData || []).find((c) => (c?._id?.$oid || c?._id) === categoryId)?.name === "gemas" && (
@@ -530,7 +598,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                   <TouchableOpacity
                     key={String(opt.value)}
                     style={[styles.optionPill, isZodiac === opt.value && styles.optionPillActive]}
-                    onPress={() => setIsZodiac(opt.value)}
+                    onPress={() => { setIsZodiac(opt.value); if (!opt.value) setZodiacSign(null); }}
                     disabled={saving || uploading}
                   >
                     <Text style={[styles.optionPillText, isZodiac === opt.value && styles.optionPillTextActive]}>
@@ -541,6 +609,45 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
               </View>
             </View>
 
+            {isZodiac && (
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>SIGNO ZODIACAL</Text>
+                <Text style={styles.skuHint}>Selecciona el signo zodiacal de esta joya.</Text>
+                <View style={[styles.optionRow, { marginTop: 8 }]}>
+                  {[
+                    { value: "aries",       label: "♈ ARIES" },
+                    { value: "tauro",       label: "♉ TAURO" },
+                    { value: "geminis",     label: "♊ GÉMINIS" },
+                    { value: "cancer",      label: "♋ CÁNCER" },
+                    { value: "leo",         label: "♌ LEO" },
+                    { value: "virgo",       label: "♍ VIRGO" },
+                    { value: "libra",       label: "♎ LIBRA" },
+                    { value: "escorpio",    label: "♏ ESCORPIO" },
+                    { value: "sagitario",   label: "♐ SAGITARIO" },
+                    { value: "capricornio", label: "♑ CAPRICORNIO" },
+                    { value: "acuario",     label: "♒ ACUARIO" },
+                    { value: "piscis",      label: "♓ PISCIS" },
+                  ].map((opt) => (
+                    <TouchableOpacity
+                      key={opt.value}
+                      style={[styles.optionPill, zodiacSign === opt.value && styles.optionPillActive]}
+                      onPress={() => setZodiacSign(opt.value)}
+                      disabled={saving || uploading}
+                    >
+                      <Text style={[styles.optionPillText, zodiacSign === opt.value && styles.optionPillTextActive]}>
+                        {opt.label}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                {zodiacSign && (
+                  <TouchableOpacity style={{ marginTop: 8 }} onPress={() => setZodiacSign(null)} disabled={saving || uploading}>
+                    <Text style={{ fontSize: 11, color: "#aaa", textDecorationLine: "underline" }}>Quitar selección</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
+
             {/* ── Colección de Letras ── */}
             <View style={styles.formField}>
               <Text style={styles.formLabel}>COLECCIÓN DE LETRAS</Text>
@@ -550,7 +657,7 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                   <TouchableOpacity
                     key={String(opt.value)}
                     style={[styles.optionPill, isLetterCollection === opt.value && styles.optionPillActive]}
-                    onPress={() => setIsLetterCollection(opt.value)}
+                    onPress={() => { setIsLetterCollection(opt.value); if (!opt.value) setLetterValue(null); }}
                     disabled={saving || uploading}
                   >
                     <Text style={[styles.optionPillText, isLetterCollection === opt.value && styles.optionPillTextActive]}>
@@ -560,6 +667,32 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                 ))}
               </View>
             </View>
+
+            {isLetterCollection && (
+              <View style={styles.formField}>
+                <Text style={styles.formLabel}>LETRA</Text>
+                <Text style={styles.skuHint}>Selecciona la letra de esta joya.</Text>
+                <View style={[styles.optionRow, { marginTop: 8 }]}>
+                  {"ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("").map((letter) => (
+                    <TouchableOpacity
+                      key={letter}
+                      style={[styles.optionPill, styles.letterPill, letterValue === letter && styles.optionPillActive]}
+                      onPress={() => setLetterValue(letter)}
+                      disabled={saving || uploading}
+                    >
+                      <Text style={[styles.optionPillText, letterValue === letter && styles.optionPillTextActive]}>
+                        {letter}
+                      </Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+                {letterValue && (
+                  <TouchableOpacity style={{ marginTop: 8 }} onPress={() => setLetterValue(null)} disabled={saving || uploading}>
+                    <Text style={{ fontSize: 11, color: "#aaa", textDecorationLine: "underline" }}>Quitar selección</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+            )}
 
             <View style={styles.formField}>
               <Text style={styles.formLabel}>Descripción</Text>
@@ -1798,6 +1931,7 @@ const styles = StyleSheet.create({
   optionPillActive: { backgroundColor: "#1c1c1c", borderColor: "#1c1c1c" },
   optionPillText: { fontSize: 11, fontWeight: "700", color: "#555", letterSpacing: 0.6 },
   optionPillTextActive: { color: "#fff" },
+  letterPill: { paddingHorizontal: 10, minWidth: 36, alignItems: "center" },
 
   // ── Tab bar ──
   tabBar: {
