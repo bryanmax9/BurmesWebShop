@@ -86,6 +86,9 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
   // Up to 3 images
   const [images, setImages] = useState([null, null, null]); // each: { previewUrl, imageUrl, driveFileId }
   const [activeUploadIndex, setActiveUploadIndex] = useState(null);
+  // Up to 3 videos
+  const [videos, setVideos] = useState([null, null, null]); // each: { videoUrl, driveFileId, fileName }
+  const [activeVideoUploadIndex, setActiveVideoUploadIndex] = useState(null);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadNotice, setUploadNotice] = useState(null); // { type: "success" | "error", text: string }
@@ -127,6 +130,15 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
           : null;
       });
       setImages(next);
+
+      const videoUrls = Array.isArray(product.videos) ? product.videos : [];
+      const videoFileIds = Array.isArray(product.videoFileIds) ? product.videoFileIds : [];
+      const nextVideos = [0, 1, 2].map((idx) => {
+        const videoUrl = videoUrls[idx] || null;
+        const driveFileId = videoFileIds[idx] || null;
+        return videoUrl ? { videoUrl, driveFileId, fileName: `Video ${idx + 1}` } : null;
+      });
+      setVideos(nextVideos);
     } else {
       setName("");
       setBrand(DEFAULT_BRAND);
@@ -147,9 +159,11 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       setLetterValue(null);
       setTallaAmericana("");
       setImages([null, null, null]);
+      setVideos([null, null, null]);
     }
     setCategoryPickerOpen(false);
     setActiveUploadIndex(null);
+    setActiveVideoUploadIndex(null);
     setUploading(false);
     setUploadProgress(0);
     setUploadNotice(null);
@@ -226,6 +240,50 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
     }
   };
 
+  const pickAndUploadVideo = async (slotIndex) => {
+    if (Platform.OS === "web" && typeof document !== "undefined") {
+      const input = document.createElement("input");
+      input.type = "file";
+      input.accept = "video/*";
+      input.onchange = async (e) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        setUploading(true);
+        setActiveVideoUploadIndex(slotIndex);
+        setUploadNotice(null);
+        try {
+          const result = await uploadImageToDrive(file, (progress) => {
+            setUploadProgress(progress);
+          });
+          const videoUrl = `https://drive.google.com/file/d/${result.fileId}/preview`;
+          setVideos((prev) => {
+            const next = [...prev];
+            next[slotIndex] = { videoUrl, driveFileId: result.fileId, fileName: file.name };
+            return next;
+          });
+          const msg = `Video ${slotIndex + 1} subido correctamente.`;
+          setUploadNotice({ type: "success", text: msg });
+          if (typeof window !== "undefined" && window.alert) window.alert(msg);
+        } catch (err) {
+          const msg = err?.message || "No se pudo subir el video a Google Drive";
+          setUploadNotice({ type: "error", text: `Error al subir video ${slotIndex + 1}: ${msg}` });
+          if (typeof window !== "undefined" && window.alert) window.alert(`Error al subir: ${msg}`);
+          setVideos((prev) => {
+            const next = [...prev];
+            next[slotIndex] = null;
+            return next;
+          });
+        } finally {
+          setUploading(false);
+          setActiveVideoUploadIndex(null);
+          setUploadProgress(0);
+        }
+      };
+      input.click();
+    } else {
+      Alert.alert("Info", "La subida de archivos solo está disponible en la web.");
+    }
+  };
 
   const SKU_REGEX = /^[A-Z]{3}-\d{5}$/;
 
@@ -263,10 +321,12 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
       const imageUrls = images.map((x) => x?.imageUrl).filter(Boolean);
       const driveFileIds = images.map((x) => x?.driveFileId).filter(Boolean);
       if (imageUrls.length === 0) {
-        showError("Sube al menos 1 imagen.");
+        showError("Sube al menos 1 imagen. Las fotos son obligatorias para publicar.");
         setSaving(false);
         return;
       }
+      const videoUrls = videos.map((x) => x?.videoUrl).filter(Boolean);
+      const videoFileIds = videos.map((x) => x?.driveFileId).filter(Boolean);
 
       const productData = {
         name: name.trim(),
@@ -280,6 +340,8 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
         images: imageUrls.slice(0, 3),
         driveFileId: driveFileIds[0] || null,
         driveFileIds: driveFileIds.slice(0, 3),
+        videos: videoUrls.slice(0, 3),
+        videoFileIds: videoFileIds.slice(0, 3),
         sku: skuValue,
         material: material || null,
         gender: gender || null,
@@ -793,6 +855,59 @@ function ProductFormModal({ product, visible, onClose, onSave, onDelete }) {
                 </View>
               )}
             </View>
+            {/* ── Videos del producto (0–3) ── */}
+            <View style={styles.formField}>
+              <Text style={styles.formLabel}>Videos del producto (opcional, máx. 3)</Text>
+              <Text style={styles.formHint}>
+                Se mostrará primero la foto/fotos y luego los videos en el listado. Al menos 1 foto es obligatoria.
+              </Text>
+              <View style={styles.imageSlotsRow}>
+                {[0, 1, 2].map((idx) => {
+                  const slot = videos[idx];
+                  const isActive = uploading && activeVideoUploadIndex === idx;
+                  return (
+                    <TouchableOpacity
+                      key={idx}
+                      style={[styles.imageSlot, styles.videoSlot]}
+                      onPress={() => !uploading && pickAndUploadVideo(idx)}
+                      disabled={saving || uploading}
+                      activeOpacity={0.85}
+                    >
+                      <View style={styles.slotIndexBadge}>
+                        <Text style={styles.slotIndexBadgeText}>V{idx + 1}</Text>
+                      </View>
+                      {slot ? (
+                        <View style={styles.videoSlotUploaded}>
+                          <Text style={styles.videoSlotIcon}>🎬</Text>
+                          <Text style={styles.videoSlotName} numberOfLines={2}>
+                            {slot.fileName || `Video ${idx + 1}`}
+                          </Text>
+                        </View>
+                      ) : (
+                        <View style={styles.imageSlotPlaceholder}>
+                          <Text style={styles.imageSlotPlus}>▶</Text>
+                          <Text style={styles.imageSlotLabel}>Video {idx + 1}</Text>
+                        </View>
+                      )}
+                      {!!slot?.driveFileId && !isActive && (
+                        <View style={styles.uploadedBadge}>
+                          <Text style={styles.uploadedBadgeText}>Subido ✓</Text>
+                        </View>
+                      )}
+                      {isActive && (
+                        <View style={styles.imageSlotOverlay}>
+                          <ActivityIndicator size="small" color="#fff" />
+                          <Text style={styles.imageSlotOverlayText}>
+                            {Math.round(uploadProgress)}%
+                          </Text>
+                        </View>
+                      )}
+                    </TouchableOpacity>
+                  );
+                })}
+              </View>
+            </View>
+
             <View style={styles.formField}>
               <TouchableOpacity
                 style={[styles.checkbox, isFeatured && styles.checkboxChecked]}
@@ -1932,6 +2047,10 @@ const styles = StyleSheet.create({
   optionPillText: { fontSize: 11, fontWeight: "700", color: "#555", letterSpacing: 0.6 },
   optionPillTextActive: { color: "#fff" },
   letterPill: { paddingHorizontal: 10, minWidth: 36, alignItems: "center" },
+  videoSlot: { backgroundColor: "#f0f0f8", borderColor: "#c8c8e8" },
+  videoSlotUploaded: { flex: 1, alignItems: "center", justifyContent: "center", padding: 8 },
+  videoSlotIcon: { fontSize: 28, marginBottom: 4 },
+  videoSlotName: { fontSize: 10, color: "#444", fontWeight: "600", textAlign: "center" },
 
   // ── Tab bar ──
   tabBar: {

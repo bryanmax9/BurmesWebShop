@@ -288,6 +288,29 @@ export default function SingleProduct({
               })}
             </View>
           )}
+
+          {/* Videos - shown below images */}
+          {Array.isArray(product?.videos) && product.videos.length > 0 && (
+            <View style={styles.videosSection}>
+              {product.videos.filter(Boolean).map((videoUrl, i) => (
+                <View key={i} style={styles.videoWrap}>
+                  {Platform.OS === "web" ? (
+                    <iframe
+                      src={videoUrl}
+                      style={{ width: "100%", height: "100%", border: "none" }}
+                      allow="autoplay"
+                      allowFullScreen
+                    />
+                  ) : (
+                    <View style={styles.videoFallback}>
+                      <Ionicons name="videocam-outline" size={32} color="#aaa" />
+                      <Text style={styles.videoFallbackText}>Video {i + 1}</Text>
+                    </View>
+                  )}
+                </View>
+              ))}
+            </View>
+          )}
         </View>
 
         <View
@@ -563,6 +586,16 @@ const styles = StyleSheet.create({
     textTransform: "uppercase",
   },
 
+  videosSection: { marginTop: 16, gap: 12 },
+  videoWrap: {
+    width: "100%",
+    aspectRatio: 16 / 9,
+    backgroundColor: "#111",
+    borderRadius: 8,
+    overflow: "hidden",
+  },
+  videoFallback: { flex: 1, alignItems: "center", justifyContent: "center", gap: 6 },
+  videoFallbackText: { color: "#aaa", fontSize: 13 },
   thumbs: { flexDirection: "row", flexWrap: "wrap", marginTop: 12, gap: 10 },
   thumb: {
     width: 64,
