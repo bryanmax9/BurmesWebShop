@@ -247,30 +247,21 @@ export default function SingleProduct({
   return (
     <ScrollView
       style={styles.container}
-      contentContainerStyle={{ paddingBottom: 48 }}
+      contentContainerStyle={styles.containerContent}
     >
       {!!onBack && (
         <TouchableOpacity
-          style={[styles.backBtn, { top: isSmall ? 60 : 120, left: padding }]}
+          style={[styles.backBtn, { top: isSmall ? 72 : 92, left: padding }]}
           onPress={onBack}
         >
-          <Ionicons name="arrow-back" size={20} color="#1a1a1a" />
+          <Ionicons name="chevron-back" size={20} color="#1a1a1a" />
+          {!isMobile && <Text style={styles.backBtnText}>Volver</Text>}
         </TouchableOpacity>
       )}
 
-      <View
-        style={[
-          styles.row,
-          {
-            paddingHorizontal: padding,
-            paddingTop: isSmall ? 90 : 140,
-            flexDirection: isMobile ? "column" : "row",
-            gap: isMobile ? 0 : 48,
-          },
-        ]}
-      >
-        {/* ── Left: image gallery ── */}
-        <View style={{ width: isMobile ? "100%" : "50%" }}>
+      <View style={[styles.pageInner, { paddingHorizontal: padding, flexDirection: isMobile ? "column" : "row" }]}>
+        {/* ── LEFT: gallery ── */}
+        <View style={[styles.galleryCol, { width: isMobile ? "100%" : "52%" }]}>
 
           {/* ── Main media display (images + videos inline) ── */}
           <View
@@ -336,9 +327,9 @@ export default function SingleProduct({
             )}
           </View>
 
-          {/* ── Thumbnail strip (all media) ── */}
-          {allMedia.length > 1 && (
-            <View style={styles.thumbs}>
+          {/* ── Thumbnail strip ── */}
+          <View style={styles.thumbStrip}>
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.thumbStripContent}>
               {allMedia.map((media, i) => (
                 <TouchableOpacity
                   key={i}
@@ -349,23 +340,23 @@ export default function SingleProduct({
                     <Image source={media.src} style={styles.thumbImg} resizeMode="cover" />
                   ) : (
                     <View style={styles.thumbVideo}>
-                      <Ionicons name="play-circle" size={26} color="#fff" />
+                      <Ionicons name="play" size={16} color="#fff" />
                     </View>
                   )}
                 </TouchableOpacity>
               ))}
-            </View>
-          )}
+            </ScrollView>
+            {allMedia.length > 5 && (
+              <View style={styles.thumbMore}>
+                <Ionicons name="chevron-forward" size={16} color="#888" />
+              </View>
+            )}
+          </View>
         </View>
 
-        {/* ── Right: product info ── */}
-        <View style={{ width: isMobile ? "100%" : "50%", marginTop: isMobile ? 24 : 0 }}>
-          {!!product.brand && (
-            <Text style={styles.brand}>{String(product.brand).toUpperCase()}</Text>
-          )}
-          <Text style={[styles.title, { fontSize: isSmall ? 26 : 34 }]}>
-            {product.name}
-          </Text>
+        {/* ── RIGHT: product info ── */}
+        <View style={[styles.infoCol, { width: isMobile ? "100%" : "48%", paddingLeft: isMobile ? 0 : 52, marginTop: isMobile ? 32 : 0 }]}>
+          <Text style={[styles.title, { fontSize: isMobile ? 24 : 32 }]}>{product.name}</Text>
 
           <Text style={styles.price}>{formatPrice(product.price)}</Text>
 
@@ -373,7 +364,7 @@ export default function SingleProduct({
             <View style={styles.stockRow}>
               <View style={[styles.stockDot, { backgroundColor: product.countInStock > 0 ? "#2d7a4a" : "#c0392b" }]} />
               <Text style={[styles.stockLabel, { color: product.countInStock > 0 ? "#2d7a4a" : "#c0392b" }]}>
-                {product.countInStock > 0 ? `En stock (${product.countInStock})` : "Agotado"}
+                {product.countInStock > 0 ? "Disponible" : "Agotado"}
               </Text>
               {product.countInStock > 0 && product.countInStock <= 5 && (
                 <Text style={styles.stockLow}>· Solo quedan {product.countInStock}</Text>
@@ -456,13 +447,11 @@ export default function SingleProduct({
             </View>
           )}
 
-          <View style={styles.noticeBox}>
-            <Text style={styles.noticeText}>
-              {isAdmin
-                ? "Solo vista previa de administrador. Pedidos y carrito deshabilitados para cuentas de administrador."
-                : "Todos los pedidos se realizan por WhatsApp para la seguridad de comprador y vendedor. Nuestra joyería se hace bajo pedido según tus indicaciones (talla, tipo de oro y otros detalles)."}
-            </Text>
-          </View>
+          {isAdmin && (
+            <View style={styles.adminNotice}>
+              <Text style={styles.adminNoticeText}>Vista previa — pedidos deshabilitados para admin.</Text>
+            </View>
+          )}
 
           {canOrder && (
             <View style={styles.orderButtons}>
@@ -553,7 +542,7 @@ export default function SingleProduct({
       </View>
 
       {related.length > 0 && (
-        <View style={[styles.relatedSection, { paddingHorizontal: padding }]}>
+        <View style={[styles.relatedSection, { paddingHorizontal: padding, marginTop: 64 }]}>
           <Text style={styles.relatedTitle}>También te puede gustar</Text>
           <View style={styles.relatedGrid}>
             {related.map((item, idx) => (
@@ -586,126 +575,154 @@ export default function SingleProduct({
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#fff" },
-  row: { width: "100%" },
+  // ── Page shell ──
+  container: {
+    flex: 1,
+    backgroundColor: "#fff",
+    ...(Platform.OS === "web" ? { minHeight: "100vh" } : {}),
+  },
+  containerContent: {
+    paddingTop: 100,
+    paddingBottom: 96,
+  },
 
+  // ── Layout ──
+  pageInner: {
+    width: "100%",
+    maxWidth: 1200,
+    alignSelf: "center",
+    alignItems: "flex-start",
+  },
+  galleryCol: {},
+  infoCol: { paddingTop: 4 },
+
+  // ── Back button ──
   backBtn: {
     position: "absolute",
     zIndex: 10,
-    backgroundColor: "#fff",
-    borderRadius: 24,
-    width: 42,
-    height: 42,
-    justifyContent: "center",
+    flexDirection: "row",
     alignItems: "center",
+    gap: 4,
+    backgroundColor: "rgba(255,255,255,0.95)",
+    borderRadius: 20,
+    paddingVertical: 7,
+    paddingHorizontal: 12,
     ...(Platform.OS === "web"
-      ? { boxShadow: "0 2px 10px rgba(0,0,0,0.12)" }
-      : { shadowColor: "#000", shadowOpacity: 0.12, shadowRadius: 8, elevation: 4 }),
+      ? { boxShadow: "0 1px 6px rgba(0,0,0,0.1)" }
+      : { elevation: 2 }),
   },
+  backBtnText: { fontSize: 13, fontWeight: "600", color: "#1a1a1a" },
 
+  // ── Main image box ──
   imageBox: {
     width: "100%",
     aspectRatio: 1,
-    backgroundColor: "#f4f4f2",
-    borderRadius: 12,
+    backgroundColor: "#f5f4f2",
+    borderRadius: 4,
     overflow: "hidden",
     justifyContent: "center",
     alignItems: "center",
     position: "relative",
-    ...(Platform.OS === "web" ? { cursor: "zoom-in" } : {}),
+    ...(Platform.OS === "web" ? { cursor: "crosshair" } : {}),
   },
   image: { width: "100%", height: "100%" },
 
-  // Arrow navigation
+  // ── Arrow nav ──
   arrowLeft: {
     position: "absolute",
-    left: 10,
-    top: "50%",
-    marginTop: -18,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.92)",
+    left: 12,
+    top: "44%",
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "rgba(255,255,255,0.95)",
     justifyContent: "center",
     alignItems: "center",
-    ...(Platform.OS === "web" ? { boxShadow: "0 2px 8px rgba(0,0,0,0.15)", cursor: "pointer" } : { elevation: 3 }),
+    ...(Platform.OS === "web" ? { boxShadow: "0 1px 6px rgba(0,0,0,0.18)", cursor: "pointer" } : { elevation: 2 }),
   },
   arrowRight: {
     position: "absolute",
-    right: 10,
-    top: "50%",
-    marginTop: -18,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.92)",
+    right: 12,
+    top: "44%",
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: "rgba(255,255,255,0.95)",
     justifyContent: "center",
     alignItems: "center",
-    ...(Platform.OS === "web" ? { boxShadow: "0 2px 8px rgba(0,0,0,0.15)", cursor: "pointer" } : { elevation: 3 }),
+    ...(Platform.OS === "web" ? { boxShadow: "0 1px 6px rgba(0,0,0,0.18)", cursor: "pointer" } : { elevation: 2 }),
   },
   mediaCounter: {
     position: "absolute",
-    bottom: 10,
+    bottom: 12,
     right: 12,
-    backgroundColor: "rgba(0,0,0,0.45)",
+    backgroundColor: "rgba(0,0,0,0.38)",
     paddingVertical: 3,
     paddingHorizontal: 8,
-    borderRadius: 12,
+    borderRadius: 10,
   },
   mediaCounterText: { color: "#fff", fontSize: 11, fontWeight: "600" },
-
-  // Magnifier hint icon
   zoomHint: {
     position: "absolute",
-    bottom: 10,
+    bottom: 12,
     left: 12,
-    backgroundColor: "rgba(0,0,0,0.4)",
-    width: 28,
-    height: 28,
-    borderRadius: 14,
+    backgroundColor: "rgba(0,0,0,0.32)",
+    width: 26,
+    height: 26,
+    borderRadius: 13,
     justifyContent: "center",
     alignItems: "center",
-    opacity: 0.7,
   },
 
-  // Video fallback (non-web)
-  videoFallback: { flex: 1, alignItems: "center", justifyContent: "center", gap: 6 },
+  // ── Video fallback ──
+  videoFallback: { flex: 1, alignItems: "center", justifyContent: "center", gap: 8 },
   videoFallbackText: { color: "#aaa", fontSize: 13 },
 
-  thumbs: { flexDirection: "row", flexWrap: "wrap", marginTop: 10, gap: 8 },
-  thumb: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    overflow: "hidden",
-    borderWidth: 2,
-    borderColor: "transparent",
+  // ── Thumbnail strip (Bobby White style) ──
+  thumbStrip: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 12,
   },
+  thumbStripContent: { flexDirection: "row", gap: 8, paddingRight: 4 },
+  thumb: {
+    width: 64,
+    height: 64,
+    borderRadius: 4,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "#e0e0e0",
+    backgroundColor: "#f5f4f2",
+  },
+  thumbActive: { borderWidth: 2, borderColor: "#1a1a1a" },
+  thumbImg: { width: "100%", height: "100%" },
   thumbVideo: {
     flex: 1,
-    backgroundColor: "#222",
+    backgroundColor: "#1a1a1a",
     justifyContent: "center",
     alignItems: "center",
   },
-  thumbActive: { borderColor: "#111" },
-  thumbImg: { width: "100%", height: "100%" },
-  thumbFallback: {
-    flex: 1,
+  thumbMore: {
+    width: 28,
+    height: 64,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#f3f3f3",
   },
 
-  brand: {
-    color: "#aaa",
-    letterSpacing: 2.5,
-    fontSize: 11,
-    fontWeight: "600",
-    marginBottom: 8,
-    textTransform: "uppercase",
+  // ── Product info ──
+  title: {
+    fontWeight: "700",
+    color: "#111",
+    marginBottom: 12,
+    lineHeight: 38,
+    letterSpacing: -0.3,
   },
-  title: { fontWeight: "700", color: "#111", marginBottom: 10, lineHeight: 42 },
-  price: { fontSize: 28, fontWeight: "800", color: "#1a1a1a", marginBottom: 16, letterSpacing: -0.5 },
+  price: {
+    fontSize: 20,
+    fontWeight: "400",
+    color: "#1a1a1a",
+    marginBottom: 20,
+  },
   stockRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -714,199 +731,145 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
   },
   stockDot: { width: 8, height: 8, borderRadius: 4 },
-  stockLabel: { fontSize: 13, fontWeight: "700" },
-  stockValueZero: { color: "#9b3c3c" },
-  stockLow: { fontSize: 12, color: "#9b3c3c", fontWeight: "600" },
-  qtyRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 12,
-    gap: 12,
-  },
-  qtyLabel: { fontSize: 13, color: "#333", fontWeight: "800" },
-  qtyControls: { flexDirection: "row", alignItems: "center", gap: 12 },
-  qtyBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: "#ddd",
-    backgroundColor: "#fff",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  qtyBtnDisabled: { opacity: 0.4 },
-  qtyBtnText: { fontSize: 18, fontWeight: "900", color: "#111", marginTop: -1 },
-  qtyValue: { minWidth: 24, textAlign: "center", fontSize: 14, fontWeight: "900", color: "#111" },
-  descBlock: {
-    backgroundColor: "#f2f2f2",
-    borderWidth: 1,
-    borderColor: "#e0e0e0",
-    borderLeftWidth: 4,
-    borderLeftColor: "#1a1a1a",
-    borderRadius: 8,
-    paddingVertical: 22,
-    paddingHorizontal: 24,
-    marginBottom: 24,
-  },
-  descLabel: {
-    fontSize: 14,
-    fontWeight: "800",
-    letterSpacing: 1.5,
-    color: "#1a1a1a",
-    marginBottom: 14,
-    textTransform: "uppercase",
-  },
-  desc: {
-    color: "#1a1a1a",
-    fontSize: 18,
-    lineHeight: 30,
-    fontWeight: "400",
-  },
+  stockLabel: { fontSize: 13, fontWeight: "600" },
+  stockLow: { fontSize: 12, color: "#9b3c3c", fontWeight: "500" },
 
-  noticeBox: {
-    backgroundColor: "#f5f5f5",
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    marginBottom: 20,
-    borderLeftWidth: 3,
-    borderLeftColor: "#1a1a1a",
-  },
-  noticeText: {
-    color: "#555",
-    fontSize: 13,
-    lineHeight: 20,
-  },
-
-  orderButtons: {},
-  contactHint: {
-    fontSize: 12,
-    color: "#666",
-    marginTop: 14,
-    marginBottom: 6,
-  },
-  contactRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  contactLink: { paddingVertical: 4, paddingRight: 8 },
-  contactLinkText: { fontSize: 13, color: "#1a1a1a", fontWeight: "600", textDecorationLine: "underline" },
-  contactDivider: { fontSize: 13, color: "#999", marginRight: 8 },
-  orderBtn: {
-    backgroundColor: "#5c5c5c",
-    borderRadius: 6,
-    paddingVertical: 14,
-    alignItems: "center",
-  },
-  orderBtnSecondary: {
-    backgroundColor: "transparent",
-    borderWidth: 2,
-    borderColor: "#5c5c5c",
-    borderRadius: 6,
-    paddingVertical: 12,
-    alignItems: "center",
-    marginTop: 12,
-  },
-  orderBtnText: {
-    color: "#fff",
-    fontWeight: "800",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
-  orderBtnTextSecondary: {
-    color: "#5c5c5c",
-    fontWeight: "800",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
-  orderBtnDisabled: { opacity: 0.55 },
-
-  relatedSection: { paddingTop: 32, paddingBottom: 24 },
-  relatedTitle: { fontSize: 20, fontWeight: "800", marginBottom: 18 },
-  relatedGrid: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "flex-start",
-  },
-  relatedCardWrapper: {
-    marginBottom: 20,
-  },
-
-  center: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 24,
-  },
-  muted: { marginTop: 10, color: "#757575" },
-
-  simpleBtn: {
-    marginTop: 14,
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderWidth: 1,
-    borderRadius: 8,
-  },
-  simpleBtnText: { fontWeight: "700" },
-
-  // Delivery message
+  // ── Delivery ──
   deliveryBox: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 8,
-    backgroundColor: "#f0f0ef",
-    borderRadius: 8,
-    paddingVertical: 11,
-    paddingHorizontal: 14,
-    marginBottom: 18,
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 20,
+    paddingVertical: 10,
+    borderTopWidth: 1,
+    borderBottomWidth: 1,
+    borderColor: "#e8e8e8",
   },
   deliveryText: {
     flex: 1,
     fontSize: 13,
-    color: "#1a1a1a",
-    fontWeight: "600",
+    color: "#444",
     lineHeight: 19,
   },
 
-  // Pulseras / Cadenas customization selectors
-  customizationBlock: {
-    marginBottom: 20,
-    gap: 14,
-  },
-  customField: {
-    gap: 8,
-  },
-  customFieldLabel: {
+  // ── Description ──
+  descBlock: { marginBottom: 24 },
+  descLabel: {
     fontSize: 11,
     fontWeight: "700",
-    color: "#888",
+    color: "#999",
     letterSpacing: 1.5,
+    marginBottom: 10,
+    textTransform: "uppercase",
   },
-  customPillRow: {
+  desc: {
+    color: "#444",
+    fontSize: 14,
+    lineHeight: 24,
+    fontWeight: "400",
+  },
+
+  // ── Admin notice ──
+  adminNotice: {
+    backgroundColor: "#fff8e1",
+    paddingVertical: 10,
+    paddingHorizontal: 14,
+    borderRadius: 6,
+    marginBottom: 16,
+    borderLeftWidth: 3,
+    borderLeftColor: "#f0a500",
+  },
+  adminNoticeText: { color: "#7a5800", fontSize: 12 },
+
+  // ── Qty ──
+  orderButtons: { marginTop: 4 },
+  qtyRow: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 8,
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 14,
   },
+  qtyLabel: { fontSize: 13, color: "#333", fontWeight: "600" },
+  qtyControls: { flexDirection: "row", alignItems: "center", gap: 16 },
+  qtyBtn: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    borderWidth: 1,
+    borderColor: "#ccc",
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  qtyBtnDisabled: { opacity: 0.35 },
+  qtyBtnText: { fontSize: 18, fontWeight: "400", color: "#111" },
+  qtyValue: { minWidth: 28, textAlign: "center", fontSize: 15, fontWeight: "600", color: "#111" },
+
+  // ── Buttons ──
+  orderBtn: {
+    backgroundColor: "#1a1a1a",
+    borderRadius: 4,
+    paddingVertical: 16,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  orderBtnSecondary: {
+    backgroundColor: "transparent",
+    borderWidth: 1,
+    borderColor: "#1a1a1a",
+    borderRadius: 4,
+    paddingVertical: 14,
+    alignItems: "center",
+    marginBottom: 10,
+  },
+  orderBtnText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  orderBtnTextSecondary: {
+    color: "#1a1a1a",
+    fontWeight: "600",
+    fontSize: 14,
+    letterSpacing: 0.8,
+    textTransform: "uppercase",
+  },
+  orderBtnDisabled: { opacity: 0.45 },
+
+  contactHint: { fontSize: 12, color: "#888", marginTop: 10, marginBottom: 6 },
+  contactRow: { flexDirection: "row", alignItems: "center" },
+  contactLink: { paddingVertical: 4, paddingRight: 8 },
+  contactLinkText: { fontSize: 13, color: "#1a1a1a", fontWeight: "500", textDecorationLine: "underline" },
+  contactDivider: { fontSize: 13, color: "#ccc", marginRight: 8 },
+
+  // ── Customizers (pulseras/cadenas) ──
+  customizationBlock: { marginBottom: 20, gap: 16 },
+  customField: { gap: 8 },
+  customFieldLabel: { fontSize: 11, fontWeight: "700", color: "#888", letterSpacing: 1.5 },
+  customPillRow: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
   customPill: {
     paddingVertical: 7,
     paddingHorizontal: 14,
-    borderRadius: 6,
+    borderRadius: 4,
     borderWidth: 1,
-    borderColor: "#d0d0d0",
+    borderColor: "#ccc",
     backgroundColor: "#fff",
   },
-  customPillActive: {
-    backgroundColor: "#1a1a1a",
-    borderColor: "#1a1a1a",
-  },
-  customPillText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#444",
-  },
-  customPillTextActive: {
-    color: "#fff",
-  },
+  customPillActive: { backgroundColor: "#1a1a1a", borderColor: "#1a1a1a" },
+  customPillText: { fontSize: 12, fontWeight: "500", color: "#444" },
+  customPillTextActive: { color: "#fff" },
+
+  // ── Related ──
+  relatedSection: { paddingTop: 16, paddingBottom: 40 },
+  relatedTitle: { fontSize: 18, fontWeight: "700", color: "#111", marginBottom: 20, letterSpacing: 0.3 },
+  relatedGrid: { flexDirection: "row", flexWrap: "wrap", justifyContent: "flex-start" },
+  relatedCardWrapper: { marginBottom: 20 },
+
+  // ── Misc ──
+  center: { flex: 1, justifyContent: "center", alignItems: "center", padding: 24 },
+  muted: { marginTop: 10, color: "#aaa", fontSize: 13 },
+  simpleBtn: { marginTop: 14, paddingVertical: 10, paddingHorizontal: 16, borderWidth: 1, borderRadius: 6 },
+  simpleBtnText: { fontWeight: "600" },
 });
